@@ -6,7 +6,7 @@
 
 'use strict';
 
-const ipo = require('./lib/ipo');
+const Ipo = require('./lib/ipo');
 
 module.exports.Ipo = Ipo;
 module.exports.contracts = [ Ipo ];
