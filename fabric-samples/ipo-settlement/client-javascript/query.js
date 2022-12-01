@@ -40,11 +40,10 @@ async function main() {
 
         // Get the contract from the network.
         const contract = network.getContract('ipo');
-        console.log(contract, "====================")
 
         // Evaluate the specified transaction.
-        // const result = await contract.evaluateTransaction('queryAllShares');
-        // console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+        const result = await contract.evaluateTransaction('queryAllShares');
+        console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
         console.log("\nSUCCESS\n");
         // Disconnect from the gateway.
         await gateway.disconnect();
