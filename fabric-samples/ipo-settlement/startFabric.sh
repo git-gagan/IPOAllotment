@@ -42,8 +42,8 @@ Follow the instructions for the programming language of your choice:
 
 JavaScript:
 
-  Start by changing into the "javascript" directory:
-    cd javascript
+  Start by changing into the "client-javascript" directory:
+    cd client-javascript
 
   Next, install all required packages:
     npm install
