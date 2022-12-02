@@ -39,14 +39,21 @@ async function main() {
 
         // Get the network (channel) our contract is deployed to.
         const network = await gateway.getNetwork('mychannel');
-        console.log("----------", network);
 
         // Get the contract from the network.
         const contract = network.getContract('ipo');
 
         // Evaluate the specified transaction.
-        const result = await contract.evaluateTransaction('queryAllShares');
-        console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+        // const result = await contract.evaluateTransaction('queryAllShares');
+        // console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+        const isBidTimeOver = await contract.evaluateTransaction('isBidTimeOver');
+        console.log(`Remaining time for bidding: ${isBidTimeOver}`);
+        const start = await contract.evaluateTransaction('startBidding');
+        console.log(start.toString());
+        // const start1 = await contract.evaluateTransaction('startBidding');
+        // console.log(start1.toString());
+        const isBidTimeOver1 = await contract.evaluateTransaction('isBidTimeOver');
+        console.log(`Remaining time for bidding: ${isBidTimeOver1}`);
         console.log("\nSUCCESS\n");
         // Disconnect from the gateway.
         await gateway.disconnect();
