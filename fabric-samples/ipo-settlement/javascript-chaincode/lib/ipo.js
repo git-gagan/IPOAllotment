@@ -17,99 +17,76 @@ class Ipo extends Contract {
         const shares = [
             // only one company is going for an IPO
             {
+                ID:'share1',
                 quantity: 500,
                 company: 'Microsoft',
-                lotSize: 50,
+                lotSize: 10,
                 priceRangeLow : 100,
                 priceRangeHigh : 200,
                 bidTime: 600 //seconds 
             },
         ];
 
-        for (let i = 0; i < shares.length; i++) {
-            shares[i].docType = 'share';
-            await ctx.stub.putState('SHARE' + i, Buffer.from(JSON.stringify(shares[i])));
-            console.info('Added <--> ', shares[i]);
+      
+        
+        for (const asset of shares) {
+            asset.docType = 'share';
+            await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
         }
-        console.info('============= END : Initialize Shares Ledger ===========');
+        console.info('============= END : Initialize Shares Ledger ===========');   
     }
+   
 
-    async queryCar(ctx, carNumber) {
-        const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
-        if (!carAsBytes || carAsBytes.length === 0) {
-            throw new Error(`${carNumber} does not exist`);
+    async ReadAsset(ctx, id) {
+        const assetJSON = await ctx.stub.getState(id); // get the asset from chaincode state
+        if (!assetJSON || assetJSON.length === 0) {
+            throw new Error(`The share ${id} does not exist`);
         }
-        console.log(carAsBytes.toString());
-        return carAsBytes.toString();
+        return assetJSON.toString();
     }
 
-    async createCar(ctx, carNumber, make, model, color, owner) {
-        console.info('============= START : Create Car ===========');
 
-        const car = {
-            color,
-            docType: 'car',
-            make,
-            model,
-            owner,
-        };
-
-        await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
-        console.info('============= END : Create Car ===========');
+    async FnBuyShares(ctx,id,lotQuantity){
+        const assetString = await this.ReadAsset(ctx, id);
+        const asset = JSON.parse(assetString);
+        const oldQuantity = asset.quantity;
+        const lotSize=asset.lotSize;
+        const newQuantity=oldQuantity-(lotSize*parseInt(lotQuantity));
+        asset.quantity=newQuantity
+        const updatedString = JSON.stringify(asset);
+        console.log(updatedString);
+        await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
+        return JSON.stringify(asset);
+        
     }
 
-    async queryAllCars(ctx) {
-        const startKey = '';
-        const endKey = '';
-        const allResults = [];
-        for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
-            const strValue = Buffer.from(value).toString('utf8');
-            let record;
-            try {
-                record = JSON.parse(strValue);
-            } catch (err) {
-                console.log(err);
-                record = strValue;
-            }
-            allResults.push({ Key: key, Record: record });
-        }
-        console.info(allResults);
-        return JSON.stringify(allResults);
-    }
+    async counter(ctx,id,bidTime) {
+        var i = parseInt(bidTime);
+        const assetString = await this.ReadAsset(ctx, id);
+        var asset = JSON.parse(assetString);
+        setInterval(function() {
+          if (i == 0) {
+            clearInterval(this);
+            
+          }
+          else{
+            const newbidTime=i--;
+            asset.bidTime=newbidTime; 
+            console.info(JSON.stringify(asset))
+           
+          }
+        }, 1000);
 
-    async changeCarOwner(ctx, carNumber, newOwner) {
-        console.info('============= START : changeCarOwner ===========');
+    //    await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
+    //    return JSON.stringify(asset);
+      } // End
+      
 
-        const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
-        if (!carAsBytes || carAsBytes.length === 0) {
-            throw new Error(`${carNumber} does not exist`);
-        }
-        const car = JSON.parse(carAsBytes.toString());
-        car.owner = newOwner;
+      async Allotment(ctx){
+        console.info("Shares Alloted")
+      }
 
-        await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
-        console.info('============= END : changeCarOwner ===========');
-    }
-
-    async queryAllShares(ctx) {
-        const startKey = '';
-        const endKey = '';
-        const allResults = [];
-        for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
-            const strValue = Buffer.from(value).toString('utf8');
-            let record;
-            try {
-                record = JSON.parse(strValue);
-            } catch (err) {
-                console.log(err);
-                record = strValue;
-            }
-            allResults.push({ Key: key, Record: record });
-        }
-        console.info(allResults);
-        return JSON.stringify(allResults);
-    }
 
 }
 
-module.exports = Ipo; 
+module.exports = Ipo; //WARNING
