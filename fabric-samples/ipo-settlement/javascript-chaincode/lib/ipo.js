@@ -7,11 +7,14 @@
 'use strict';
 
 const { Contract } = require('fabric-contract-api');
+var bidStartDate = null;
+var bidTime = null; //seconds
+var bidStartTime =  null;
+var isBidding = false;
 
 class Ipo extends Contract {
 
     // Ipo class for shares settlement
-
     async initLedger(ctx) {
         console.info('============= START : Initialize Shares Ledger ===========');
         const shares = [
@@ -22,18 +25,29 @@ class Ipo extends Contract {
                 company: 'Microsoft',
                 lotSize: 10,
                 priceRangeLow : 100,
-                priceRangeHigh : 200,
-                bidTime: 600 //seconds 
+                priceRangeHigh : 200, 
             },
         ];
 
-      
-        
         for (const asset of shares) {
             asset.docType = 'share';
             await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
         }
         console.info('============= END : Initialize Shares Ledger ===========');   
+    }
+
+    async startBidding(ctx){
+        console.log("\n\n\n\n\n\n", isBidding)
+        if(!isBidding){
+            bidStartDate = new Date();
+            bidTime = 100; //Seconds
+            bidStartTime = bidStartDate.toUTCString();
+            let information = `Bidding started from ${bidStartDate}`;
+            isBidding = true;
+            return JSON.stringify(information);
+        }
+        let information = `Bidding already going on from ${bidStartDate}`;
+        return JSON.stringify(information);
     }
    
 
@@ -46,46 +60,87 @@ class Ipo extends Contract {
     }
 
 
-    async FnBuyShares(ctx,id,lotQuantity){
+    async FnBuyShares(ctx, id, lotQuantity){
         const assetString = await this.ReadAsset(ctx, id);
         const asset = JSON.parse(assetString);
         const oldQuantity = asset.quantity;
-        const lotSize=asset.lotSize;
-        const newQuantity=oldQuantity-(lotSize*parseInt(lotQuantity));
-        asset.quantity=newQuantity
+        const lotSize = asset.lotSize;
+        const newQuantity = oldQuantity-(lotSize*parseInt(lotQuantity));
+        asset.quantity = newQuantity
         const updatedString = JSON.stringify(asset);
         console.log(updatedString);
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
-        return JSON.stringify(asset);
-        
+        return JSON.stringify(asset); 
     }
 
-    async counter(ctx,id,bidTime) {
-        var i = parseInt(bidTime);
-        const assetString = await this.ReadAsset(ctx, id);
-        var asset = JSON.parse(assetString);
-        setInterval(function() {
-          if (i == 0) {
-            clearInterval(this);
+    async isBidTimeOver(ctx) {
+        if (bidStartDate){
+            const date = new Date();
+            const currentDate = date.toUTCString();
+            let timeDifference = Math.abs(date - bidStartDate)/1000 - bidTime;
+            console.log(bidStartDate,"=-=-=-=-=-=-=-=-", date)
+            if (timeDifference > 0){ 
+                console.log("\n--------------------------");
+                console.log("Bidding OVER!");
+                this.Allotment(ctx);
+                isBidding = false;
+                console.log("--------------------------\n");
+                return JSON.stringify(0)
+            }
+            console.log("\n---Bidding GOING ON---\n");
+            timeDifference = Math.abs(timeDifference)
+            console.log("Time remaining", timeDifference);
+            return JSON.stringify(timeDifference);
+        }
+        else{
+            let error = "Bidding hasn't started yet! Please call startBidding() first!";
+            return JSON.stringify(error);
+        }
+    }
+
+    // async counter(ctx, id, bidTime) {
+    //     var i = parseInt(bidTime);
+    //     const assetString = await this.ReadAsset(ctx, id);
+    //     var asset = JSON.parse(assetString);
+    //     setInterval(function() {
+    //       if (i == 0) {
+    //         clearInterval(this);
             
-          }
-          else{
-            const newbidTime=i--;
-            asset.bidTime=newbidTime; 
-            console.info(JSON.stringify(asset))
+    //       }
+    //       else{
+    //         const newbidTime=i--;
+    //         asset.bidTime=newbidTime; 
+    //         console.info(JSON.stringify(asset))
            
-          }
-        }, 1000);
+    //       }
+    //     }, 1000);
 
     //    await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
     //    return JSON.stringify(asset);
-      } // End
+    //}  End
       
-
       async Allotment(ctx){
-        console.info("Shares Alloted")
+        console.info("Shares Alloted");
       }
 
+      async queryAllShares(ctx) {
+        const startKey = '';
+        const endKey = '';
+        const allResults = [];
+        for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
+            const strValue = Buffer.from(value).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            allResults.push({ Key: key, Record: record });
+        }
+        console.info(allResults);
+        return JSON.stringify(allResults);
+    }
 
 }
 
