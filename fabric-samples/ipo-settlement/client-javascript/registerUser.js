@@ -6,17 +6,22 @@
 
 'use strict';
 
-const { Wallets } = require('fabric-network');
-const FabricCAServices = require('fabric-ca-client');
-const fs = require('fs');
-const path = require('path');
-const { userInfo } = require('os');
+import FabricCAServices from 'fabric-ca-client';
+import { Wallets } from 'fabric-network';
+import fs from 'fs';
+import path from 'path';
+
+// const { Wallets } = require('fabric-network');
+// const FabricCAServices = require('fabric-ca-client');
+// const fs = require('fs');
+// const path = require('path');
 
 async function main() {
     try {
         // load the network configuration
         console.log(process.argv);
         const userName = "user-" + process.argv[2];   // Take username from command line
+        const __dirname = path.resolve(path.dirname(''));
         const ccpPath = path.resolve(__dirname, '..', '..', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
         const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
         

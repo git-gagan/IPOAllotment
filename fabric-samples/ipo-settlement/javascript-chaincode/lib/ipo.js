@@ -21,11 +21,13 @@ class Ipo extends Contract {
             // only one company is going for an IPO
             {
                 ID:'share1',
-                quantity: 500,
+                sharesQuantity: 500,
                 company: 'Microsoft',
                 lotSize: 10,
                 priceRangeLow : 100,
                 priceRangeHigh : 200, 
+                sharesBidded : 0,
+                sharesSold : 0
             },
         ];
 
@@ -88,10 +90,11 @@ class Ipo extends Contract {
         userObj = JSON.parse(userObj);
         const assetString = await this.ReadAsset(ctx, id);
         const asset = JSON.parse(assetString);
-        const oldQuantity = asset.quantity;
+        const oldQuantity = asset.sharesQuantity;
         const lotSize = asset.lotSize;
         const newQuantity = oldQuantity-(lotSize*parseInt(lotQuantity));
-        asset.quantity = newQuantity;
+        asset.sharesQuantity = newQuantity;
+        asset.sharesBidded += lotSize*parseInt(lotQuantity)
         userObj["sharesBid"] = lotQuantity;
         console.log("==========",typeof(userObj), userObj,"=====");
         userObj["amountForBidding"] -= lotQuantity * userObj["bidPerShare"];
@@ -111,7 +114,7 @@ class Ipo extends Contract {
             if (timeDifference > 0){ 
                 console.log("\n--------------------------");
                 console.log("Bidding OVER!");
-                this.Allotment(ctx);
+                // this.Allotment(ctx);
                 isBidding = false;
                 console.log("--------------------------\n");
                 return JSON.stringify(0)
@@ -121,14 +124,13 @@ class Ipo extends Contract {
             console.log("Time remaining", timeDifference);
             return JSON.stringify(timeDifference);
         }
-        else{
-            let error = "Bidding hasn't started yet! Please call startBidding() first!";
-            return JSON.stringify(error);
-        }
+        isBidding = false;
+        return JSON.stringify(-1);
     }
       
     async Allotment(ctx){
         console.info("Shares Alloted");
+        return true;
     }
 
       async queryAllShares(ctx) {
