@@ -1,7 +1,8 @@
 {
-    "name": "fabcar",
+    "name": "ipo",
+    "type": "module",
     "version": "1.0.0",
-    "description": "FabCar application implemented in JavaScript",
+    "description": "IPO application implemented in JavaScript",
     "engines": {
         "node": ">=8",
         "npm": ">=5"
