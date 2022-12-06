@@ -24,7 +24,7 @@ async function main() {
             //"lotQuantity": 0,
             "sharesBid": 0,
             "sharesAlloted": 0,
-            "amountForBidding": 200,
+            "amountForBidding": 2000,
             "bidPerShare": 100
         }
 
