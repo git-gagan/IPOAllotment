@@ -91,7 +91,9 @@ function generateOrg3() {
     infoln "Generating certificates using Fabric CA"
     ${CONTAINER_CLI_COMPOSE} -f ${COMPOSE_FILE_CA_BASE} -f $COMPOSE_FILE_CA_ORG3 up -d 2>&1
 
+    infoln "\n==================================================\n"
     . fabric-ca/registerEnroll.sh
+    infoln "\n==================================================\n"
 
     sleep 10
 

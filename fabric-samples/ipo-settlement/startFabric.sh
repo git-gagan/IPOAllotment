@@ -32,6 +32,10 @@ pushd ../test-network
 ./network.sh deployCC -ccn ipo -ccv 1 -cci initLedger -ccl ${CC_SRC_LANGUAGE} -ccp ${CC_SRC_PATH}
 popd
 
+pushd ../test-network/addOrg3
+./addOrg3.sh up -ca -c mychannel
+popd
+
 cat <<EOF
 
 Total setup execution time : $(($(date +%s) - starttime)) secs ...
@@ -48,12 +52,9 @@ JavaScript:
 
   Then run the following applications to enroll the admin user, and register a new user
   called appUser which will be used by the other applications to interact with the deployed
-  FabCar contract:
+  ipo contract:
     node enrollAdmin
     node registerUser {userName}
-
-  You can run the invoke application as follows. 
-    node invoke
 
   You can run the query application as follows. By default, the query application will
   return all the shares, but you can update the application to evaluate other transactions:
