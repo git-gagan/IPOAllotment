@@ -10,7 +10,9 @@
 'use strict';
 
 import { authorizeUser } from './userAuth.js';
+import { performDBquery } from './DBquery.js';
 import { retrieveContract } from './getContract.js';
+
 
 async function main() {
     try {
@@ -24,7 +26,7 @@ async function main() {
             //"lotQuantity": 0,
             "sharesBid": 0,
             "sharesAlloted": 0,
-            "amountForBidding": 2000,
+            "walletBalance": 2000,
             "bidPerShare": 100
         }
 
@@ -45,6 +47,17 @@ async function main() {
                 console.log(`User information before the bid:- ${JSON.stringify(userObj)}\n`);
                 userObj = await contract.submitTransaction('FnBuyShares', userObj["stockToBuy"], 2, JSON.stringify(userObj));
                 console.log('Transaction has been submitted');
+                // Perform the DB operation
+                //user_name text primary key,
+                //    ...>     stock_name text,
+                //    ...>     shares_bidded integer,
+                //    ...>     shares_allotted integer,
+                //    ...>     amount_for_bidding integer,
+                //    ...>     bid_per_share integer);
+                // let sql = `insert into ipo_users (user_name, stock_name, shares_bidded, shares_allotted, amount for bidding, bid_per_share)
+                //                 Values(${userName}, ${userObj.stockToBuy}, ${userObj.sharesBid}, ${userObj.sharesAlloted}, ${userObj.amountForBidding}, ${userObj.bidPerShare})`;
+                // let sql = `insert into ipo_users (user_name) values ('${userName}')`;
+                // performDBquery(sql);
                 console.log(`User information after the bid:- ${userObj}\n`);
             }
             else{

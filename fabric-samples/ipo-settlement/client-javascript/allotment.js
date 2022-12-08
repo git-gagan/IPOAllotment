@@ -22,7 +22,7 @@ async function main() {
             //"lotQuantity": 0,
             "sharesBid": 20,
             "sharesAlloted": 0,
-            "amountForBidding": 0,
+            "walletBalance": 0,
             "bidPerShare": 100
         }
 
@@ -42,7 +42,7 @@ async function main() {
             }
             else{
                 console.log(`User information before the Allotment:- ${JSON.stringify(userObj)}\n`);
-                userObj = await contract.submitTransaction('Allotment', userObj["stockToBuy"], 2, JSON.stringify(userObj))
+                userObj = await contract.evaluateTransaction('Allotment', userObj["stockToBuy"], 2, JSON.stringify(userObj)) //not writing on the block
                 if(userObj != "false"){
                     console.log('Transaction has been submitted');
                     console.log(`User information after the allotment:- ${userObj}\n`);

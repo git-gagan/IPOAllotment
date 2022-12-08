@@ -40,6 +40,7 @@ class Ipo extends Contract {
     }
 
     async startBidding(ctx){
+        // Call only once
         console.log("\n\n\n\n\n\n", isBidding)
         if(!isBidding){
             bidStartDate = new Date();
@@ -77,7 +78,7 @@ class Ipo extends Contract {
         asset.sharesBidded += lotSize*parseInt(lotQuantity)
         userObj["sharesBid"] = lotQuantity*lotSize;
         console.log("==========",typeof(userObj), userObj,"=====");
-        userObj["amountForBidding"] -= lotQuantity*lotSize*userObj["bidPerShare"];
+        userObj["walletBalance"] -= lotQuantity*lotSize*userObj["bidPerShare"];
         const updatedString = JSON.stringify(asset);
         console.log(updatedString);
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
@@ -115,9 +116,12 @@ class Ipo extends Contract {
             const assetString = await this.ReadAsset(ctx, id);
             const asset = JSON.parse(assetString);
             asset.sharesSold += asset.sharesBidded/2;
+            console.log(asset.sharesSold + "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp\n")
+            const updatedString = JSON.stringify(asset);
+            console.log(updatedString);
             await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
             userObj["sharesAlloted"] += userObj["sharesBid"]/2;
-            userObj["amountForBidding"] += (userObj["sharesBid"] - userObj["sharesAlloted"])*userObj["bidPerShare"];
+            userObj["walletBalance"] += (userObj["sharesBid"] - userObj["sharesAlloted"])*userObj["bidPerShare"];
             console.info("Shares Alloted");
             isAlloted = true;
             return JSON.stringify(userObj);
@@ -146,4 +150,4 @@ class Ipo extends Contract {
 
 }
 
-module.exports = Ipo; //WARNING
+module.exports = Ipo; 
