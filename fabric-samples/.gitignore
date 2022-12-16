@@ -27,6 +27,10 @@ builders/
 config/
 external-chaincode/
 install-fabric.sh
+test-network/addOrg3/fabric-ca/org3/
+
+# Database Files
+ipo.db
 
 # override the ignore of all config/ folders
 !full-stack-asset-transfer-guide/infrastructure/sample-network/config
