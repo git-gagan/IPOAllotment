@@ -27,7 +27,6 @@ builders/
 config/
 external-chaincode/
 install-fabric.sh
-test-network/addOrg3/fabric-ca/org3/
 
 # Database Files
 ipo.db

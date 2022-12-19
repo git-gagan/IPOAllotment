@@ -13,4 +13,4 @@ pushd ../test-network
 popd
 
 # clean out any old identites in the wallets
-rm -rf client-javascript/wallet/*
+rm -rf client-javascript/MSP/wallet/*
