@@ -6,8 +6,8 @@
 
 'use strict';
 
-import { authorizeUser } from './userAuth.js';
-import { retrieveContract } from './getContract.js';
+import { authorizeUser } from '../userAuth.js';
+import { retrieveContract } from '../getContract.js';
 
 
 async function main() {

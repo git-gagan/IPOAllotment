@@ -18,17 +18,19 @@ async function authorizeUser(userName) {
     try {
         const __dirname = path.resolve(path.dirname(''));
         // load the network configuration
-        const ccpPath = path.resolve(__dirname, '..', '..', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
+        const ccpPath = path.resolve(__dirname, '..', '..', '..', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
         console.log("==========================================\n")
         const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
         // Create a new file system based wallet for managing identities.
-        const walletPath = path.join(process.cwd(), 'wallet');
+        const walletPath = path.join(process.cwd(), '../MSP/wallet');
+        // console.log(walletPath);
         const wallet = await Wallets.newFileSystemWallet(walletPath);
         console.log(`Wallet path: ${walletPath}`);
 
         // Check to see if we've already enrolled the user.
         const identity = await wallet.get(userName);
+        // console.log(identity);
         if (!identity) {
             console.log(`An identity for the user '${userName}' does not exist in the wallet`);
             console.log(`Run the registerUser.js ${userName} application before retrying`);

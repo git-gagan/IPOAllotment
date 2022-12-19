@@ -6,14 +6,14 @@
 
 'use strict';
 
-import { authorizeUser } from './userAuth.js';
-import { retrieveContract } from './getContract.js';
+import { authorizeUser } from '../userAuth.js';
+import { retrieveContract } from '../getContract.js';
 
 
 async function main() {
     try {
         console.log(process.argv);
-        const userName = "user-" + process.argv[2];   // Take username from command line
+        const userName = "IS-" + process.argv[2];   // Take username from command line
 
         let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
         console.log("\n1, ")

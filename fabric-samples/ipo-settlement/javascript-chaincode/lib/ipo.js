@@ -19,21 +19,46 @@ class Ipo extends Contract {
     async initLedger(ctx) {
         console.info('============= START : Initialize Shares Ledger ===========');
         const shares = [
-            // only one company is going for an IPO
             {
-                ID:'share1',
-                sharesQuantity: 500,
-                company: 'Microsoft',
-                lotSize: 10,
-                priceRangeLow : 100,
-                priceRangeHigh : 200, 
-                sharesBidded : 0,
-                sharesSold : 0
-            },
-        ];
+                ID : "M1",
+                M1:{	
+                    ipoInfo: {
+                        issuer_name: "Microsoft",
+                        totalSize: 500,
+                        priceRangeLow: 100,
+                        priceRangeHigh: 200,
+                        total_investors: 0,
+                        total_bid: 0,
+                        total_allotted: 0,
+                        balance: 0
+                    },
+                    escrowInfo:{
+                        agentId:"",
+                        total_amount:0,
+                        last_transaction:"",
+                        refund_amount:"",
+                        transfer_amount:""
+                    },
+                    userInfo: {
+                        DEF: {
+                            name: "DEFAULT",
+                            transaction: {
+                                lot_size: "",
+                                lots_bid: 0,
+                                bid_amount: 0
+                            },
+                            wallet: {
+                                initial_wallet_balance: 0,
+                                wallet_balance_after_bid: 0
+                            }
+                        }
+                    }
+                }
+            }
+        ]      
 
         for (const asset of shares) {
-            asset.docType = 'share';
+            asset.docType = 'IPO-Info';
             await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
         }
         console.info('============= END : Initialize Shares Ledger ===========');   

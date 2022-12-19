@@ -20,7 +20,7 @@ async function main() {
     try {
         // load the network configuration
         const __dirname = path.resolve(path.dirname(''));
-        const ccpPath = path.resolve(__dirname, '..', '..', 'test-network', 'organizations', 'peerOrganizations', 'org2.example.com', 'connection-org2.json');
+        const ccpPath = path.resolve(__dirname, '..', '..', '..' , 'test-network', 'organizations', 'peerOrganizations', 'org2.example.com', 'connection-org2.json');
         const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
         // Create a new CA client for interacting with the CA.
