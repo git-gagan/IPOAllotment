@@ -9,9 +9,9 @@
 
 'use strict';
 
-import { authorizeUser } from '../userAuth.js';
-import { performDBquery } from '../DBquery.js';
-import { retrieveContract } from '../getContract.js';
+import { authorizeUser } from '../utils/userAuth.js';
+import { performDBquery } from '../utils/DBquery.js';
+import { retrieveContract } from '../utils/getContract.js';
 
 
 async function main() {

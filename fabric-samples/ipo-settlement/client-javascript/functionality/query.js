@@ -6,31 +6,58 @@
 
 'use strict';
 
-import { authorizeUser } from '../userAuth.js';
-import { retrieveContract } from '../getContract.js';
+import { authorizeUser } from '../utils/userAuth.js';
+import { retrieveContract } from '../utils/getContract.js';
+import { getIdFromUsername } from '../utils/getUserId.js';
 
 
 async function main() {
     try {
         console.log(process.argv);
-        const userName = "IS-" + process.argv[2];   // Take username from command line
+        let userName = process.argv[2];   // Take username from command line
 
-        let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
-        console.log("\n1, ")
+        // let user_id, role_id = getIdFromUsername(process.argv[2]);
+        // console.log("USER ID:- ", user_id, role_id);
 
-        if (isAuthUser){
-            console.log("USER AUTH:- ", isAuthUser)
-            var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
-            console.log("\n2")
-            // Evaluate the specified transaction.
-            const result = await contract.evaluateTransaction('queryAllShares');
-            console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
-            console.log("\nSUCCESS\n");
-            await gateway.disconnect();
+        // Harcoded for testing
+        // let role_id = "IN";
+        // userName = "gagan";
+        // let user_id = "G1";
+        let role_id = "AG";
+        userName = "Zerodha";
+        let user_id = "AG-Ze";
+
+        if(user_id){
+            userName = role_id + "-" + userName;
+            let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
+            console.log("\n1, ")
+
+            if (isAuthUser) {
+                let function_call = "";
+                if (role_id == "IN"){
+                    function_call = "queryInvestor";
+                }
+                else if (role_id == "IS"){
+                    function_call = "queryIssuer";
+                }
+                else if (role_id == "AG"){
+                    function_call = "queryAgent"
+                }
+                var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
+                console.log("\n2")
+                // Evaluate the specified transaction.
+                const result = await contract.evaluateTransaction(function_call, user_id);
+                console.log(`Transaction has been evaluated, result is: ${result}`);
+                console.log("\nSUCCESS\n");
+                await gateway.disconnect();
+            }
+            else {
+                console.log("\n3")
+                console.log("Unauthorized User!");
+            }
         }
         else{
-            console.log("\n3")
-            console.log("Unauthorized User!");
+            console.log("This user doesn't exist!");
         }
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);

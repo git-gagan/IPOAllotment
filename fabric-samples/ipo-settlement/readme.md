@@ -17,7 +17,7 @@ peer lifecycle chaincode install ipo.tar.gz
 
 peer lifecycle chaincode queryinstalled
 
-export CC_PACKAGE_ID=ipo_1:c111c015e5d841fdb287da3b9e857a74f7f332dd096caaf69cb6dfc9cc901090
+export CC_PACKAGE_ID=ipo_1:2ccf8b2c82e17a070a247b913ec252bee4ab7e16404a985ddd0f194305f2865f
 
 peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" --channelID mychannel --name ipo --version 1 --package-id $CC_PACKAGE_ID --sequence 1 --init-required
 

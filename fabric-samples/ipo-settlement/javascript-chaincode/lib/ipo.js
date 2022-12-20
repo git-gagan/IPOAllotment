@@ -30,18 +30,23 @@ class Ipo extends Contract {
                         total_investors: 0,
                         total_bid: 0,
                         total_allotted: 0,
+                        bid_start_date: "",
+                        total_bid_time: "",
+                        ipo_announcement_date: "",
+                        total_bid_time: 0,
+                        is_complete: false,
                         balance: 0
                     },
                     escrowInfo:{
-                        agentId:"",
+                        agentId:"AG-Ze",
                         total_amount:0,
                         last_transaction:"",
                         refund_amount:"",
                         transfer_amount:""
                     },
                     userInfo: {
-                        DEF: {
-                            name: "DEFAULT",
+                        G1: {
+                            name: "Gagan",
                             transaction: {
                                 lot_size: "",
                                 lots_bid: 0,
@@ -79,16 +84,6 @@ class Ipo extends Contract {
         let information = `Bidding already going on from ${bidStartDate}`;
         return JSON.stringify(information);
     }
-   
-
-    async ReadAsset(ctx, id) {
-        const assetJSON = await ctx.stub.getState(id); // get the asset from chaincode state
-        if (!assetJSON || assetJSON.length === 0) {
-            throw new Error(`The share ${id} does not exist`);
-        }
-        return assetJSON.toString();
-    }
-
 
     async FnBuyShares(ctx, id, lotQuantity, userObj){
         // let id = "share1" // Fixed
@@ -154,7 +149,84 @@ class Ipo extends Contract {
         return false
     }
 
-      async queryAllShares(ctx) {
+
+    // Query Functions here
+
+    async queryIssuer(ctx, user_id) {
+        /*
+        An issuer can see all the data related to its ipo so we pass the user_id
+        of the issuer and fetch the complete record for this unique issuer_id
+        */
+        const assetJSON = await ctx.stub.getState(user_id); // get the asset from chaincode state
+        if (!assetJSON || assetJSON.length === 0) {
+            throw new Error(`The share ${id} does not exist`);
+        }
+        return assetJSON.toString();
+    }
+
+    async queryInvestor(ctx, user_id){
+        /*
+        An investor can only see his/her info so we iterate over all the ipo's to fetch
+        investor specific information from each one of them
+        */
+        const startKey = '';
+        const endKey = '';
+        const investorResults = [];
+        for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
+            const strValue = Buffer.from(value).toString('utf8');
+            console.log(key);
+            let record;
+            try {
+                record = JSON.parse(strValue);
+                console.log(record[key], record[`${key}`]);
+                let investor_dictionary = record[key]['userInfo'];
+                console.log(investor_dictionary);
+                if (user_id in investor_dictionary){
+                    var investor_info = investor_dictionary[user_id];
+                    console.log(investor_info);
+                }
+                else{
+                    continue;
+                }
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            investorResults.push({ Key: user_id, Record: investor_info });
+        }
+        console.info(investorResults);
+        return JSON.stringify(investorResults);
+    }
+
+    async queryAgent(ctx, user_id){
+        /*
+        An agent can see complete information of all the issuers he is dealing with.
+        So here, we loop and fetch the records where escrow_info_id is same as user_id
+        */
+        const startKey = '';
+        const endKey = '';
+        const agentResults = [];
+        for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
+            const strValue = Buffer.from(value).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+                let escrow_id = record[key]['escrowInfo']['agentId'];
+                console.log("\n\n", escrow_id, "\n\n");
+                if (escrow_id != user_id){
+                    continue;
+                }
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            agentResults.push({ Key: key, Record: record });
+        }
+        console.info(agentResults);
+        return JSON.stringify(agentResults);
+    }
+
+    async queryAllShares(ctx) {
         const startKey = '';
         const endKey = '';
         const allResults = [];
