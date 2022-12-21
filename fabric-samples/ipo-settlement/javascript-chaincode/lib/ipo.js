@@ -31,7 +31,6 @@ class Ipo extends Contract {
                         total_bid: 0,
                         total_allotted: 0,
                         bid_start_date: "",
-                        total_bid_time: "",
                         ipo_announcement_date: "",
                         total_bid_time: 0,
                         is_complete: false,
@@ -149,8 +148,30 @@ class Ipo extends Contract {
         return false
     }
 
+    // Adding Users here...
 
-    // Query Functions here
+    async addIssuer(ctx, user_id, issuer_obj){
+        /*
+        This function receives an issuer object along with its user_id from the backend
+        and put it onto the ledger
+        */
+        issuer_obj = JSON.parse(issuer_obj);
+        console.log(issuer_obj, typeof(issuer_obj));
+        issuer_obj.docType = 'IPO-Info';
+        try{
+            await ctx.stub.putState(user_id, Buffer.from(JSON.stringify(issuer_obj)));
+            console.log("\n--- Issuer Updated Successfully ---\n");
+            return true;
+        }
+        catch(err){
+            console.log(err);
+            console.log("\n--- Addition Failed ---\n");
+            return false;
+        }  
+    }
+
+
+    // Query Functions here...
 
     async queryIssuer(ctx, user_id) {
         /*
@@ -159,7 +180,7 @@ class Ipo extends Contract {
         */
         const assetJSON = await ctx.stub.getState(user_id); // get the asset from chaincode state
         if (!assetJSON || assetJSON.length === 0) {
-            throw new Error(`The share ${id} does not exist`);
+            throw new Error(`The share ${user_id} does not exist`);
         }
         return assetJSON.toString();
     }
