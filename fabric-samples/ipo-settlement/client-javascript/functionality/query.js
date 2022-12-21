@@ -16,16 +16,12 @@ async function main() {
         console.log(process.argv);
         let userName = process.argv[2];   // Take username from command line
 
-        // let user_id, role_id = getIdFromUsername(process.argv[2]);
-        // console.log("USER ID:- ", user_id, role_id);
+        let user_promise = await getIdFromUsername(process.argv[2]);
+        console.log("USER ID:- ", user_promise);
 
-        // Harcoded for testing
-        // let role_id = "IN";
-        // userName = "gagan";
-        // let user_id = "G1";
-        let role_id = "AG";
-        userName = "Zerodha";
-        let user_id = "AG-Ze";
+        let user_id = user_promise['user_id'];
+        let role_id = user_promise['role_id'];
+        console.log(user_id, role_id)
 
         if(user_id){
             userName = role_id + "-" + userName;
