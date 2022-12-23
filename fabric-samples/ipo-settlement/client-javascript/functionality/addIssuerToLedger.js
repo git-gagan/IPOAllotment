@@ -25,7 +25,9 @@ async function main() {
         console.log(user_id, role_id)
 
         function createIssuerObject(){
-            // Create the issuer objet which will be passed to the smart contract to be put on the ledger
+            let today = new Date();
+            let startDate = new Date(Date.now() + 500*60); // 1 min
+            // Create the issuer object which will be passed to the smart contract to be put on the ledger
             return {
                 ID: user_id,
                 [user_id]: {
@@ -35,15 +37,23 @@ async function main() {
                         priceRangeLow: 100,
                         priceRangeHigh: 200,
                         total_investors: 0,
-                        total_bid: 0,
+                        total_bid: 1,
                         total_allotted: 0,
-                        bid_start_date: "",
-                        ipo_announcement_date: "",
-                        total_bid_time: 0,
+                        bid_start_date: startDate,
+                        ipo_announcement_date: today,
+                        total_bid_time: 30, // Seconds
                         is_complete: false,
-                        balance: 0
+                        has_bidding_started: false,
+                        balance: 0,
+                        wallet_balance:0
                     },
-                    escrowInfo: {},
+                    escrowInfo: {
+                        agentId:"AG-Ze",
+                        total_amount:0,
+                        last_transaction:"",
+                        refund_amount:"",
+                        transfer_amount:""
+                    },
                     userInfo: {}
                 }
             }
@@ -69,7 +79,14 @@ async function main() {
                 else{
                     console.log(`Failed to add Issuer to the ledger!`);
                 }
+                // console.log(issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'],"\n\n")
                 await gateway.disconnect();
+                // let start_bidding = await startBid(contract, user_id, issuer_obj);
+                // console.log(start_bidding,"=========")
+                // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
+                // console.log(bid_time_over, "============")
+                console.log("OVER")
+                process.exit(1);
             }
             else {
                 console.log("\n3")
@@ -86,3 +103,57 @@ async function main() {
 }
 
 main();
+
+async function biddingOver(contract, user_id, issuer_obj){
+    var resPromise = new Promise(
+        (resolve, reject) => {
+            let result;
+            setTimeout(
+                async function(){
+                    console.log("Setting is_complete to TRUE\n")
+                    result = await contract.submitTransaction('closeBidding', user_id);
+                    result = result.toString();
+                    console.log(result);
+                    if (result == "1"){
+                        resolve("Bidding Closed!");
+                    }
+                    else if (result == "0"){
+                        resolve("Bidding is already Over!");
+                    }
+                    else{
+                        resolve("Bidding hasn't started yet!");
+                    }
+                },
+                issuer_obj['total_bid_time']*1000
+            )
+        }
+    )
+    return resPromise;
+}
+
+async function startBid(contract, user_id, issuer_obj){
+    var resPromise = new Promise(
+        (resolve, reject) =>{
+            let result;
+            setTimeout(
+                async function(){
+                    console.log("Setting has_bidding_started to TRUE\n")
+                    result = await contract.submitTransaction('startBidding', user_id);
+                    result = result.toString();
+                    console.log(result);
+                    if (result == "1"){
+                        resolve("Bidding Started!");
+                    }
+                    else if (result == "0"){
+                        resolve("Bidding Over!");
+                    }
+                    else{
+                        resolve("Bidding Already Going on!");
+                    }
+                }
+                , (issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'])
+            )
+        }
+    )
+    return resPromise;
+}

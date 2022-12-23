@@ -34,7 +34,9 @@ class Ipo extends Contract {
                         ipo_announcement_date: "",
                         total_bid_time: 0,
                         is_complete: false,
-                        balance: 0
+                        has_bidding_started: false,
+                        balance: 0,
+                        wallet_ballence:0
                     },
                     escrowInfo:{
                         agentId:"AG-Ze",
@@ -68,20 +70,58 @@ class Ipo extends Contract {
         console.info('============= END : Initialize Shares Ledger ===========');   
     }
 
-    async startBidding(ctx){
-        // Call only once
-        console.log("\n\n\n\n\n\n", isBidding)
-        if(!isBidding){
-            bidStartDate = new Date();
-            bidTime = 100; //Seconds
-            bidStartTime = bidStartDate.toUTCString();
-            let information = `Bidding started from ${bidStartDate}`;
-            isBidding = true;
-            isAlloted = false;
-            return JSON.stringify(information);
+    async startBidding(ctx, user_id){
+        /*
+         The function takes an issuer id as user_id and starts the bidding for that
+         particular IPO by changing the required flags 
+        */
+        let assetJSON = await this.queryIssuer(ctx, user_id); // get the asset from chaincode state
+        assetJSON = JSON.parse(assetJSON);
+        console.log(assetJSON, typeof(assetJSON));
+        let ipo_info = assetJSON[user_id]['ipoInfo'];
+        console.log(assetJSON[user_id]);
+        console.log(ipo_info);
+        if (!ipo_info.has_bidding_started && !ipo_info.is_complete){
+            console.log(`--- Bidding Started for ${user_id} ---`);
+            assetJSON[user_id]['ipoInfo']['has_bidding_started'] = true;
+            await ctx.stub.putState(user_id, JSON.stringify(assetJSON));
+            return 1;
         }
-        let information = `Bidding already going on from ${bidStartDate}`;
-        return JSON.stringify(information);
+        else if (ipo_info.has_bidding_started && !ipo_info.is_complete){
+            console.log(`Bidding Already Going on from ${ipo_info.bid_start_date}`);
+            return -1;
+        }
+        else{
+            console.log("--- Bidding is already Over! ---");
+            return 0;
+        }
+    }
+
+    async closeBidding(ctx, user_id){
+        /*
+         The function takes an issuer id as user_id and stops the bidding for that
+         particular IPO by changing the required flags 
+        */
+        let assetJSON = await this.queryIssuer(ctx, user_id); // get the asset from chaincode state
+        assetJSON = JSON.parse(assetJSON);
+        console.log(assetJSON, typeof(assetJSON));
+        let ipo_info = assetJSON[user_id]['ipoInfo'];
+        console.log(assetJSON[user_id]);
+        console.log(ipo_info);
+        if (ipo_info.has_bidding_started && !ipo_info.is_complete){
+            console.log(`--- Bidding Closed for ${user_id} ---`);
+            assetJSON[user_id]['ipoInfo']['is_complete'] = true;
+            await ctx.stub.putState(user_id, JSON.stringify(assetJSON));
+            return 1;
+        }
+        else if (!ipo_info.has_bidding_started){
+            console.log(`Bidding hasn't started yet for ${user_id}`);
+            return -1;
+        }
+        else{
+            console.log("--- Bidding is already Over! ---");
+            return 0;
+        }
     }
 
     async FnBuyShares(ctx, id, lotQuantity, userObj){
@@ -104,48 +144,9 @@ class Ipo extends Contract {
         console.log(`${userObj['userName']} placed a successfull bid!\nUpdated ledger:- ${updatedString}`);
         return JSON.stringify(userObj);
     }
-
-    async isBidTimeOver(ctx) {
-        if (bidStartDate){
-            const date = new Date();
-            const currentDate = date.toUTCString();
-            let timeDifference = Math.abs(date - bidStartDate)/1000 - bidTime;
-            console.log(bidStartDate,"=-=-=-=-=-=-=-=-", date)
-            if (timeDifference > 0){ 
-                console.log("\n--------------------------");
-                console.log("Bidding OVER!");
-                // this.Allotment(ctx);
-                isBidding = false;
-                console.log("--------------------------\n");
-                return JSON.stringify(0)
-            }
-            console.log("\n---Bidding GOING ON---\n");
-            timeDifference = Math.abs(timeDifference)
-            console.log("Time remaining", timeDifference);
-            return JSON.stringify(timeDifference);
-        }
-        isBidding = false;
-        return JSON.stringify(-1);
-    }
       
     async Allotment(ctx, id, lotQuantity, userObj){
-        if (!isAlloted){
-            console.log(typeof(userObj), userObj);
-            userObj = JSON.parse(userObj);
-            const assetString = await this.ReadAsset(ctx, id);
-            const asset = JSON.parse(assetString);
-            asset.sharesSold += asset.sharesBidded/2;
-            console.log(asset.sharesSold + "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp\n")
-            const updatedString = JSON.stringify(asset);
-            console.log(updatedString);
-            await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
-            userObj["sharesAlloted"] += userObj["sharesBid"]/2;
-            userObj["walletBalance"] += (userObj["sharesBid"] - userObj["sharesAlloted"])*userObj["bidPerShare"];
-            console.info("Shares Alloted");
-            isAlloted = true;
-            return JSON.stringify(userObj);
-        }
-        return false
+        console.log("\n\n ----Alloted---- \n\n")
     }
 
     // Adding Users here...

@@ -10,7 +10,13 @@
                 "total_investors": "",
                 "total_bid": "",
                 "total_allotted": "",
-                "balance": ""
+                "balance": "",
+                "bid_start_date": "",
+                "ipo_announcement_date": "",
+                "total_bid_time": 0,
+                "is_complete": false,
+                "has_bidding_started": false,
+                "wallet_ballence":0
             },
             "escrowInfo":{
                 "agentId":"",
