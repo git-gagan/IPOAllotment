@@ -18,15 +18,22 @@ async function main() {
         let userName = process.argv[2]; 
 
         let user_promise = await getIdFromUsername(process.argv[2]);
-        console.log("USER ID:- ", user_promise);
+        console.log("USER promise:- ", user_promise);
 
-        let user_id = user_promise['user_id'];
-        let role_id = user_promise['role_id'];
+        let user_id, role_id;
+        if (user_promise){
+            user_id = user_promise['user_id'];
+            role_id = user_promise['role_id'];
+        }
+        else{
+            user_id = null;
+        }
+        
         console.log(user_id, role_id)
 
         function createIssuerObject(){
             let today = new Date();
-            let startDate = new Date(Date.now() + 500*60); // 1 min
+            let startDate = new Date(Date.now() + 100*60); // 1 min
             // Create the issuer object which will be passed to the smart contract to be put on the ledger
             return {
                 ID: user_id,
@@ -34,15 +41,16 @@ async function main() {
                     ipoInfo: {
                         issuer_name: userName,
                         totalSize: 500,
-                        priceRangeLow: 100,
-                        priceRangeHigh: 200,
+                        priceRangeLow: 10,
+                        priceRangeHigh: 20,
                         total_investors: 0,
-                        total_bid: 1,
+                        total_bid: 0,
                         total_allotted: 0,
                         bid_start_date: startDate,
                         ipo_announcement_date: today,
-                        total_bid_time: 30, // Seconds
+                        total_bid_time: 60, // Seconds
                         is_complete: false,
+                        lot_size: 10,
                         has_bidding_started: false,
                         balance: 0,
                         wallet_balance:0
@@ -81,10 +89,8 @@ async function main() {
                 }
                 // console.log(issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'],"\n\n")
                 await gateway.disconnect();
-                // let start_bidding = await startBid(contract, user_id, issuer_obj);
-                // console.log(start_bidding,"=========")
+                let start_bidding = await startBid(contract, user_id, issuer_obj);
                 // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
-                // console.log(bid_time_over, "============")
                 console.log("OVER")
                 process.exit(1);
             }
@@ -103,6 +109,8 @@ async function main() {
 }
 
 main();
+
+// ----------- Low level Fix for timer ------------ //
 
 async function biddingOver(contract, user_id, issuer_obj){
     var resPromise = new Promise(

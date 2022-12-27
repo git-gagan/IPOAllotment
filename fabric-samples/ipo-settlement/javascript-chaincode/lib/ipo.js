@@ -7,16 +7,12 @@
 'use strict';
 
 const { Contract } = require('fabric-contract-api');
-var bidStartDate = null;
-var bidTime = null; //seconds
-var bidStartTime =  null;
-var isBidding = false;
-var isAlloted = false;
 
 class Ipo extends Contract {
-
     // Ipo class for shares settlement
+
     async initLedger(ctx) {
+        // Initialize ledger state with the given information
         console.info('============= START : Initialize Shares Ledger ===========');
         const shares = [
             {
@@ -25,13 +21,14 @@ class Ipo extends Contract {
                     ipoInfo: {
                         issuer_name: "Microsoft",
                         totalSize: 500,
-                        priceRangeLow: 100,
-                        priceRangeHigh: 200,
+                        priceRangeLow: 10,
+                        priceRangeHigh: 20,
                         total_investors: 0,
                         total_bid: 0,
                         total_allotted: 0,
                         bid_start_date: "",
                         ipo_announcement_date: "",
+                        lot_size: "",
                         total_bid_time: 0,
                         is_complete: false,
                         has_bidding_started: false,
@@ -46,18 +43,19 @@ class Ipo extends Contract {
                         transfer_amount:""
                     },
                     userInfo: {
-                        G1: {
-                            name: "Gagan",
-                            transaction: {
-                                lot_size: "",
-                                lots_bid: 0,
-                                bid_amount: 0
-                            },
-                            wallet: {
-                                initial_wallet_balance: 0,
-                                wallet_balance_after_bid: 0
+                        G1: [
+                                {
+                                name: "Gagan",
+                                transaction: {
+                                    lots_bid: 0,
+                                    bid_amount: 0
+                                },
+                                wallet: {
+                                    initial_wallet_balance: 0,
+                                    wallet_balance_after_bid: 0
+                                }
                             }
-                        }
+                        ]
                     }
                 }
             }
@@ -69,6 +67,8 @@ class Ipo extends Contract {
         }
         console.info('============= END : Initialize Shares Ledger ===========');   
     }
+
+    // Start and Close bidding functions
 
     async startBidding(ctx, user_id){
         /*
@@ -124,28 +124,67 @@ class Ipo extends Contract {
         }
     }
 
-    async FnBuyShares(ctx, id, lotQuantity, userObj){
-        // let id = "share1" // Fixed
-        console.log(typeof(userObj), userObj);
-        userObj = JSON.parse(userObj);
-        const assetString = await this.ReadAsset(ctx, id);
-        const asset = JSON.parse(assetString);
-        const oldQuantity = asset.sharesQuantity;
-        const lotSize = asset.lotSize;
-        const newQuantity = oldQuantity-(lotSize*parseInt(lotQuantity));
-        asset.sharesQuantity = newQuantity;
-        asset.sharesBidded += lotSize*parseInt(lotQuantity)
-        userObj["sharesBid"] = lotQuantity*lotSize;
-        console.log("==========",typeof(userObj), userObj,"=====");
-        userObj["walletBalance"] -= lotQuantity*lotSize*userObj["bidPerShare"];
-        const updatedString = JSON.stringify(asset);
-        console.log(updatedString);
-        await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
-        console.log(`${userObj['userName']} placed a successfull bid!\nUpdated ledger:- ${updatedString}`);
-        return JSON.stringify(userObj);
+    // Buy/Allotment/Refund Functionality
+
+    async buyShares(ctx, user_id, investor_obj, ipo_id){
+        /*
+            This buy shares functionality allows the investors to buy the ipo
+            for the first time or maybe again by doing all the relevant checks
+            and updating the ledger state by putting the modified asset
+        */
+        console.log("---Inside Buy Shares---");
+        let asset = await this.queryIssuer(ctx, ipo_id);
+        let assetJSON = JSON.parse(asset);
+        let has_bidding_started = assetJSON[ipo_id]['ipoInfo']['has_bidding_started'];
+        let is_complete = assetJSON[ipo_id]['ipoInfo']['is_complete'];
+        if (has_bidding_started && !is_complete){
+            console.log("\n---Bidding Allowed---\n")
+            investor_obj = JSON.parse(investor_obj);
+            console.log(investor_obj);
+            let bid_amount = investor_obj[user_id]['transaction']['bid_amount'];
+            let lots_bid = investor_obj[user_id]['transaction']['lots_bid'];
+            let lot_size = assetJSON[ipo_id]['ipoInfo']['lot_size'];
+            let total_size = assetJSON[ipo_id]['ipoInfo']['totalSize'];
+            if (bid_amount < assetJSON[ipo_id]['ipoInfo']['priceRangeLow']){
+                console.log("Your bidding amount is too low!");
+                return -1;
+            }
+            let users_info = assetJSON[ipo_id]['userInfo'];
+            console.log("Info of all the users:\n", users_info);
+            if (user_id in users_info){
+                console.log("Update needed!");
+                investor_obj[user_id]['wallet']['wallet_balance_after_bid'] = assetJSON[ipo_id]['userInfo'][user_id][(assetJSON[ipo_id]['userInfo'][user_id]).length-1]['wallet']['wallet_balance_after_bid']-bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
+                if (investor_obj[user_id]['wallet']['wallet_balance_after_bid'] < 0){
+                    console.log("Not enough balance in the wallet!");
+                    return -1
+                }  
+                assetJSON[ipo_id]['userInfo'][user_id].push(investor_obj[user_id]);
+                console.log("Update set up!");
+            }
+            else{
+                console.log("Insertion needed!");
+                investor_obj[user_id]['wallet']['wallet_balance_after_bid'] = bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
+                assetJSON[ipo_id]['userInfo'][user_id] = [investor_obj[user_id]];
+                assetJSON[ipo_id]['ipoInfo']['total_investors'] += 1;
+                console.log("Insert set up!");
+            }
+            // Change in asset's ipoInfo
+            console.log("----------------------")
+            assetJSON[ipo_id]['ipoInfo']['total_bid'] += (lots_bid*lot_size);
+            assetJSON[ipo_id]['ipoInfo']['balance'] = total_size-(assetJSON[ipo_id]['ipoInfo']['total_bid']);
+            // Change in assets' escrow info
+            console.log("=======================")
+            assetJSON[ipo_id]['escrowInfo']['total_amount'] += bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
+            assetJSON[ipo_id]['escrowInfo']['last_transaction'] = `${bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size']} for IPO ${ipo_id} by user ${user_id}`;
+            console.log("Ready to be put to ledger:- \n", assetJSON);
+            await ctx.stub.putState(ipo_id, Buffer.from(JSON.stringify(assetJSON)));
+            console.log("\nShares bought Successfully by the user\n");
+            return 1;
+        }
+        return 0;
     }
       
-    async Allotment(ctx, id, lotQuantity, userObj){
+    async allotShares(ctx, agent_id, ipo_id){
         console.log("\n\n ----Alloted---- \n\n")
     }
 
@@ -170,7 +209,6 @@ class Ipo extends Contract {
             return false;
         }  
     }
-
 
     // Query Functions here...
 

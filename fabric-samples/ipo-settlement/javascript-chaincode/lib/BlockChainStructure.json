@@ -14,6 +14,7 @@
                 "bid_start_date": "",
                 "ipo_announcement_date": "",
                 "total_bid_time": 0,
+                "lot_size": "",
                 "is_complete": false,
                 "has_bidding_started": false,
                 "wallet_ballence":0
@@ -29,7 +30,6 @@
                 "Nik1": {
                     "name": "Nikita",
                     "transaction": {
-                        "lot_size": "",
                         "lots_bid": "",
                         "bid_amount": ""
                     },
@@ -41,7 +41,6 @@
                 "Aa1": {
                     "name": "Aasawari",
                     "transaction": {
-                        "lot_size": "",
                         "lots_bid": "",
                         "bid_amount": ""
                     },
