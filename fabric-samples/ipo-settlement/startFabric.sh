@@ -34,6 +34,7 @@ popd
 
 pushd ../test-network/addOrg3
 ./addOrg3.sh up -ca -c mychannel
+./addOrg3.sh deployCC -ccn ipo -ccv 1 -ccl ${CC_SRC_LANGUAGE} -ccp ${CC_SRC_PATH}
 popd
 
 cat <<EOF
