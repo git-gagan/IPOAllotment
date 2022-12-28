@@ -19,8 +19,15 @@ async function main() {
         let user_promise = await getIdFromUsername(process.argv[2]);
         console.log("USER ID:- ", user_promise);
 
-        let user_id = user_promise['user_id'];
-        let role_id = user_promise['role_id'];
+        let user_id, role_id;
+        if (user_promise){
+            user_id = user_promise['user_id'];
+            role_id = user_promise['role_id'];
+        }
+        else{
+            user_id = null;
+        }
+        
         console.log(user_id, role_id)
 
         if(user_id){

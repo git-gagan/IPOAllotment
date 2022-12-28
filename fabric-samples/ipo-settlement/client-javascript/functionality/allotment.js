@@ -8,55 +8,50 @@
 
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
+import { getIdFromUsername } from '../utils/getUserId.js';
 
 
 async function main() {
     try {
         console.log(process.argv);
-        const userName = "user-" + process.argv[2];   // Take username from command line
+        let userName = process.argv[2];   // Take username from command line
 
-        // Random fixed User object
-        let userObj = {
-            "userName": userName,
-            "stockToBuy": "share1",
-            //"lotQuantity": 0,
-            "sharesBid": 20,
-            "sharesAlloted": 0,
-            "walletBalance": 0,
-            "bidPerShare": 100
-        }
+        let user_promise = await getIdFromUsername(process.argv[2]);
+        console.log("USER ID:- ", user_promise);
 
-        let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
-        console.log("\n1, ")
-
-        if (isAuthUser){
-            console.log("USER AUTH:- ", isAuthUser)
-            var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
-            console.log("\n2")
-            // Evaluate the specified transaction.
-            let result = await contract.evaluateTransaction('isBidTimeOver')
-            result = result.toString();
-            console.log(result);
-            if (result != "0"){
-                console.log("Allotment cannot be made!");
-            }
-            else{
-                console.log(`User information before the Allotment:- ${JSON.stringify(userObj)}\n`);
-                userObj = await contract.evaluateTransaction('Allotment', userObj["stockToBuy"], 2, JSON.stringify(userObj)) //not writing on the block
-                if(userObj != "false"){
-                    console.log('Transaction has been submitted');
-                    console.log(`User information after the allotment:- ${userObj}\n`);
-                    console.log("\nSUCCESS\n");
-                }
-                else{
-                    console.log("Allotment has been made already!")
-                }
-            }
-            await gateway.disconnect();
+        let user_id, role_id;
+        if (user_promise){
+            user_id = user_promise['user_id'];
+            role_id = user_promise['role_id'];
         }
         else{
-            console.log("\n3")
-            console.log("Unauthorized User!");
+            user_id = null;
+        }
+        
+        console.log(user_id, role_id)
+
+        if(user_id){
+            var ipo_id = "M1";
+            userName = role_id + "-" + userName;
+            let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
+            console.log("\n1, ")
+
+            if (isAuthUser && role_id == "AG") {
+                var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
+                console.log("\n2")
+                // Evaluate the specified transaction.
+                const result = await contract.evaluateTransaction('allotShares', user_id, ipo_id);
+                console.log(`Transaction has been evaluated, result is: ${result}`);
+                console.log("\nSUCCESS\n");
+                await gateway.disconnect();
+            }
+            else {
+                console.log("\n3")
+                console.log("Unauthorized User!");
+            }
+        }
+        else{
+            console.log("This user doesn't exist!");
         }
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
@@ -64,4 +59,4 @@ async function main() {
     }
 }
 
-main()
+main();

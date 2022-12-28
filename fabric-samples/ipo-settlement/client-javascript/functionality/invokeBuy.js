@@ -69,6 +69,15 @@ async function main() {
                 // Evaluate the specified transaction.
                 const result = await contract.submitTransaction('buyShares', user_id, JSON.stringify(investor_obj), ipo_id);
                 console.log(`Transaction has been evaluated, result is: ${result}`);
+                if (result == '0'){
+                    console.log("Bidding not allowed!");
+                }
+                else if (result == '1'){
+                    console.log(`Shares bought Successfully by the user: ${userName}`);
+                }
+                else{
+                    console.log("Not enough funds to place the bid");
+                }
                 console.log("\nSUCCESS\n");
                 await gateway.disconnect();
             }

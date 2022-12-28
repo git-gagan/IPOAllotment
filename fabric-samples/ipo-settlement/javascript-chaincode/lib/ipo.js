@@ -33,7 +33,7 @@ class Ipo extends Contract {
                         is_complete: false,
                         has_bidding_started: false,
                         balance: 0,
-                        wallet_ballence:0
+                        wallet_balance:0
                     },
                     escrowInfo:{
                         agentId:"AG-Ze",
@@ -185,7 +185,45 @@ class Ipo extends Contract {
     }
       
     async allotShares(ctx, agent_id, ipo_id){
-        console.log("\n\n ----Alloted---- \n\n")
+        /*
+            The allotment functionality allots the shares to the investors &
+            update the ledger depending upon the case of oversubscription or
+            undersubscription.
+        */
+        console.log("--- Inside Allotment ---");
+        let asset = await this.queryIssuer(ctx, ipo_id);
+        let assetJSON = JSON.parse(asset);
+        let has_bidding_started = assetJSON[ipo_id]['ipoInfo']['has_bidding_started'];
+        let is_complete = assetJSON[ipo_id]['ipoInfo']['is_complete'];
+        if (has_bidding_started && is_complete){
+            let total_bid = assetJSON[ipo_id]['ipoInfo']['total_bid'];
+            let total_size = assetJSON[ipo_id]['ipoInfo']['totalSize'];
+            if (total_bid > total_size){
+                console.log("\n--- OVERSUBSCRIPTION ---\n");
+            }
+            else{
+                console.log("\n--- UNDERSUBSCRIPTION ---\n");
+                assetJSON = this.allotUndersubscription(ipo_id, assetJSON);
+            }
+            console.log(assetJSON);
+            await ctx.stub.putState(ipo_id, Buffer.from(JSON.stringify(assetJSON)));
+            console.log("\n\n ----Alloted---- \n\n");
+        }
+        return 0;
+    }
+
+    allotUndersubscription(ipo_id, assetJSON){
+        /*
+            In this case, all the investors get all the shares they bid for and 
+            the respective value transfer happen on all the accounts (no refund)
+        */
+        console.log("\nInside UNDERSUBSCRIPTION\n");
+        assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount'];
+        assetJSON[ipo_id]['escrowInfo']['total_amount'] = 0;
+        assetJSON[ipo_id]['escrowInfo']['refund_amount'] = 0;
+        assetJSON[ipo_id]['ipoInfo']['wallet_balance'] += assetJSON[ipo_id]['escrowInfo']['transfer_amount'];
+        assetJSON[ipo_id]['ipoInfo']['total_allotted'] = assetJSON[ipo_id]['ipoInfo']['total_bid'];
+        return assetJSON;
     }
 
     // Adding Users here...
