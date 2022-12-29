@@ -1,0 +1,27 @@
+{
+    "G1":{
+        "name": "Gagan",
+        "transactions": [
+            {
+                "lots_bid": 5,
+                "bid_amount": 10
+            },
+            {
+                "lots_bid": 5,
+                "bid_amount": 10
+            },
+            {
+                "lots_bid": 5,
+                "bid_amount": 10
+            }
+        ], 
+        "wallet": {
+            "initial_wallet_balance": 0,
+            "current_wallet_balance": 0
+        },
+        "shares":{
+            "bid": 0,
+            "alloted": 0
+        }
+    }
+}

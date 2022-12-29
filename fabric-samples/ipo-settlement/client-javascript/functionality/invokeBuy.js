@@ -56,7 +56,7 @@ async function main() {
 
         if(user_id){
             // Get the investor object
-            var ipo_id = "M1";
+            var ipo_id = "F1";
             let investor_obj = createInvestorObject();
             console.log("\n", investor_obj);
             userName = role_id + "-" + userName;
