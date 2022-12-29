@@ -1,0 +1,1 @@
+This directory consists of all the information related to Frontend and it's integration with node.js
