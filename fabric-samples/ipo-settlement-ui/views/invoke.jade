@@ -1,0 +1,25 @@
+extends layout
+
+block content
+    div.container
+        if data!=''
+            //- div.alert.alert-warning.alert-dismissible.fade.show(role="alert")
+            //- strong #{data}
+            //- button.close(type="button",data-dismiss="alert",aria-label="Close")
+            //-     span(aria-hidden="true") &times;
+            strong #{data}
+        else 
+            
+
+        
+        h1 Bid Shares
+        form.mt-5(action="/actionInvoke",method="post")
+            div.form-group
+                label(for="lotQuantity")  Lot Quantity 
+                input.form-control(type="number",id="lotQuantity",name="lotQuantity" required)
+            div.form-group
+                label(for="bidperShare")  Bid Per Share 
+                input.form-control(type="number",id="bidperShare",name="bidperShare" required)
+            button.btn.btn-primary(type="Submit") Submit Bid
+
+script(src='/bootstrap/js/bootstrap.bundle.js') 

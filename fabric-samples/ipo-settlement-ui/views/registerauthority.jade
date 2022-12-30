@@ -1,0 +1,41 @@
+extends layout
+block content
+    div.container
+        h1 Register an Authority 
+
+        - if(message != '') {
+            p #{message}
+        - } else {
+            p 
+        - }
+        form.mt-5(action="/registerauthority",method="post")
+            div.form-group
+                label(for="username")  Username 
+                input.form-control(type="text",id="username",placeholder="Enter Username",name="username" required)
+            div.form-group
+                label(for="password")  Password 
+                input.form-control(type="password",id="password",placeholder="Password",name="password" required)
+
+            //- div.li.dropdown.btn.btn-primary.mb-5
+            //-     span
+            //-         |  Select an Authority
+            //-     ul.dropdown-menu.dropdown-toggle(data-toggle="dropdown")
+            //-         li
+            //-         a(href="#") Issuer
+
+            //- .dropdown
+            //- button#dropdownMenuButton.btn.btn-lg.btn-primary.dropdown-toggle.mb-5(type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+            //-     | Select an Authority
+            //- .dropdown-menu(aria-labelledby='dropdownMenuButton')
+            //-     a.dropdown-item(href='#') Issuer
+            //-     a.dropdown-item(href='#') Paying Agent
+
+            label(for="authority") Select an Authority
+            select.form-control#authority(name='authority')
+                option(value='Issuer') Issuer
+                option(value='Paying Agent') Paying Agent
+                
+                    
+            button.btn.btn-primary.form-control.mt-5(type="submit") Register an Authority
+
+script(src='/bootstrap/js/bootstrap.bundle.js') 

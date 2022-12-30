@@ -1,0 +1,21 @@
+extends layout
+
+block content
+    div.container
+        h1 Sign Up
+        - if(message != '') {
+            p #{message}
+        - } else {
+            p 
+        - }
+        form.mt-5(action="/signup",method="post")
+            div.form-group
+                label(for="username")  Username 
+                input.form-control(type="text",id="username",placeholder="Enter Username",name="username" required)
+            div.form-group
+                label(for="password")  Password 
+                input.form-control(type="password",id="password",placeholder="Password",name="password" required)
+            button.btn.btn-primary(type="submit") Sign Up
+
+
+script(src='/bootstrap/js/bootstrap.bundle.js')

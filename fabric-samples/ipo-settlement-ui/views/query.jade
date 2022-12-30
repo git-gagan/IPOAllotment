@@ -1,0 +1,20 @@
+extends layout
+
+block content
+    #data
+        if data != undefined && data.length > 0
+            for item in data
+                div.row
+                    div.col-6
+                        div.card.mt-5.mb-5(style="width: 18rem;")
+                            ul.list-group.list-group-flush
+                                li.list-group-item.h3.bg-primary #{item.Record.company} IPO
+                        a.btn.btn-lg.btn-primary(href='/invoke') Apply Now
+                    div.col-6
+                        div.card.mt-5.mb-5.bg-primary(style="width: 30rem;")
+                            ul.list-group.list-group-flush
+                                //- for share in item
+                                li.list-group-item.h3 Minimum Order Quantity  #{item.Record.lotSize}    
+                                li.list-group-item.h3 Price Range  #{item.Record.priceRangeLow}  -  #{item.Record.priceRangeHigh}     
+        
+script(src='/bootstrap/js/bootstrap.bundle.js')

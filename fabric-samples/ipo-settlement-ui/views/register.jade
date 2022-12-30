@@ -1,0 +1,10 @@
+extends layout
+
+block content
+    h1 IPO Allotment - Register User
+    #data
+        if data != undefined && data.length > 0
+            p.lead The returned result was: #{data}
+        else
+            a.btn.btn-lg.btn-primary(href='/actionRegisterUser') Register User
+script(src='/bootstrap/js/bootstrap.bundle.js')

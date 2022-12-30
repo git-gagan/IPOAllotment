@@ -1,0 +1,33 @@
+extends layout
+
+block content
+    div.container
+        h1 Issuer On Boarding
+        - if(message != '') {
+            p #{message}
+        - } else {
+            p 
+        - }
+        form.mt-5(action="/signup",method="post")
+            div.form-group
+                label(for="ipo") IPO
+                input.form-control(type="text",id="ipo",placeholder="Enter IPO",name="ipo" required) 
+            div.form-group
+                label(for="totalSize")  Total Number of Shares 
+                input.form-control(type="number",id="totalSize",placeholder="Enter Total Number of Shares",name="totalSize" required)
+            div.form-group
+                label(for="priceRangeLow")  Minimum price Range 
+                input.form-control(type="number",id="priceRangeLow",placeholder="Enter Minimum price Range",name="priceRangeLow" required)
+             div.form-group
+                label(for="priceRangeHigh")  Maximum price Range 
+                input.form-control(type="number",id="priceRangeHigh",placeholder="Enter Maximum price Range",name="priceRangeHigh" required)
+            div.form-group
+                label(for="bidStartDate")  Choose Bid Start Date
+                input.form-control(type="date",id="bidStartDate",name="bidStartDate" required)
+            div.form-group
+                label(for="totalBidTime")  Choose Total Bid Time
+                input.form-control(type="time",id="totalBidTime",name="totalBidTime" required)
+            button.btn.btn-primary(type="submit") Submit
+
+
+script(src='/bootstrap/js/bootstrap.bundle.js')

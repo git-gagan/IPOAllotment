@@ -11,6 +11,7 @@ var bidStartDate = null;
 var bidTime = null; //seconds
 var bidStartTime =  null;
 var isBidding = false;
+var isAlloted = false;
 
 class Ipo extends Contract {
 
@@ -21,11 +22,13 @@ class Ipo extends Contract {
             // only one company is going for an IPO
             {
                 ID:'share1',
-                quantity: 500,
+                sharesQuantity: 500,
                 company: 'Microsoft',
                 lotSize: 10,
                 priceRangeLow : 100,
                 priceRangeHigh : 200, 
+                sharesBidded : 0,
+                sharesSold : 0
             },
         ];
 
@@ -44,6 +47,7 @@ class Ipo extends Contract {
             bidStartTime = bidStartDate.toUTCString();
             let information = `Bidding started from ${bidStartDate}`;
             isBidding = true;
+            isAlloted = false;
             return JSON.stringify(information);
         }
         let information = `Bidding already going on from ${bidStartDate}`;
@@ -60,17 +64,25 @@ class Ipo extends Contract {
     }
 
 
-    async FnBuyShares(ctx, id, lotQuantity){
+    async FnBuyShares(ctx, id, lotQuantity, userObj){
+        // let id = "share1" // Fixed
+        console.log(typeof(userObj), userObj);
+        userObj = JSON.parse(userObj);
         const assetString = await this.ReadAsset(ctx, id);
         const asset = JSON.parse(assetString);
-        const oldQuantity = asset.quantity;
+        const oldQuantity = asset.sharesQuantity;
         const lotSize = asset.lotSize;
         const newQuantity = oldQuantity-(lotSize*parseInt(lotQuantity));
-        asset.quantity = newQuantity
+        asset.sharesQuantity = newQuantity;
+        asset.sharesBidded += lotSize*parseInt(lotQuantity)
+        userObj["sharesBid"] = lotQuantity*lotSize;
+        console.log("==========",typeof(userObj), userObj,"=====");
+        userObj["amountForBidding"] -= lotQuantity*lotSize*userObj["bidPerShare"];
         const updatedString = JSON.stringify(asset);
         console.log(updatedString);
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
-        return JSON.stringify(asset); 
+        console.log(`${userObj['userName']} placed a successfull bid!\nUpdated ledger:- ${updatedString}`);
+        return JSON.stringify(userObj);
     }
 
     async isBidTimeOver(ctx) {
@@ -82,7 +94,7 @@ class Ipo extends Contract {
             if (timeDifference > 0){ 
                 console.log("\n--------------------------");
                 console.log("Bidding OVER!");
-                this.Allotment(ctx);
+                // this.Allotment(ctx);
                 isBidding = false;
                 console.log("--------------------------\n");
                 return JSON.stringify(0)
@@ -92,36 +104,26 @@ class Ipo extends Contract {
             console.log("Time remaining", timeDifference);
             return JSON.stringify(timeDifference);
         }
-        else{
-            let error = "Bidding hasn't started yet! Please call startBidding() first!";
-            return JSON.stringify(error);
-        }
+        isBidding = false;
+        return JSON.stringify(-1);
     }
-
-    // async counter(ctx, id, bidTime) {
-    //     var i = parseInt(bidTime);
-    //     const assetString = await this.ReadAsset(ctx, id);
-    //     var asset = JSON.parse(assetString);
-    //     setInterval(function() {
-    //       if (i == 0) {
-    //         clearInterval(this);
-            
-    //       }
-    //       else{
-    //         const newbidTime=i--;
-    //         asset.bidTime=newbidTime; 
-    //         console.info(JSON.stringify(asset))
-           
-    //       }
-    //     }, 1000);
-
-    //    await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
-    //    return JSON.stringify(asset);
-    //}  End
       
-      async Allotment(ctx){
-        console.info("Shares Alloted");
-      }
+    async Allotment(ctx, id, lotQuantity, userObj){
+        if (!isAlloted){
+            console.log(typeof(userObj), userObj);
+            userObj = JSON.parse(userObj);
+            const assetString = await this.ReadAsset(ctx, id);
+            const asset = JSON.parse(assetString);
+            asset.sharesSold += asset.sharesBidded/2;
+            await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
+            userObj["sharesAlloted"] += userObj["sharesBid"]/2;
+            userObj["amountForBidding"] += (userObj["sharesBid"] - userObj["sharesAlloted"])*userObj["bidPerShare"];
+            console.info("Shares Alloted");
+            isAlloted = true;
+            return JSON.stringify(userObj);
+        }
+        return false
+    }
 
       async queryAllShares(ctx) {
         const startKey = '';
