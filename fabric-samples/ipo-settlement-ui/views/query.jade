@@ -8,13 +8,14 @@ block content
                     div.col-6
                         div.card.mt-5.mb-5(style="width: 18rem;")
                             ul.list-group.list-group-flush
-                                li.list-group-item.h3.bg-primary #{item.Record.company} IPO
+                                input#custId(type='hidden' name='custId' value=`${item.Key}`)
+                                li.list-group-item.h3.bg-primary #{item.Record.M1.ipoInfo.issuer_name} IPO
                         a.btn.btn-lg.btn-primary(href='/invoke') Apply Now
                     div.col-6
                         div.card.mt-5.mb-5.bg-primary(style="width: 30rem;")
                             ul.list-group.list-group-flush
                                 //- for share in item
-                                li.list-group-item.h3 Minimum Order Quantity  #{item.Record.lotSize}    
-                                li.list-group-item.h3 Price Range  #{item.Record.priceRangeLow}  -  #{item.Record.priceRangeHigh}     
+                                li.list-group-item.h3 Minimum Order Quantity  #{item.Record.M1.ipoInfo.lot_size}    
+                                li.list-group-item.h3 Price Range  #{item.Record.M1.ipoInfo.priceRangeLow}  -  #{item.Record.M1.ipoInfo.priceRangeHigh}     
         
 script(src='/bootstrap/js/bootstrap.bundle.js')

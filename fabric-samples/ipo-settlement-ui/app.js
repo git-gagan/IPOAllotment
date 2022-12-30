@@ -1,17 +1,33 @@
 
 // Fabcar commandline client for enrolling and Admin
-var enrollAdmin = require("./handlers/enrollAdmin");
-var registerUser = require("./handlers/registerUser");
-var invoke = require("./handlers/invoke");
-var query = require("./handlers/query");
-var startBid=require("./handlers/startBid");
-const sqlite3 = require('sqlite3');
-const session = require('express-session')
+
+// import {enrollAdminAgent} from "./handlers/client-javascript/MSP/enrollAdminAgent.js";
+// import {enrollAdminInvestor} from  "./handlers/client-javascript/MSP/enrollAdminInvestor.js";
+// import  {enrollAdminIssuer} from  "./handlers/client-javascript/MSP/enrollAdminIssuer.js";
+import {registerUserAgent} from "./handlers/client-javascript/MSP/registerUserAgent.js";
+import {registerUserInvestor} from  "./handlers/client-javascript/MSP/registerUserInvestor.js";
+import {registerUserIssuer}  from  "./handlers/client-javascript/MSP/registerUserIssuer.js";
+import {query} from "./handlers/client-javascript/functionality/query.js"
+import {queryTransaction} from "./handlers/client-javascript/functionality/queryAllShares.js"
+import {invokeTransaction} from "./handlers/client-javascript/functionality/invokeBuy.js"
+
+// var invoke = require("./handlers/invoke");
+// var query = require("./handlers/query");
+// var startBid=require("./handlers/startBid");
+// const sqlite3 = require('sqlite3');
+// const session = require('express-session')
+import session from "express-session";
+import sqlite3 from "sqlite3";
+import express from "express";
+import bodyParser from "body-parser";
+
+
+import { v4 as uuidv4 } from 'uuid';
 
 /////////////////////////////////////////
 // Express setup
-var express = require("express");
-var bodyParser = require('body-parser')
+// var express = require("express");
+// var bodyParser = require('body-parser')
 var app = express();
 app.set("views", "./views");
 app.use(express.static("public"));
@@ -31,48 +47,16 @@ app.use(session({
     saveUninitialized: true
 }))
 
-
-const db = new sqlite3.Database('./ipo.db', (err) => {
-    if (err) {
-        console.error("Error opening database " + err.message);
-    } else {
-
-        db.run('CREATE TABLE tbl_role(\
-            role_id int primary key,\
-            role_name varchar\
-            )', (err) => {
-            if (err) {
-                console.log("Table already exists.");
-            }
-        });
-
-
-        db.run('CREATE TABLE tbl_user(\
-            user_id int primary key,\
-            user_name varchar(50),\
-            user_pwd varchar(20)\
-            )', (err) => {
-            if (err) {
-                console.log("Table already exists.");
-            }
-        });
-
-
-        db.run('CREATE TABLE tbl_userrole(\
-            user_id varchar(50) primary key,\
-            role_id varchar(50),\
-            Foreign key (role_id) references tbl_role(role_id), \
-            foreign key (user_id) references tbl_user(user_id) ,\
-            user_pwd varchar(20)\
-            )', (err) => {
-            if (err) {
-                console.log("Table already exists.");
-            }
-        });
-    
-        
+var sess="";
+let db = new sqlite3.Database('ipo.db', (err)=>{
+    if (err){
+        return console.error(err.message);
     }
-});
+    else{
+        console.log('Connected to the SQlite database.');
+    }
+})
+
 
 /////////////////////////////////////////
 // VIEWS
@@ -131,9 +115,13 @@ app.get('/agentpanel', function (req, res){
 app.post("/actionInvoke",function(req,res){
     var lotQuantity=req.body.lotQuantity;
     var bidperShare=req.body.bidperShare;
+    var shareId=req.body.custId;
+
     console.log("lot quantity:",lotQuantity);
     console.log("bid per share:",bidperShare);
-    var promiseInvoke = invoke.invokeTransaction(req.session.name,lotQuantity,bidperShare);
+    console.log("Share Id:",shareId);
+
+    var promiseInvoke = invokeTransaction(req.session.name,lotQuantity,bidperShare,shareId);
     var promiseValue = async () => {
         const value = await promiseInvoke;
         console.log(value);
@@ -147,7 +135,7 @@ app.post("/signup",function (req, res) {
     console.log(req.body);
     var username = req.body.username
     var password = req.body.password
-    db.get(`SELECT * FROM user where username = ?`, [req.body.username], (err, row) => {
+    db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], (err, row) => {
         if (err) {
           res.status(400).json({"error":err.message});
           console.log(error.message);
@@ -157,10 +145,14 @@ app.post("/signup",function (req, res) {
             res.render("signup.jade",{message:"Username already exist",session:req.session.name});
         }
         else{
-            let insert = 'INSERT INTO user (username, password) VALUES (?,?)';
+            let user_id=uuidv4()
+            let insert = 'INSERT INTO tbl_user (user_id,user_name, user_pwd) VALUES (?,?,?)';
+            let insert2 = 'INSERT INTO tbl_userrole (user_id,role_id) VALUES (?,?)';
+
             try {
-                db.run(insert, [username,password]);
-                var promiseRegisterUser = registerUser.register(username);
+                db.run(insert, [user_id,username,password]);
+                db.run(insert2, [user_id,'IN']);
+                var promiseRegisterUser = registerUserInvestor(username);
                 var promiseValue = async () => {
                     const value = await promiseRegisterUser;
                     console.log(value);
@@ -201,7 +193,7 @@ app.post("/registerauthority",function(req,res){
 
 app.post("/login",function(req,res){
     
-    db.get(`SELECT * FROM user where username = ? and password = ?`, [req.body.username,req.body.password], (err, row) => {
+    db.get(`SELECT * FROM tbl_user where user_name = ? and user_pwd = ?`, [req.body.username,req.body.password], (err, row) => {
         console.log(row);
         if(err){
             res.status(400).json({"error":err.message});
@@ -261,19 +253,19 @@ app.get('/actionRegisterUser', function (req, res){
     };
     promiseValue();
 });
-app.get('/actionInvoke', function (req, res){
-    //ar promiseInvoke = invoke.log();
-    var promiseInvoke = invoke.invokeTransaction();
-    var promiseValue = async () => {
-        const value = await promiseInvoke;
-        console.log(value);
-        res.render("invoke.jade", {data: value,session:req.session.name});
-    };
-    promiseValue();
-});
+// app.get('/actionInvoke', function (req, res){
+//     //ar promiseInvoke = invoke.log();
+//     var promiseInvoke = invokeTransaction(req.session.name);
+//     var promiseValue = async () => {
+//         const value = await promiseInvoke;
+//         console.log(value);
+//         res.render("invoke.jade", {data: value,session:req.session.name});
+//     };
+//     promiseValue();
+// });
 app.get('/actionQuery', function (req, res){
     //var promiseQuery = query.log();
-    var promiseQuery = query.queryTransaction(req.session.name);
+    var promiseQuery = queryTransaction(req.session.name);
     var promiseValue = async () => {
         const value = await promiseQuery;
         console.log(value);
@@ -281,6 +273,9 @@ app.get('/actionQuery', function (req, res){
     }; 
     promiseValue();
 });
+
+
+
 
 app.get("/startBid",function(req,res){
     var promiseQuery=startBid.startBid();

@@ -15,6 +15,7 @@ block content
         h1 Bid Shares
         form.mt-5(action="/actionInvoke",method="post")
             div.form-group
+                //- input#custId(type='hidden' name='custId' value=`${item.Key}`)
                 label(for="lotQuantity")  Lot Quantity 
                 input.form-control(type="number",id="lotQuantity",name="lotQuantity" required)
             div.form-group
