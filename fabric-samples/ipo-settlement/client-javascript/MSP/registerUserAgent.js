@@ -53,6 +53,7 @@ async function main() {
         const provider = wallet.getProviderRegistry().getProvider(adminIdentity.type);
         const adminUser = await provider.getUserContext(adminIdentity, 'admin-agent');
         // Register the user, enroll the user, and import the new identity into the wallet.
+        console.log("Registering Agent...");
         const secret = await ca.register({
             affiliation: 'org3.department1',
             enrollmentID: userName,

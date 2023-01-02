@@ -49,6 +49,10 @@ async function main() {
                         wallet: {
                             initial_wallet_balance: 1000, // 1000 for every user
                             wallet_balance_after_bid: null
+                        },
+                        shares:{
+                            bid: 0,
+                            alloted: 0
                         }
                     }
             }
@@ -56,7 +60,7 @@ async function main() {
 
         if(user_id){
             // Get the investor object
-            var ipo_id = "M1";
+            var ipo_id = "F1";
             let investor_obj = createInvestorObject();
             console.log("\n", investor_obj);
             userName = role_id + "-" + userName;

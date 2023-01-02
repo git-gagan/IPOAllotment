@@ -15,56 +15,58 @@ class Ipo extends Contract {
         // Initialize ledger state with the given information
         console.info('============= START : Initialize Shares Ledger ===========');
         const shares = [
-            {
-                ID : "M1",
-                M1:{	
-                    ipoInfo: {
-                        issuer_name: "Microsoft",
-                        totalSize: 500,
-                        priceRangeLow: 10,
-                        priceRangeHigh: 20,
-                        total_investors: 0,
-                        total_bid: 0,
-                        total_allotted: 0,
-                        bid_start_date: "",
-                        ipo_announcement_date: "",
-                        lot_size: "",
-                        total_bid_time: 0,
-                        is_complete: false,
-                        has_bidding_started: false,
-                        balance: 0,
-                        wallet_balance:0
-                    },
-                    escrowInfo:{
-                        agentId:"AG-Ze",
-                        total_amount:0,
-                        last_transaction:"",
-                        refund_amount:"",
-                        transfer_amount:""
-                    },
-                    userInfo: {
-                        G1: [
-                                {
-                                name: "Gagan",
-                                transaction: {
-                                    lots_bid: 0,
-                                    bid_amount: 0
-                                },
-                                wallet: {
-                                    initial_wallet_balance: 0,
-                                    wallet_balance_after_bid: 0
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
+            // Expected Ledger State
+            // {
+            //     ID : "M1",
+            //     M1:{	
+            //         ipoInfo: {
+            //             issuer_name: "Microsoft",
+            //             totalSize: 500,
+            //             priceRangeLow: 10,
+            //             priceRangeHigh: 20,
+            //             total_investors: 0,
+            //             total_bid: 0,
+            //             total_allotted: 0,
+            //             bid_start_date: "",
+            //             ipo_announcement_date: "",
+            //             lot_size: "",
+            //             total_bid_time: 0,
+            //             is_complete: false,
+            //             has_bidding_started: false,
+            //             balance: 0,
+            //             wallet_balance:0
+            //         },
+            //         escrowInfo:{
+            //             agentId:"AG-Ze",
+            //             total_amount:0,
+            //             last_transaction:"",
+            //             refund_amount:"",
+            //             transfer_amount:""
+            //         },
+            //         userInfo: {
+            //             G1: [
+            //                     {
+            //                     name: "Gagan",
+            //                     transaction: {
+            //                         lots_bid: 0,
+            //                         bid_amount: 0
+            //                     },
+            //                     wallet: {
+            //                         initial_wallet_balance: 0,
+            //                         wallet_balance_after_bid: 0
+            //                     }
+            //                 }
+            //             ]
+            //         }
+            //     }
+            // }
         ]      
 
-        for (const asset of shares) {
-            asset.docType = 'IPO-Info';
-            await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
-        }
+        // for (const asset of shares) {
+        //     asset.docType = 'IPO-Info';
+        //     await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
+        // }
+        console.log("Shares:- ",shares);
         console.info('============= END : Initialize Shares Ledger ===========');   
     }
 
@@ -134,6 +136,10 @@ class Ipo extends Contract {
         */
         console.log("---Inside Buy Shares---");
         let asset = await this.queryIssuer(ctx, ipo_id);
+        if (!asset){
+            console.log("NOT ASSET:-", asset);
+            return 0;
+        }
         let assetJSON = JSON.parse(asset);
         let has_bidding_started = assetJSON[ipo_id]['ipoInfo']['has_bidding_started'];
         let is_complete = assetJSON[ipo_id]['ipoInfo']['is_complete'];
@@ -145,8 +151,8 @@ class Ipo extends Contract {
             let lots_bid = investor_obj[user_id]['transaction']['lots_bid'];
             let lot_size = assetJSON[ipo_id]['ipoInfo']['lot_size'];
             let total_size = assetJSON[ipo_id]['ipoInfo']['totalSize'];
-            if (bid_amount < assetJSON[ipo_id]['ipoInfo']['priceRangeLow']){
-                console.log("Your bidding amount is too low!");
+            if (bid_amount < assetJSON[ipo_id]['ipoInfo']['priceRangeLow'] || bid_amount > assetJSON[ipo_id]['ipoInfo']['priceRangeHigh']){
+                console.log("Your bidding amount is not in the expected range!");
                 return -1;
             }
             let users_info = assetJSON[ipo_id]['userInfo'];
@@ -158,12 +164,14 @@ class Ipo extends Contract {
                     console.log("Not enough balance in the wallet!");
                     return -1
                 }  
+                investor_obj[user_id]['shares']['bid'] = lots_bid + assetJSON[ipo_id]['userInfo'][user_id][(assetJSON[ipo_id]['userInfo'][user_id]).length-1]['shares']['bid'];
                 assetJSON[ipo_id]['userInfo'][user_id].push(investor_obj[user_id]);
                 console.log("Update set up!");
             }
             else{
                 console.log("Insertion needed!");
                 investor_obj[user_id]['wallet']['wallet_balance_after_bid'] = bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
+                investor_obj[user_id]['shares']['bid'] = lots_bid;
                 assetJSON[ipo_id]['userInfo'][user_id] = [investor_obj[user_id]];
                 assetJSON[ipo_id]['ipoInfo']['total_investors'] += 1;
                 console.log("Insert set up!");
@@ -223,6 +231,7 @@ class Ipo extends Contract {
         assetJSON[ipo_id]['escrowInfo']['refund_amount'] = 0;
         assetJSON[ipo_id]['ipoInfo']['wallet_balance'] += assetJSON[ipo_id]['escrowInfo']['transfer_amount'];
         assetJSON[ipo_id]['ipoInfo']['total_allotted'] = assetJSON[ipo_id]['ipoInfo']['total_bid'];
+        users_info = assetJSON[ipo_id]['userInfo'];
         return assetJSON;
     }
 
@@ -256,8 +265,15 @@ class Ipo extends Contract {
         of the issuer and fetch the complete record for this unique issuer_id
         */
         const assetJSON = await ctx.stub.getState(user_id); // get the asset from chaincode state
-        if (!assetJSON || assetJSON.length === 0) {
-            throw new Error(`The share ${user_id} does not exist`);
+        try{
+            if (!assetJSON || assetJSON.length === 0) {
+                throw new Error(`The share ${user_id} does not exist`);
+            }
+        }
+        catch(err){
+            console.log(err);
+            console.log("---------------");
+            return [];
         }
         return assetJSON.toString();
     }
