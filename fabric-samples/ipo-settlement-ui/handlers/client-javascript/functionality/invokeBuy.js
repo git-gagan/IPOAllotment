@@ -17,8 +17,9 @@ import { getIdFromUsername } from '../utils/getUserId.js';
 async function invokeTransaction(username,lotQuantity,bidperShare) {
     try {
         console.log(process.argv);
-        let userName = username;   // Take username from command line
-
+        var queryResult = '';
+        // let userName = process.argv[2];   // Take username from command line
+        let userName=username
         let user_promise = await getIdFromUsername(userName);
         console.log("USER promise:- ", user_promise);
 
@@ -69,21 +70,37 @@ async function invokeTransaction(username,lotQuantity,bidperShare) {
                 // Evaluate the specified transaction.
                 const result = await contract.submitTransaction('buyShares', user_id, JSON.stringify(investor_obj), ipo_id);
                 console.log(`Transaction has been evaluated, result is: ${result}`);
+                if (result == '0'){
+                    console.log("Bidding not allowed!");
+                    queryResult=`Bidding not allowed!`
+                }
+                else if (result == '1'){
+                    console.log(`Shares bought Successfully by the user: ${userName}`);
+                    queryResult=`Shares bought Successfully by the user: ${userName}`
+                }
+                else{
+                    console.log("Not enough funds to place the bid");
+                    queryResult=`Not enough funds to place the bid`
+                }
                 console.log("\nSUCCESS\n");
                 await gateway.disconnect();
             }
             else {
                 console.log("\n3")
                 console.log("Unauthorized User!");
+                queryResult=`Unauthorized User!`
             }
         }
         else{
             console.log("This user doesn't exist!");
+            queryResult=`This user doesn't exist!`
         }
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
         process.exit(1);
     }
+
+    return queryResult
 }
 
 export {invokeTransaction}

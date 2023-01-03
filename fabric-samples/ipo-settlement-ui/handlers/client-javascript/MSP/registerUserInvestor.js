@@ -81,4 +81,7 @@ async function registerUserInvestor(username) {
     }
 }
 
+
+
+
 export {registerUserInvestor}

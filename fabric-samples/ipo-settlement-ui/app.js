@@ -10,6 +10,9 @@ import {registerUserIssuer}  from  "./handlers/client-javascript/MSP/registerUse
 import {query} from "./handlers/client-javascript/functionality/query.js"
 import {queryTransaction} from "./handlers/client-javascript/functionality/queryAllShares.js"
 import {invokeTransaction} from "./handlers/client-javascript/functionality/invokeBuy.js"
+import {IssuertoLedger} from "./handlers/client-javascript/functionality/addIssuerToLedger.js"
+import { getIdFromUsername } from './handlers/client-javascript/utils/getUserId.js';
+
 
 // var invoke = require("./handlers/invoke");
 // var query = require("./handlers/query");
@@ -48,6 +51,7 @@ app.use(session({
 }))
 
 var sess="";
+var role_id="";
 let db = new sqlite3.Database('ipo.db', (err)=>{
     if (err){
         return console.error(err.message);
@@ -62,32 +66,32 @@ let db = new sqlite3.Database('ipo.db', (err)=>{
 // VIEWS
 app.get('/', function (req, res){
     if(req.session.name){
-        res.render("index.jade",{session:req.session.name})
+        res.render("index.jade",{session:req.session.name,role:role_id})
     }
     else{
         res.render("index.jade")
     }
 });
 app.get('/enroll', function (req, res){
-    res.render("enroll.jade",{session:req.session.name})
+    res.render("enroll.jade",{session:req.session.name,role:role_id})
 });
 app.get('/register', function (req, res){
-    res.render("register.jade",{session:req.session.name})
+    res.render("register.jade",{session:req.session.name,role:role_id})
 });
 app.get('/invoke', function (req, res){
-    res.render("invoke.jade",{session:req.session.name})
+    res.render("invoke.jade",{session:req.session.name,role:role_id})
 });
 app.get('/query', function (req, res){
-    res.render("query.jade",{session:req.session.name})
+    res.render("query.jade",{session:req.session.name,role:role_id})
 });
 app.get('/signup', function (req, res){
-    res.render("signup.jade",{session:req.session.name})
+    res.render("signup.jade",{session:req.session.name,role:role_id})
 });
 app.get('/issuerpanel', function (req, res){
-    var promiseInvoke = query.queryTransaction(req.session.name);
-    var promiseValue = async () => {
-        const value = await promiseInvoke;
-        console.log(value);
+    // var promiseInvoke = query.queryTransaction(req.session.name);
+    // var promiseValue = async () => {
+    //     const value = await promiseInvoke;
+    //     console.log(value);
         // res.render("invoke.jade", {data: value,session:req.session.name});
         // if (value != undefined && value.length > 0){
         //     res.render("issuerpanel.jade",{session:req.session.name,data: value})
@@ -95,18 +99,24 @@ app.get('/issuerpanel', function (req, res){
         //     res.render("issuerregister.jade",{session:req.session.name})
         // }
 
-        res.render("issuerpanel.jade",{session:req.session.name,data: value})
+        res.render("issuerpanel.jade",{session:req.session.name,role:role_id})
 
     }
-    promiseValue();
+    // promiseValue();
+);
+
+
+app.post("/issuerpanel",function(req,res){
+    
 
 });
+
 app.get('/agentpanel', function (req, res){
     var promiseInvoke = query.queryTransaction(req.session.name);
     var promiseValue = async () => {
         const value = await promiseInvoke;
         console.log(value);
-        res.render("agentpanel.jade",{session:req.session.name,data: value})
+        res.render("agentpanel.jade",{session:req.session.name,data: value,role:role_id})
 
     }
     promiseValue();
@@ -125,7 +135,7 @@ app.post("/actionInvoke",function(req,res){
     var promiseValue = async () => {
         const value = await promiseInvoke;
         console.log(value);
-        res.render("invoke.jade", {data: value,session:req.session.name});
+        res.render("invoke.jade", {data: value,session:req.session.name,role:role_id});
     };
     promiseValue();
 
@@ -135,6 +145,8 @@ app.post("/signup",function (req, res) {
     console.log(req.body);
     var username = req.body.username
     var password = req.body.password
+    var identity=req.body.identity
+    console.log("Identity :",identity)
     db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], (err, row) => {
         if (err) {
           res.status(400).json({"error":err.message});
@@ -142,23 +154,34 @@ app.post("/signup",function (req, res) {
           return;
        }
         else if(row){
-            res.render("signup.jade",{message:"Username already exist",session:req.session.name});
+            res.render("signup.jade",{message:"Username already exist",session:req.session.name,role:role_id});
         }
         else{
             let user_id=uuidv4()
+            var promiseRegister;
             let insert = 'INSERT INTO tbl_user (user_id,user_name, user_pwd) VALUES (?,?,?)';
             let insert2 = 'INSERT INTO tbl_userrole (user_id,role_id) VALUES (?,?)';
 
             try {
-                db.run(insert, [user_id,username,password]);
-                db.run(insert2, [user_id,'IN']);
-                var promiseRegisterUser = registerUserInvestor(username);
+               
+                if(identity=='IN'){
+                    promiseRegister=registerUserInvestor(username);
+                }
+                else if(identity=='IS'){
+                    promiseRegister=registerUserIssuer(username)
+                }
+                else if(identity=='AG'){
+                    promiseRegister=registerUserAgent(username)
+                }
+                
                 var promiseValue = async () => {
-                    const value = await promiseRegisterUser;
+                    const value = await promiseRegister;
                     console.log(value);
                 };
                 promiseValue();
-                res.render("login.jade",{message:"Successfully registered!!",session:req.session.name});
+                db.run(insert, [user_id,username,password]);
+                db.run(insert2, [user_id,identity]);
+                res.render("login.jade",{message:"Successfully registered!!",session:req.session.name,role:role_id});
             } catch (error) {
                 console.log(error.message);
             }
@@ -169,11 +192,11 @@ app.post("/signup",function (req, res) {
 
 });
 app.get('/login', function (req, res){
-    res.render("login.jade",{session:req.session.name})
+    res.render("login.jade",{session:req.session.name,role:role_id})
 });
 
 app.get("/registerauthority",function(req,res){
-    res.render("registerauthority.jade",{session:req.session.name})
+    res.render("registerauthority.jade",{session:req.session.name,role:role_id})
 })
 
 
@@ -182,8 +205,9 @@ app.post("/registerauthority",function(req,res){
     var password=req.body.password;
     var role=req.body.authority;
     console.log(username,password,role)
-    res.render("registerauthority.jade",{session:req.session.name})
+    res.render("registerauthority.jade",{session:req.session.name,role:role_id})
 })
+
 
 
 // app.get("/issuerregister",function(req,res){
@@ -191,9 +215,11 @@ app.post("/registerauthority",function(req,res){
 // })
 
 
-app.post("/login",function(req,res){
-    
-    db.get(`SELECT * FROM tbl_user where user_name = ? and user_pwd = ?`, [req.body.username,req.body.password], (err, row) => {
+
+
+app.post("/login", async function(req,res){
+    var data;
+    db.get(`SELECT * FROM tbl_user where user_name = ? and user_pwd = ?`, [req.body.username,req.body.password], async (err, row) => {
         console.log(row);
         if(err){
             res.status(400).json({"error":err.message});
@@ -201,22 +227,30 @@ app.post("/login",function(req,res){
             return;
         }
         
-        else if(req.body.username=="admin" && req.body.password=="admin"){
-            req.session.name = req.body.username
-            sess=req.session.name;
-            res.render("index.jade",{session:req.session.name});
-
-        }
+       
 
         else if(row){
             // user=req.body.username
+           
+            let user_promise = await getIdFromUsername(req.body.username);
+            console.log("USER promise:- ", user_promise);
 
+           
+            if (user_promise){
+               
+                role_id = user_promise['role_id'];
+            }
+            else{
+                role_id = null;
+            }
+            
+            console.log(role_id)
             req.session.name = req.body.username
             sess=req.session.name;
-            res.render("index.jade",{session:req.session.name});
+            res.render("index.jade",{session:req.session.name,role:role_id});
         }
         else{
-            res.render("login.jade",{message:"please fill out correct details",session:req.session.name});
+            res.render("login.jade",{message:"please fill out correct details",session:req.session.name,role:role_id});
         }
         
       });
@@ -239,7 +273,7 @@ app.get('/actionEnrollAdmin', function (req, res){
     var promiseValue = async () => {
         const value = await promiseEnrollAdmin;
         console.log(value);
-        res.render("enroll.jade", {data: value,session:req.session.name});
+        res.render("enroll.jade", {data: value,session:req.session.name,role:role_id});
     };
     promiseValue();
 });
@@ -249,7 +283,7 @@ app.get('/actionRegisterUser', function (req, res){
     var promiseValue = async () => {
         const value = await promiseRegisterUser;
         console.log(value);
-        res.render("register.jade", {data: value,session:req.session.name});
+        res.render("register.jade", {data: value,session:req.session.name,role:role_id});
     };
     promiseValue();
 });
@@ -269,7 +303,7 @@ app.get('/actionQuery', function (req, res){
     var promiseValue = async () => {
         const value = await promiseQuery;
         console.log(value);
-        res.render("query.jade", {data: value,session:req.session.name});
+        res.render("query.jade", {data: value,session:req.session.name,role:role_id});
     }; 
     promiseValue();
 });
@@ -284,7 +318,7 @@ app.get("/startBid",function(req,res){
         const value = await promiseQuery;
         const data = await promiseInvoke;
         console.log(value);
-        res.render("issuerpanel.jade", {message: value,session:req.session.name,data:data});
+        res.render("issuerpanel.jade", {message: value,session:req.session.name,data:data,role:role_id});
     }; 
     promiseValue();   
 })

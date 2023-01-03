@@ -12,12 +12,13 @@ import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../utils/getUserId.js';
 
-async function main() {
+async function IssuertoLedger(username) {
     try {
-        console.log(process.argv);
-        let userName = process.argv[2]; 
+        // console.log(process.argv);
+        // let userName = process.argv[2]; 
+        let userName=username
 
-        let user_promise = await getIdFromUsername(process.argv[2]);
+        let user_promise = await getIdFromUsername(userName);
         console.log("USER promise:- ", user_promise);
 
         let user_id, role_id;
@@ -108,7 +109,7 @@ async function main() {
     }
 }
 
-main();
+export {IssuertoLedger}
 
 // ----------- Low level Fix for timer ------------ //
 

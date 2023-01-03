@@ -9,6 +9,12 @@ block content
             p 
         - }
         form.mt-5(action="/signup",method="post")
+            div.form-group 
+                label(for="identity") Select Your Identity
+                select.form-control#role(name='identity')
+                    option(value="IN") Investor
+                    option(value="IS") Issuer
+                    option(value="AG") Paying Agent
             div.form-group
                 label(for="username")  Username 
                 input.form-control(type="text",id="username",placeholder="Enter Username",name="username" required)

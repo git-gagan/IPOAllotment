@@ -15,35 +15,30 @@ html(lang='en')
                     span.navbar-toggler-icon
                 #navbarCollapse.collapse.navbar-collapse
                     ul.navbar-nav.me-auto.mb-2.mb-md-0.navbar-right
-                        - if(session=="admin") {
-                             li.nav-item
-                            a.nav-link(href='/registerauthority') Register an Authority
-                            li.nav-item
-                            a.nav-link(href='/logout') Log out
-
-                        - }else if(session=="issuer") {
-                            li.nav-item
-                            a.nav-link(href='/issuerpanel') IPO Listing
-                            //- li.nav-item
-                            //- a.nav-link(href='/issuerregister') Issuer On Boarding
-                            li.nav-item
-                            a.nav-link(href='/logout') Log out
-                            
-                        - }else if(session=="agent") {
-                            li.nav-item
-                            a.nav-link(href='/agentpanel') IPO Listing
-                            //- li.nav-item
-                            //- a.nav-link(href='/issuerregister') Issuer On Boarding
-                            li.nav-item
-                            a.nav-link(href='/logout') Log out
-                            
-                        - }  else if(session) {
+                        - if(session && role=='IN') {
                             li.nav-item
                             a.nav-link(href='/actionQuery') Apply for an IPO
                             li.nav-item
                             a.nav-link(href='/logout') Log out
                             
-                        - } else {
+
+                        - }else if(session && role=='IS') {
+                            li.nav-item
+                            a.nav-link(href='/issuerpanel') Launch IPO
+                            //- li.nav-item
+                            //- a.nav-link(href='/issuerregister') Issuer On Boarding
+                            li.nav-item
+                            a.nav-link(href='/logout') Log out
+                            
+                        - }else if(session && role=='AG') {
+                            li.nav-item
+                            a.nav-link(href='/agentpanel') IPO Allotment
+                            //- li.nav-item
+                            //- a.nav-link(href='/issuerregister') Issuer On Boarding
+                            li.nav-item
+                            a.nav-link(href='/logout') Log out
+                            
+                        - }  else {
                              li.nav-item
                             a.nav-link(href='/signup') Sign Up
                             li.nav-item

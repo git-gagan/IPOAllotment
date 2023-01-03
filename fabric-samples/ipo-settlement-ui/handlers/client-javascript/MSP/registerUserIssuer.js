@@ -16,13 +16,14 @@ import path from 'path';
 // const fs = require('fs');
 // const path = require('path');
 
-async function registerUserIssuer() {
+async function registerUserIssuer(username) {
     try {
         // load the network configuration
-        console.log(process.argv);
-        const userName = "IS-" + process.argv[2];   // Take username from command line
+        // console.log(process.argv);
+        // const userName = "IS-" + process.argv[2];   // Take username from command line
+        const userName="IS-"+username
         const __dirname = path.resolve(path.dirname(''));
-        const ccpPath = path.resolve(__dirname, '..', '..', '..', 'test-network', 'organizations', 'peerOrganizations', 'org2.example.com', 'connection-org2.json');
+        const ccpPath = path.resolve( '..', 'test-network', 'organizations', 'peerOrganizations', 'org2.example.com', 'connection-org2.json');
         const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
         
         // Create a new CA client for interacting with the CA.
