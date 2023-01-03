@@ -1,103 +1,100 @@
 [
-    {
-        "ID" : "M1",
-        "M1":{	
-            "ipoInfo": {
-                "issuer_name": "",
-                "totalSize": "",
-                "priceRangeLow": "",
-                "priceRangeHigh": "",
-                "total_investors": "",
-                "total_bid": "",
-                "total_allotted": "",
-                "balance": "",
-                "bid_start_date": "",
-                "ipo_announcement_date": "",
-                "total_bid_time": 0,
-                "lot_size": "",
-                "is_complete": false,
-                "has_bidding_started": false,
-                "wallet_ballence":0
-            },
-            "escrowInfo":{
-                "agentId":"",
-                "total_amount":0,
-                "last_transaction":"",
-                "refund_amount":"",
-                "transfer_amount":""
-            },
-            "userInfo": {
-                "Nik1": {
-                    "name": "Nikita",
-                    "transaction": {
-                        "lots_bid": "",
-                        "bid_amount": ""
-                    },
-                    "wallet": {
-                        "initial_wallet_balance": "",
-                        "wallet_balance_after_bid": ""
-                    }
-                },
-                "Aa1": {
-                    "name": "Aasawari",
-                    "transaction": {
-                        "lots_bid": "",
-                        "bid_amount": ""
-                    },
-                    "wallet": {
-                        "initial_wallet_balance": "",
-                        "wallet_balance_after_bid": ""
-                    }
-                }
-            }
-        }
-    },
-    {
-        "ID" : "A1",
-        "A1":{	
-            "ipoInfo": {
-                "issuer_name": "",
-                "totalSize": "",
-                "priceRangeLow": "",
-                "priceRangeHigh": "",
-                "total_investors": "",
-                "total_bid": "",
-                "total_allotted": "",
-                "balance": ""
-            },
-            "escrowInfo":{
-                "agentId":"",
-                "total_amount":0,
-                "last_transaction":"",
-                "refund_amount":"",
-                "transfer_amount":""
-            },
-            "userInfo": {
-                "Nik1": {
-                    "name": "Nikita",
-                    "transaction": {
-                        "lot_size": "",
-                        "lots_bid": "",
-                        "bid_amount": ""
-                    },
-                    "wallet": {
-                        "initial_wallet_balance": "",
-                        "wallet_balance_after_bid": ""
-                    }
-                },
-                "Aa1": {
-                    "name": "Aasawari",
-                    "transaction": {
-                        "lot_size": "",
-                        "lots_bid": "",
-                        "bid_amount": ""
-                    },
-                    "wallet": {
-                        "initial_wallet_balance": "",
-                        "wallet_balance_after_bid": ""
-                    }
-                }
-            }
-        }
-    }
+	{
+		"ID": "_global_user_info_confidential",
+		"_global_user_info_confidential": {
+			"G1": {
+				"wallet": {
+					"initial_wallet_balance": 1000,
+					"current_balance": 0,
+					"refund_amount": 10
+				},
+				"portfolio": {
+					"M1": {
+						"avg_price_per_share": 10,
+						"totalShares": 15,
+						"total_value": 150
+					},
+					"F1": {
+						"avg_price_per_share": 10,
+						"totalShares": 15,
+						"total_value": 150
+					}
+				}
+			}
+		}
+	},
+	{
+		"ID": "M1",
+		"M1": {
+			"ipoInfo": {
+				"issuer_name": "",
+				"totalSize": "",
+				"priceRangeLow": "",
+				"priceRangeHigh": "",
+				"total_investors": "",
+				"total_bid": "",
+				"total_allotted": "",
+				"balance": "",
+				"bid_start_date": "",
+				"ipo_announcement_date": "",
+				"total_bid_time": 0,
+				"lot_size": "",
+				"is_complete": false,
+				"has_bidding_started": false,
+				"wallet_ballence": 0,
+				"is_allotted": false
+			},
+			"escrowInfo": {
+				"agentId": "",
+				"total_amount": 0,
+				"last_transaction": "",
+				"refund_amount": "",
+				"transfer_amount": ""
+			},
+			"userInfo": {
+				"G1": {
+					"name": "Gagan",
+					"transactions": [
+						{
+							"lots_bid": 5,
+							"bid_amount": 10
+						},
+						{
+							"lots_bid": 5,
+							"bid_amount": 10
+						},
+						{
+							"lots_bid": 5,
+							"bid_amount": 10
+						}
+					],
+					"shares": {
+						"bid": 0,
+						"alloted": 0
+					}
+				},
+				"N1": {
+					"name": "Gagan",
+					"transactions": [
+						{
+							"lots_bid": 5,
+							"bid_amount": 10
+						},
+						{
+							"lots_bid": 5,
+							"bid_amount": 10
+						},
+						{
+							"lots_bid": 5,
+							"bid_amount": 10
+						}
+					],
+					"shares": {
+						"bid": 0,
+						"alloted": 0
+					}
+				}
+			}
+		}
+	}
 ]

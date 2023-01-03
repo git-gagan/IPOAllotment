@@ -15,57 +15,23 @@ class Ipo extends Contract {
         // Initialize ledger state with the given information
         console.info('============= START : Initialize Shares Ledger ===========');
         const shares = [
-            // Expected Ledger State
-            // {
-            //     ID : "M1",
-            //     M1:{	
-            //         ipoInfo: {
-            //             issuer_name: "Microsoft",
-            //             totalSize: 500,
-            //             priceRangeLow: 10,
-            //             priceRangeHigh: 20,
-            //             total_investors: 0,
-            //             total_bid: 0,
-            //             total_allotted: 0,
-            //             bid_start_date: "",
-            //             ipo_announcement_date: "",
-            //             lot_size: "",
-            //             total_bid_time: 0,
-            //             is_complete: false,
-            //             has_bidding_started: false,
-            //             balance: 0,
-            //             wallet_balance:0
-            //         },
-            //         escrowInfo:{
-            //             agentId:"AG-Ze",
-            //             total_amount:0,
-            //             last_transaction:"",
-            //             refund_amount:"",
-            //             transfer_amount:""
-            //         },
-            //         userInfo: {
-            //             G1: [
-            //                     {
-            //                     name: "Gagan",
-            //                     transaction: {
-            //                         lots_bid: 0,
-            //                         bid_amount: 0
-            //                     },
-            //                     wallet: {
-            //                         initial_wallet_balance: 0,
-            //                         wallet_balance_after_bid: 0
-            //                     }
-            //                 }
-            //             ]
-            //         }
-            //     }
-            // }
+            // Expected Initial Ledger State
+            // No issuer/ No investor initially
+            {
+                ID: "global_user_info_confidential_",
+                global_user_info_confidential_: {}
+            },
         ]      
 
-        // for (const asset of shares) {
-        //     asset.docType = 'IPO-Info';
-        //     await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
-        // }
+        for (const asset of shares) {
+            if (asset.ID == "_global_user_info_confidential"){
+                asset.docType = 'Investor-Info';
+            }
+            else{
+                asset.docType = 'IPO-Info';
+            }
+            await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
+        }
         console.log("Shares:- ",shares);
         console.info('============= END : Initialize Shares Ledger ===========');   
     }
