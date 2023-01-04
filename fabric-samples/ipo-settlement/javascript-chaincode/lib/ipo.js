@@ -8,6 +8,9 @@
 
 const { Contract } = require('fabric-contract-api');
 
+var _global_investors_id = "global_user_info_confidential_";
+
+
 class Ipo extends Contract {
     // Ipo class for shares settlement
 
@@ -239,7 +242,7 @@ class Ipo extends Contract {
         catch(err){
             console.log(err);
             console.log("---------------");
-            return [];
+            return 0;
         }
         return assetJSON.toString();
     }
@@ -253,6 +256,9 @@ class Ipo extends Contract {
         const endKey = '';
         const investorResults = [];
         for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
+            if (key == _global_investors_id){
+                continue;
+            }
             const strValue = Buffer.from(value).toString('utf8');
             console.log(key);
             let record;
@@ -263,6 +269,7 @@ class Ipo extends Contract {
                 console.log(investor_dictionary);
                 if (user_id in investor_dictionary){
                     var investor_info = investor_dictionary[user_id];
+                    investor_info["personal"] = await this.getGlobalInvestorInfo(ctx, user_id);
                     console.log(investor_info);
                 }
                 else{
@@ -287,6 +294,9 @@ class Ipo extends Contract {
         const endKey = '';
         const agentResults = [];
         for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
+            if (key == _global_investors_id){
+                continue;
+            }
             const strValue = Buffer.from(value).toString('utf8');
             let record;
             try {
@@ -306,7 +316,7 @@ class Ipo extends Contract {
         return JSON.stringify(agentResults);
     }
 
-    async queryAllShares(ctx) {
+    async queryAll(ctx) {
         const startKey = '';
         const endKey = '';
         const allResults = [];
@@ -323,6 +333,26 @@ class Ipo extends Contract {
         }
         console.info(allResults);
         return JSON.stringify(allResults);
+    }
+
+    // Global investor information function (confidential)
+    async getGlobalInvestorInfo(ctx, investor_id){
+        /*
+            This function gets the global investor confidential information like
+            wallet from the ledger
+        */
+        const asset = await ctx.stub.getState(_global_investors_id);
+        let assetJSON = JSON.parse(asset);
+        console.log(assetJSON);
+        if (investor_id in assetJSON[_global_investors_id]){
+            let investor_info = assetJSON[_global_investors_id][investor_id];
+            console.log(investor_info);
+            return investor_info;
+        }
+        else{
+            console.log(`${investor_id} does not exist in global investor info`);
+            return 0;
+        }
     }
 
 }
