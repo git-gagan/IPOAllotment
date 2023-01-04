@@ -12,12 +12,12 @@
 					"M1": {
 						"avg_price_per_share": 10,
 						"totalShares": 15,
-						"total_value": 150
+						"totalValue": 150
 					},
 					"F1": {
 						"avg_price_per_share": 10,
 						"totalShares": 15,
-						"total_value": 150
+						"totalValue": 150
 					}
 				}
 			}

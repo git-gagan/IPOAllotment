@@ -33,6 +33,7 @@ async function main() {
         
         console.log(user_id, role_id)
 
+        var ipo_id = "M1";
         function createInvestorObject(){
             /*
                 This function creates an investor object during the buy process
@@ -42,16 +43,14 @@ async function main() {
                 [user_id]: 
                         {
                         name: userName,
-                        transaction: {
-                            lots_bid: 5,
-                            bid_amount: 10
-                        },
-                        wallet: {
-                            initial_wallet_balance: 1000, // 1000 for every user
-                            wallet_balance_after_bid: null
-                        },
+                        transactions: [
+                                {
+                                lots_bid: 5,
+                                bid_amount: 10
+                            }
+                        ],
                         shares:{
-                            bid: 0,
+                            bid: 5,
                             alloted: 0
                         }
                     }
@@ -60,7 +59,6 @@ async function main() {
 
         if(user_id){
             // Get the investor object
-            var ipo_id = "F1";
             let investor_obj = createInvestorObject();
             console.log("\n", investor_obj);
             userName = role_id + "-" + userName;

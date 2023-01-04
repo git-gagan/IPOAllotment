@@ -113,19 +113,41 @@ class Ipo extends Contract {
         let has_bidding_started = assetJSON[ipo_id]['ipoInfo']['has_bidding_started'];
         let is_complete = assetJSON[ipo_id]['ipoInfo']['is_complete'];
         if (has_bidding_started && !is_complete){
+            // If bidding has started but not over yet
             console.log("\n---Bidding Allowed---\n")
             investor_obj = JSON.parse(investor_obj);
             console.log(investor_obj);
-            let bid_amount = investor_obj[user_id]['transaction']['bid_amount'];
-            let lots_bid = investor_obj[user_id]['transaction']['lots_bid'];
+            let bid_amount = investor_obj[user_id]['transactions'][0]['bid_amount'];
+            let lots_bid = investor_obj[user_id]['transactions'][0]['lots_bid'];
             let lot_size = assetJSON[ipo_id]['ipoInfo']['lot_size'];
             let total_size = assetJSON[ipo_id]['ipoInfo']['totalSize'];
             if (bid_amount < assetJSON[ipo_id]['ipoInfo']['priceRangeLow'] || bid_amount > assetJSON[ipo_id]['ipoInfo']['priceRangeHigh']){
+                // If the current bid_amount of the investor is either too low or too high
                 console.log("Your bidding amount is not in the expected range!");
                 return -1;
             }
+            // Get investor/user info from the ipo as well as from the global dictionary of investors
             let users_info = assetJSON[ipo_id]['userInfo'];
+            let global_users_info_obj = await this.getGlobalInvestorInfo(ctx);
+            let temp_investor_obj = {}
             console.log("Info of all the users:\n", users_info);
+            console.log("Global info of all the users:\n", global_users_info_obj);
+            // Checking if the investor has earlier placed a bid globally in the system or not
+            if (user_id in global_users_info_obj[_global_investors_id]){
+                // Investor info is already there globally so we fetch wallet info from there
+                let current_balance = global_users_info_obj[_global_investors_id][user_id]["wallet"]["current_balance"]
+                if (current_balance < bid_amount){
+                    console.log("Insufficient Wallet Balance. Please add more money to wallet before placing the bid!");
+                    return -2;
+                }
+                console.log("Sufficient balance in wallet");
+                temp_investor_obj = global_users_info_obj[_global_investors_id];
+            }
+            else{
+                // Create global investors object
+                temp_investor_obj = this.createGlobalInvestorInfo(investor_obj, user_id, ipo_id);
+            }
+            // Check if the investor has already bid for the current ipo or not
             if (user_id in users_info){
                 console.log("Update needed!");
                 investor_obj[user_id]['wallet']['wallet_balance_after_bid'] = assetJSON[ipo_id]['userInfo'][user_id][(assetJSON[ipo_id]['userInfo'][user_id]).length-1]['wallet']['wallet_balance_after_bid']-bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
@@ -139,22 +161,31 @@ class Ipo extends Contract {
             }
             else{
                 console.log("Insertion needed!");
-                investor_obj[user_id]['wallet']['wallet_balance_after_bid'] = bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
-                investor_obj[user_id]['shares']['bid'] = lots_bid;
-                assetJSON[ipo_id]['userInfo'][user_id] = [investor_obj[user_id]];
+                // investor_obj[user_id]['wallet']['current_balance'] = temp_investor_obj[user_id]['wallet']['current_balance'] - bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
+                investor_obj[user_id]['shares']['bid'] = lots_bid*lot_size;
+                assetJSON[ipo_id]['userInfo'][user_id] = investor_obj[user_id];
                 assetJSON[ipo_id]['ipoInfo']['total_investors'] += 1;
                 console.log("Insert set up!");
             }
-            // Change in asset's ipoInfo
+            // Change in global investorInfo
+            temp_investor_obj["ID"] = _global_investors_id; 
+            temp_investor_obj[_global_investors_id] = {};
+            temp_investor_obj[user_id]['wallet']['current_balance'] -= bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
+            temp_investor_obj[_global_investors_id][user_id] = temp_investor_obj[user_id];
+            delete temp_investor_obj[user_id];
             console.log("----------------------")
+            // Change in asset's ipoInfo
             assetJSON[ipo_id]['ipoInfo']['total_bid'] += (lots_bid*lot_size);
             assetJSON[ipo_id]['ipoInfo']['balance'] = total_size-(assetJSON[ipo_id]['ipoInfo']['total_bid']);
             // Change in assets' escrow info
             console.log("=======================")
             assetJSON[ipo_id]['escrowInfo']['total_amount'] += bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
             assetJSON[ipo_id]['escrowInfo']['last_transaction'] = `${bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size']} for IPO ${ipo_id} by user ${user_id}`;
-            console.log("Ready to be put to ledger:- \n", assetJSON);
+            console.log("\nReady to be put to ledger:- \n", assetJSON);
             await ctx.stub.putState(ipo_id, Buffer.from(JSON.stringify(assetJSON)));
+            console.log("\nInvestor info updated for the IPO!!!")
+            await ctx.stub.putState(_global_investors_id, Buffer.from(JSON.stringify(temp_investor_obj)));
+            console.log("\nGlobal investor info updated!!!");
             console.log("\nShares bought Successfully by the user\n");
             return 1;
         }
@@ -336,7 +367,7 @@ class Ipo extends Contract {
     }
 
     // Global investor information function (confidential)
-    async getGlobalInvestorInfo(ctx, investor_id){
+    async getGlobalInvestorInfo(ctx, investor_id=-1){
         /*
             This function gets the global investor confidential information like
             wallet from the ledger
@@ -344,6 +375,9 @@ class Ipo extends Contract {
         const asset = await ctx.stub.getState(_global_investors_id);
         let assetJSON = JSON.parse(asset);
         console.log(assetJSON);
+        if (investor_id == -1){
+            return assetJSON;
+        }
         if (investor_id in assetJSON[_global_investors_id]){
             let investor_info = assetJSON[_global_investors_id][investor_id];
             console.log(investor_info);
@@ -355,6 +389,29 @@ class Ipo extends Contract {
         }
     }
 
+    // Create Global Investor object utility
+    createGlobalInvestorInfo(investor_obj, user_id, ipo_id){
+        /*
+            This utility function helps create a global investor object to be put 
+            onto the global investor key of the ledger
+        */
+        console.log("\n---Inside createGlobalInvestorInfo utility---\n");
+        let temp_obj = {};
+        temp_obj[user_id] = {};
+        temp_obj[user_id]['wallet'] = {};
+        temp_obj[user_id]['portfolio'] = {};
+        temp_obj[user_id]['portfolio'][ipo_id] = {};
+        // Fill the portfolio and wallet dictionary
+        temp_obj[user_id]['wallet']["initial_wallet_balance"] = 1000; // Default initial wallet balance for every investor
+        temp_obj[user_id]['wallet']["current_balance"] = 1000; // Since no purchase has been made yet
+        temp_obj[user_id]['wallet']["refund_amount"] = 0;
+        temp_obj[user_id]['portfolio'][ipo_id]["avg_price_per_share"] = investor_obj[user_id]['transactions'][0]['bid_amount'];
+        temp_obj[user_id]['portfolio'][ipo_id]["totalShares"] = 0;
+        temp_obj[user_id]['portfolio'][ipo_id]["totalValue"] = 0;
+        console.log(temp_obj);
+        console.log("-----RETURN-----");
+        return temp_obj
+    }
 }
 
 module.exports = Ipo; 
