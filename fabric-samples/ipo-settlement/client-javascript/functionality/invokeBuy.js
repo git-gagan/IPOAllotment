@@ -33,7 +33,7 @@ async function main() {
         
         console.log(user_id, role_id)
 
-        var ipo_id = "M1";
+        var ipo_id = "F1";
         function createInvestorObject(){
             /*
                 This function creates an investor object during the buy process
@@ -77,8 +77,11 @@ async function main() {
                 else if (result == '1'){
                     console.log(`Shares bought Successfully by the user: ${userName}`);
                 }
+                else if (result == '-2'){
+                    console.log(`Insufficient Wallet Balance!`);
+                }
                 else{
-                    console.log("Not enough funds to place the bid");
+                    console.log("Invalid Bid amount!");
                 }
                 console.log("\nSUCCESS\n");
                 await gateway.disconnect();
