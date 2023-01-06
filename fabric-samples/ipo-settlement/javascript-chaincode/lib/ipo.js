@@ -27,7 +27,7 @@ class Ipo extends Contract {
         ]      
 
         for (const asset of shares) {
-            if (asset.ID == "_global_user_info_confidential"){
+            if (asset.ID == _global_investors_id){
                 asset.docType = 'Investor-Info';
             }
             else{
@@ -294,6 +294,7 @@ class Ipo extends Contract {
         const startKey = '';
         const endKey = '';
         const investorResults = [];
+        var investor_info = {};
         for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
             if (key == _global_investors_id){
                 continue;
@@ -307,8 +308,8 @@ class Ipo extends Contract {
                 let investor_dictionary = record[key]['userInfo'];
                 console.log(investor_dictionary);
                 if (user_id in investor_dictionary){
-                    var investor_info = investor_dictionary[user_id];
-                    investor_info["personal"] = await this.getGlobalInvestorInfo(ctx, user_id);
+                    investor_info = investor_dictionary[user_id];
+                    investor_info['ipo'] = key;
                     console.log(investor_info);
                 }
                 else{
@@ -320,6 +321,8 @@ class Ipo extends Contract {
             }
             investorResults.push({ Key: user_id, Record: investor_info });
         }
+        let personal_info_investor = await this.getGlobalInvestorInfo(ctx, user_id);
+        investorResults.push({ Key: user_id, Record: personal_info_investor });
         console.info(investorResults);
         return JSON.stringify(investorResults);
     }
