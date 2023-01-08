@@ -12,6 +12,7 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../utils/getUserId.js';
+import { insertBid } from '../utils/insertBidtoDB.js';
 
 
 async function main() {
@@ -33,7 +34,7 @@ async function main() {
         
         console.log(user_id, role_id)
 
-        var ipo_id = "F1";
+        var ipo_id = "M1";
         function createInvestorObject(){
             /*
                 This function creates an investor object during the buy process
@@ -45,8 +46,8 @@ async function main() {
                         name: userName,
                         transactions: [
                                 {
-                                lots_bid: 5,
-                                bid_amount: 10
+                                lots_bid: 15,
+                                bid_amount: 15
                             }
                         ],
                         shares:{
@@ -76,6 +77,9 @@ async function main() {
                 }
                 else if (result == '1'){
                     console.log(`Shares bought Successfully by the user: ${userName}`);
+                    // If Bid is successful, put the information in tbl_investor_transactions
+                    let bidDb = await insertBid(investor_obj, user_id, ipo_id);
+                    console.log(bidDb);
                 }
                 else if (result == '-2'){
                     console.log(`Insufficient Wallet Balance!`);
