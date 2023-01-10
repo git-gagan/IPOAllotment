@@ -71,7 +71,9 @@
 					"shares": {
 						"bid": 0,
 						"alloted": 0
-					}
+					},
+					"total_invested": 0,
+                    "refund_amount": 0
 				},
 				"N1": {
 					"name": "Gagan",
@@ -92,7 +94,9 @@
 					"shares": {
 						"bid": 0,
 						"alloted": 0
-					}
+					},
+					"total_invested": 0,
+                    "refund_amount": 0
 				}
 			}
 		}

@@ -159,6 +159,7 @@ class Ipo extends Contract {
             // Check if the investor has already bid for the current ipo or not
             if (user_id in users_info){
                 console.log("Update needed!");
+                assetJSON[ipo_id]['userInfo'][user_id]['total_invested'] += lots_bid*lot_size*bid_amount;
                 assetJSON[ipo_id]['userInfo'][user_id]['shares']['bid'] += lots_bid*lot_size;
                 assetJSON[ipo_id]['userInfo'][user_id]['transactions'].push(investor_obj[user_id]['transactions'][0]);
                 temp_investor_obj[user_id]['portfolio'][ipo_id]['avg_price_per_share'] = this.getAveragePricePerShare(assetJSON[ipo_id]['userInfo'][user_id]['transactions'], lot_size);
@@ -168,6 +169,7 @@ class Ipo extends Contract {
                 console.log("Insertion needed!");
                 // investor_obj[user_id]['wallet']['current_balance'] = temp_investor_obj[user_id]['wallet']['current_balance'] - bid_amount*lots_bid*assetJSON[ipo_id]['ipoInfo']['lot_size'];
                 investor_obj[user_id]['shares']['bid'] = lots_bid*lot_size;
+                investor_obj[user_id]['total_invested'] = lots_bid*lot_size*bid_amount;
                 assetJSON[ipo_id]['userInfo'][user_id] = investor_obj[user_id];
                 assetJSON[ipo_id]['ipoInfo']['total_investors'] += 1;
                 temp_investor_obj[user_id]['portfolio'][ipo_id] = {};

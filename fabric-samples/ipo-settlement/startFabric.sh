@@ -37,6 +37,13 @@ pushd ../test-network/addOrg3
 ./addOrg3.sh deployCC -ccn ipo -ccv 1 -ccl ${CC_SRC_LANGUAGE} -ccp ${CC_SRC_PATH}
 popd
 
+# Enroll admin entities for all 3 organizations
+pushd ./client-javascript/MSP
+node enrollAdminIssuer.js
+node enrollAdminInvestor.js
+node enrollAdminAgent.js
+popd
+
 cat <<EOF
 
 Total setup execution time : $(($(date +%s) - starttime)) secs ...

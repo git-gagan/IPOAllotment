@@ -46,14 +46,16 @@ async function main() {
                         name: userName,
                         transactions: [
                                 {
-                                lots_bid: 2,
-                                bid_amount: 10
+                                lots_bid: 1,
+                                bid_amount: 20
                             }
                         ],
                         shares:{
                             bid: 5,
                             allotted: 0
-                        }
+                        },
+                        total_invested: 0,
+                        refund_amount: 0
                     }
             }
         }
