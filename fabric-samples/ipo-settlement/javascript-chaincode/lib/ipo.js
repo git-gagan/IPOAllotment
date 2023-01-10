@@ -200,47 +200,79 @@ class Ipo extends Contract {
         return 0;
     }
       
-    async allotShares(ctx, agent_id, ipo_id){
+    async allotShares(ctx, ipo_id, issuer_info, allocation_dict){
         /*
             The allotment functionality allots the shares to the investors &
             update the ledger depending upon the case of oversubscription or
-            undersubscription.
+            undersubscription. It receives a processed dictionary from the nodejs
+            backend and using that dictionary updates the ledger.
         */
         console.log("--- Inside Allotment ---");
-        let asset = await this.queryIssuer(ctx, ipo_id);
+        // let asset = await this.queryIssuer(ctx, ipo_id);
+        let asset = issuer_info;
         let assetJSON = JSON.parse(asset);
+        let allocation_info = JSON.parse(allocation_dict);
         let has_bidding_started = assetJSON[ipo_id]['ipoInfo']['has_bidding_started'];
         let is_complete = assetJSON[ipo_id]['ipoInfo']['is_complete'];
         if (has_bidding_started && is_complete){
+            let global_investor_info = await this.getGlobalInvestorInfo(ctx);
+            console.log("-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=");
+            console.log(global_investor_info);
             let total_bid = assetJSON[ipo_id]['ipoInfo']['total_bid'];
             let total_size = assetJSON[ipo_id]['ipoInfo']['totalSize'];
             if (total_bid > total_size){
                 console.log("\n--- OVERSUBSCRIPTION ---\n");
+                assetJSON = this.allotOversubscription(ipo_id, assetJSON, allocation_info);
             }
             else{
                 console.log("\n--- UNDERSUBSCRIPTION ---\n");
-                assetJSON = this.allotUndersubscription(ipo_id, assetJSON);
+                assetJSON = this.allotUndersubscription(ipo_id, assetJSON, allocation_info);
+                for (let key in global_investor_info[_global_investors_id]){
+                    console.log(key);
+                    console.log(global_investor_info[_global_investors_id]);
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares']*global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'];
+                }
             }
             console.log(assetJSON);
             await ctx.stub.putState(ipo_id, Buffer.from(JSON.stringify(assetJSON)));
             console.log("\n\n ----Alloted---- \n\n");
+            // Update global investor information
+            console.log(global_investor_info);
+            await ctx.stub.putState(_global_investors_id, Buffer.from(JSON.stringify(global_investor_info)));
+            console.log("\nGlobal investor info updated!!!");
+            return 1;
         }
         return 0;
     }
 
-    allotUndersubscription(ipo_id, assetJSON){
+    allotUndersubscription(ipo_id, assetJSON, allocation_info){
         /*
-            In this case, all the investors get all the shares they bid for and 
-            the respective value transfer happen on all the accounts (no refund)
+            Here, we are creating a global ledger object using allocation_info
+            which will replace the current ledger info for the case of undersubscription
         */
-        console.log("\nInside UNDERSUBSCRIPTION\n");
+        console.log("\nMaking Allotment for the ledger\n");
         assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount'];
         assetJSON[ipo_id]['escrowInfo']['total_amount'] = 0;
         assetJSON[ipo_id]['escrowInfo']['refund_amount'] = 0;
         assetJSON[ipo_id]['ipoInfo']['wallet_balance'] += assetJSON[ipo_id]['escrowInfo']['transfer_amount'];
         assetJSON[ipo_id]['ipoInfo']['total_allotted'] = assetJSON[ipo_id]['ipoInfo']['total_bid'];
-        users_info = assetJSON[ipo_id]['userInfo'];
+        assetJSON[ipo_id]['ipoInfo']['is_allotted'] = true;
+        // Now update each invester's info
+        let users_info = assetJSON[ipo_id]['userInfo'];
+        console.log(users_info);
+        for (let key in users_info){
+            console.log("KEY:- ", key);
+            console.log(assetJSON[ipo_id]['userInfo'][key]);
+            assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = allocation_info['investorInfo'][key]['shares_allotted']
+        }
         return assetJSON;
+    }
+
+    allotOversubscription(ipo_id, assetJSON, allocation_info){
+        /*
+            This function deals with the oversubscription logic for allotment
+        */
     }
 
     // Adding Users here...

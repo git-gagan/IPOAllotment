@@ -92,7 +92,7 @@ async function main() {
                 let start_bidding = await startBid(contract, user_id, issuer_obj);
                 console.log("================")
                 // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
-                // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
+                let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
                 console.log("OVER")
                 await gateway.disconnect();
                 process.exit(1);
@@ -135,7 +135,7 @@ async function biddingOver(contract, user_id, issuer_obj){
                         resolve("Bidding hasn't started yet!");
                     }
                 },
-                issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000
+                issuer_obj[user_id]['ipoInfo']['total_bid_time']*2000
             )
         }
     )

@@ -20,7 +20,7 @@ async function insertBid(investor_obj, investor_id, ipo_id) {
             '${investor_obj[investor_id]['transactions'][0]['lots_bid']}',
             '${investor_obj[investor_id]['transactions'][0]['bid_amount']}',
             '0',
-            '${new Date()}'
+            '${(new Date().toISOString().split('T')).join(" ")}'
         )`
         const dbpromise = new Promise(
             (resolve, reject) => {
