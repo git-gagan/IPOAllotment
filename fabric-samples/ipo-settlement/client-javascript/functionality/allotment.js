@@ -32,7 +32,7 @@ async function main() {
         console.log(user_id, role_id)
 
         if(user_id){
-            var ipo_id = "F1";
+            var ipo_id = "M1";
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
@@ -52,7 +52,7 @@ async function main() {
                     // Query the current Db, create a processed dictionary to be passed to the smart contract for allocation
                     var allocation_dict = await getAllocationData(ipo_id, totalSize, lotSize);
                     console.log(allocation_dict);
-                    allocation_dict = processAllocationDict(allocation_dict, lotSize);
+                    allocation_dict = processAllocationDict(allocation_dict, lotSize, totalSize);
                     console.log(allocation_dict);
                     if (issuer_info[ipo_id]['ipoInfo']['total_bid'] <= totalSize){
                         console.log("It is the case of Undersubscription");
@@ -84,7 +84,7 @@ async function main() {
     }
 }
 
-function processAllocationDict(allocation_dict, lotSize){
+function processAllocationDict(allocation_dict, lotSize, totalSize){
     /* 
     The following function processes the allocation dictionary and 
     returns a processed dictionary to be passed to the smart contract
@@ -95,15 +95,33 @@ function processAllocationDict(allocation_dict, lotSize){
         "totalShares": 0
     };
     for(let i in allocation_dict){
+        if (processed_dict['totalShares'] >= totalSize){
+            console.log("No more shares available!");
+            break;
+        }
         if (!(allocation_dict[i]['investor_id'] in processed_dict['investorInfo'])){
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']] = {};
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['shares_allotted'] = 0;
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] = 0;
         }
-        processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['shares_allotted'] += allocation_dict[i]['lots_bid']*lotSize;
-        processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] += allocation_dict[i]['lots_bid']*lotSize*allocation_dict[i]['bid_amount'];
-        processed_dict['totalAmount'] += allocation_dict[i]['lots_bid']*lotSize*allocation_dict[i]['bid_amount'];
-        processed_dict['totalShares'] += allocation_dict[i]['lots_bid']*lotSize;
+        let shares_to_be_allotted = 0;
+        let amount_invested = 0;
+        let shares_demanded = allocation_dict[i]['lots_bid']*lotSize
+        let available_shares = totalSize-processed_dict['totalShares'];
+        if (available_shares >= shares_demanded){
+            // If shares available are more than the investors current demand
+            shares_to_be_allotted = shares_demanded;
+            amount_invested = shares_demanded*allocation_dict[i]['bid_amount'];
+        }
+        else{
+            // If shares available are less than the demand, allocate whatever is possible
+            shares_to_be_allotted = available_shares;
+            amount_invested = available_shares*allocation_dict[i]['bid_amount'];
+        }
+        processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['shares_allotted'] += shares_to_be_allotted;
+        processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] += amount_invested;
+        processed_dict['totalAmount'] += amount_invested;
+        processed_dict['totalShares'] += shares_to_be_allotted;
     }
     return processed_dict;
 }

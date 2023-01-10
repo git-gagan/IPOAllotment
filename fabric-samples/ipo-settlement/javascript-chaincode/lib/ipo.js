@@ -222,18 +222,27 @@ class Ipo extends Contract {
             console.log(global_investor_info);
             let total_bid = assetJSON[ipo_id]['ipoInfo']['total_bid'];
             let total_size = assetJSON[ipo_id]['ipoInfo']['totalSize'];
+            let is_oversubscribed = null;
             if (total_bid > total_size){
                 console.log("\n--- OVERSUBSCRIPTION ---\n");
-                assetJSON = this.allotOversubscription(ipo_id, assetJSON, allocation_info);
+                is_oversubscribed = true
+                assetJSON = this.makeAllotment(ipo_id, assetJSON, allocation_info, is_oversubscribed);
             }
             else{
+                is_oversubscribed = false
                 console.log("\n--- UNDERSUBSCRIPTION ---\n");
-                assetJSON = this.allotUndersubscription(ipo_id, assetJSON, allocation_info);
-                for (let key in global_investor_info[_global_investors_id]){
-                    console.log(key);
-                    console.log(global_investor_info[_global_investors_id]);
-                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
-                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares']*global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'];
+                assetJSON = this.makeAllotment(ipo_id, assetJSON, allocation_info, is_oversubscribed);
+            }
+            for (let key in global_investor_info[_global_investors_id]){
+                // Updating global investor information
+                console.log(key);
+                console.log(global_investor_info[_global_investors_id]);
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares']*global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'];
+                if (is_oversubscribed){
+                    console.log("refund initiated");
+                    global_investor_info[_global_investors_id][key]['wallet']['current_balance'] += assetJSON[ipo_id]['userInfo'][key]['refund_amount'];
+                    global_investor_info[_global_investors_id][key]['wallet']['refund_amount'] += `->${assetJSON[ipo_id]['userInfo'][key]['refund_amount']} refunded for ipo ${ipo_id}`;
                 }
             }
             console.log(assetJSON);
@@ -248,15 +257,23 @@ class Ipo extends Contract {
         return 0;
     }
 
-    allotUndersubscription(ipo_id, assetJSON, allocation_info){
+    makeAllotment(ipo_id, assetJSON, allocation_info, is_oversubscribed){
         /*
             Here, we are creating a global ledger object using allocation_info
-            which will replace the current ledger info for the case of undersubscription
+            which will replace the current ledger info for all cases of subscription
         */
-        console.log("\nMaking Allotment for the ledger\n");
-        assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount'];
+        console.log("\n---Making Allotment---\n");
+        if (is_oversubscribed){
+            console.log("OVERSUBSCRIBED");
+            assetJSON[ipo_id]['escrowInfo']['refund_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount']-allocation_info['totalAmount'];
+            assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = allocation_info['totalAmount']
+        }
+        else{
+            console.log("UNDERSUBSCRIBED");
+            assetJSON[ipo_id]['escrowInfo']['refund_amount'] = 0;
+            assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount'];
+        }
         assetJSON[ipo_id]['escrowInfo']['total_amount'] = 0;
-        assetJSON[ipo_id]['escrowInfo']['refund_amount'] = 0;
         assetJSON[ipo_id]['ipoInfo']['wallet_balance'] += assetJSON[ipo_id]['escrowInfo']['transfer_amount'];
         assetJSON[ipo_id]['ipoInfo']['total_allotted'] = assetJSON[ipo_id]['ipoInfo']['total_bid'];
         assetJSON[ipo_id]['ipoInfo']['is_allotted'] = true;
@@ -266,15 +283,13 @@ class Ipo extends Contract {
         for (let key in users_info){
             console.log("KEY:- ", key);
             console.log(assetJSON[ipo_id]['userInfo'][key]);
-            assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = allocation_info['investorInfo'][key]['shares_allotted']
+            assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = allocation_info['investorInfo'][key]['shares_allotted'];
+            if (is_oversubscribed){
+                console.log("Putting Refund amount of each investor");
+                assetJSON[ipo_id]['userInfo'][key]['refund_amount'] = assetJSON[ipo_id]['userInfo'][key]['total_invested']-allocation_info['investorInfo'][key]['amount_invested'];
+            }
         }
         return assetJSON;
-    }
-
-    allotOversubscription(ipo_id, assetJSON, allocation_info){
-        /*
-            This function deals with the oversubscription logic for allotment
-        */
     }
 
     // Adding Users here...
@@ -448,7 +463,7 @@ class Ipo extends Contract {
         // Fill the portfolio and wallet dictionary
         temp_obj[user_id]['wallet']["initial_wallet_balance"] = 1000; // Default initial wallet balance for every investor
         temp_obj[user_id]['wallet']["current_balance"] = 1000; // Since no purchase has been made yet
-        temp_obj[user_id]['wallet']["refund_amount"] = 0;
+        temp_obj[user_id]['wallet']["refund_amount"] = '';
         console.log(temp_obj);
         console.log("-----RETURN-----");
         return temp_obj

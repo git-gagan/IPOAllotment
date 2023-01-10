@@ -6,7 +6,7 @@
 				"wallet": {
 					"initial_wallet_balance": 1000,
 					"current_balance": 0,
-					"refund_amount": 10
+					"refund_amount": ""
 				},
 				"portfolio": {
 					"M1": {
