@@ -40,7 +40,7 @@ async function main() {
                 [user_id]: {
                     ipoInfo: {
                         issuer_name: userName,
-                        totalSize: 100,
+                        totalSize: 150,
                         priceRangeLow: 10,
                         priceRangeHigh: 20,
                         total_investors: 0,
@@ -135,7 +135,7 @@ async function biddingOver(contract, user_id, issuer_obj){
                         resolve("Bidding hasn't started yet!");
                     }
                 },
-                issuer_obj[user_id]['ipoInfo']['total_bid_time']*2000
+                issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000
             )
         }
     )

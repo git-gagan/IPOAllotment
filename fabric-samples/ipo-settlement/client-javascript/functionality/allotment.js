@@ -32,7 +32,7 @@ async function main() {
         console.log(user_id, role_id)
 
         if(user_id){
-            var ipo_id = "M1";
+            var ipo_id = "F1";
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")

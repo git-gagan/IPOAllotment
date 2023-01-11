@@ -237,8 +237,14 @@ class Ipo extends Contract {
                 // Updating global investor information
                 console.log(key);
                 console.log(global_investor_info[_global_investors_id]);
+                if (!(key in allocation_info['investorInfo'])){
+                    // If investor hasn't bid for this ipo, no need to update global information
+                    console.log("This investor hasn't bid for this ipo...");
+                    continue;
+                }
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'] = allocation_info['investorInfo'][key]['amount_invested']/allocation_info['investorInfo'][key]['shares_allotted'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
-                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares']*global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'];
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = allocation_info['investorInfo'][key]['amount_invested'];
                 if (is_oversubscribed){
                     console.log("refund initiated");
                     global_investor_info[_global_investors_id][key]['wallet']['current_balance'] += assetJSON[ipo_id]['userInfo'][key]['refund_amount'];
