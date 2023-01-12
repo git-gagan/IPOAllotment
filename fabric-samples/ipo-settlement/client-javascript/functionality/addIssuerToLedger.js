@@ -40,7 +40,7 @@ async function main() {
                 [user_id]: {
                     ipoInfo: {
                         issuer_name: userName,
-                        totalSize: 150,
+                        totalSize: 50,
                         priceRangeLow: 10,
                         priceRangeHigh: 20,
                         total_investors: 0,
