@@ -12,9 +12,9 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../utils/getUserId.js';
+import {insertBid} from "../utils/insertBidtoDB.js";
 
-
-async function invokeTransaction(username,lotQuantity,bidperShare) {
+async function invokeTransaction(username,lotQuantity,bidperShare,shareId) {
     try {
         console.log(process.argv);
         var queryResult = '';
@@ -43,21 +43,25 @@ async function invokeTransaction(username,lotQuantity,bidperShare) {
                 [user_id]: 
                         {
                         name: userName,
-                        transaction: {
-                            lots_bid: lotQuantity,
-                            bid_amount: bidperShare
+                        transactions: [
+                                {
+                                lots_bid: parseInt(lotQuantity),
+                                bid_amount: parseInt(bidperShare)
+                            }
+                        ],
+                        shares:{
+                            bid: parseInt(lotQuantity),
+                            alloted: 0
                         },
-                        wallet: {
-                            initial_wallet_balance: 1000, // 1000 for every user
-                            wallet_balance_after_bid: null
-                        }
+                        total_invested: 0,
+                        refund_amount: 0
                     }
             }
         }
 
         if(user_id){
             // Get the investor object
-            var ipo_id = "M1";
+            var ipo_id = shareId;
             let investor_obj = createInvestorObject();
             console.log("\n", investor_obj);
             userName = role_id + "-" + userName;
@@ -72,15 +76,26 @@ async function invokeTransaction(username,lotQuantity,bidperShare) {
                 console.log(`Transaction has been evaluated, result is: ${result}`);
                 if (result == '0'){
                     console.log("Bidding not allowed!");
-                    queryResult=`Bidding not allowed!`
+                    queryResult="Bidding not allowed!"
                 }
                 else if (result == '1'){
                     console.log(`Shares bought Successfully by the user: ${userName}`);
                     queryResult=`Shares bought Successfully by the user: ${userName}`
+                    // If Bid is successful, put the information in tbl_investor_transactions
+                    let bidDb = await insertBid(investor_obj, user_id, ipo_id);
+                    console.log(bidDb);
+                }
+                else if (result == '-2'){
+                    console.log(`Insufficient Wallet Balance!`);
+                    queryResult='Insufficient Wallet Balance!'
+                }
+                else if(result == "-1"){
+                    console.log("Your bidding amount is not in the expected range!")
+                    queryResult="-1"
                 }
                 else{
-                    console.log("Not enough funds to place the bid");
-                    queryResult=`Not enough funds to place the bid`
+                    console.log("Invalid Bid amount!");
+                    queryResult='Invalid Bid amount!'
                 }
                 console.log("\nSUCCESS\n");
                 await gateway.disconnect();

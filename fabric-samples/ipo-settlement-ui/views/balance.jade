@@ -1,0 +1,18 @@
+extends layout
+
+block content
+    div.container   
+          
+        .row 
+            .col-2 
+            .col-8
+                .card.bg-primary.mb-5
+                        .card-body
+                            h1.mb-3(style="text-align:center;")
+                                i.fas.fa-wallet
+                            h1.mb-5(style="text-align:center;") Wallet Balance 
+
+                            h1(style="text-align:center;") 
+                                i.fas.fa-rupee-sign   #{balance}
+
+                        

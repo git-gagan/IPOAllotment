@@ -12,11 +12,12 @@ import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../utils/getUserId.js';
 
-async function IssuertoLedger(username) {
+async function IssuertoLedger(username,ipo,totalSize,priceRangeLow,priceRangeHigh,bidStartDate,totalBidTime,lotSize,agent) {
     try {
         // console.log(process.argv);
         // let userName = process.argv[2]; 
         let userName=username
+        var queryResult = '';
 
         let user_promise = await getIdFromUsername(userName);
         console.log("USER promise:- ", user_promise);
@@ -40,24 +41,24 @@ async function IssuertoLedger(username) {
                 ID: user_id,
                 [user_id]: {
                     ipoInfo: {
-                        issuer_name: userName,
-                        totalSize: 500,
-                        priceRangeLow: 10,
-                        priceRangeHigh: 20,
+                        issuer_name: ipo,
+                        totalSize: parseInt(totalSize),
+                        priceRangeLow: parseInt(priceRangeLow),
+                        priceRangeHigh: parseInt(priceRangeHigh),
                         total_investors: 0,
                         total_bid: 0,
                         total_allotted: 0,
-                        bid_start_date: startDate,
+                        bid_start_date: new Date(bidStartDate),
                         ipo_announcement_date: today,
-                        total_bid_time: 60, // Seconds
+                        total_bid_time: parseInt(totalBidTime), // Seconds
                         is_complete: false,
-                        lot_size: 10,
+                        lot_size: parseInt(lotSize),
                         has_bidding_started: false,
                         balance: 0,
                         wallet_balance:0
                     },
                     escrowInfo: {
-                        agentId:"AG-Ze",
+                        agentId:agent,
                         total_amount:0,
                         last_transaction:"",
                         refund_amount:"",
@@ -84,24 +85,32 @@ async function IssuertoLedger(username) {
                 if (result){
                     console.log(`Issuer has been added to the ledger!`);
                     console.log("\nSUCCESS\n");
+                    queryResult=`Issuer has been added to the ledger!`
+                    // return queryResult
+
                 }
                 else{
                     console.log(`Failed to add Issuer to the ledger!`);
+                    queryResult=`Failed to add Issuer`
+
                 }
                 // console.log(issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'],"\n\n")
                 await gateway.disconnect();
                 let start_bidding = await startBid(contract, user_id, issuer_obj);
-                // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
+                let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
                 console.log("OVER")
-                process.exit(1);
+                // process.exit(1);
+                return queryResult
             }
             else {
                 console.log("\n3")
                 console.log("Unauthorized User!");
+                queryResult=`Unauthorized User!`
             }
         }
         else{
             console.log("This user doesn't exist!");
+            queryResult=`This user doesn't exist!`
         }
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
@@ -133,7 +142,7 @@ async function biddingOver(contract, user_id, issuer_obj){
                         resolve("Bidding hasn't started yet!");
                     }
                 },
-                issuer_obj['total_bid_time']*1000
+                issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000
             )
         }
     )

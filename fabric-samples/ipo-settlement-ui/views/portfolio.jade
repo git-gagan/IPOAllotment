@@ -1,0 +1,39 @@
+extends layout
+
+block content
+    div.container   
+          
+        .row 
+            .col-2 
+            .col-8
+                #portfolios
+                //- if data 
+                //-     .alert.alert-info(role='alert') #{data}
+               
+                if portfolios
+                    for item in portfolios
+                       
+                        .card.border-primary.mb-5
+                            .card-body
+                                .card-header.h3.bg-primary(style="text-align:center;") #{item.ipo}
+                        table.table
+                        
+                            tbody
+                                tr
+                                    td 
+                                        h4 Total Shares
+                                    td 
+                                        h4 #{item.totalShares}
+                                
+                                tr
+                                    td 
+                                        h4 Total Value
+                                    td 
+                                        h4 #{item.totalValue}
+                                    
+                                
+
+                            
+
+                            
+                                

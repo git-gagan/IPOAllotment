@@ -1,57 +1,51 @@
 extends layout
 block content
-    div.container
-        if data != undefined && data.length > 0
-            - if(message != '') {
-                p #{message}
-            - } else {
-                p 
-            - }
-            h1 Listed IPO
-        
-           
-            #data
-            //- if data != undefined && data.length > 0
-            for item in data
-                div.row
-                    div.col-6
-                        div.card.mt-5.mb-5(style="width: 18rem;")
-                            ul.list-group.list-group-flush
-                                li.list-group-item.h3.bg-primary #{item.Record.company} IPO
-                        a.btn.btn-lg.btn-primary(href='/startBid') Start Bid
-                    div.col-6
-                        div.card.mt-5.mb-5.bg-primary(style="width: 30rem;")
-                            ul.list-group.list-group-flush
-                                //- for share in item
-                                li.list-group-item.h3 Minimum Order Quantity  #{item.Record.lotSize}    
-                                li.list-group-item.h3 Price Range  #{item.Record.priceRangeLow}  -  #{item.Record.priceRangeHigh}
-        else 
-            h1 Issuer On Boarding
-            - if(message != '') {
-                p #{message}
-            - } else {
-                p 
-            - }
-            form.mt-5(action="#",method="post")
-                div.form-group
-                    label(for="ipo") IPO 
-                    input.form-control(type="text",id="ipo",placeholder="Enter IPO",name="ipo" required) 
-                div.form-group
-                    label(for="totalSize")  Total Number of Shares 
-                    input.form-control(type="number",id="totalSize",placeholder="Enter Total Number of Shares",name="totalSize" required)
-                div.form-group
-                    label(for="priceRangeLow")  Minimum price Range 
-                    input.form-control(type="number",id="priceRangeLow",placeholder="Enter Minimum price Range",name="priceRangeLow" required)
-                div.form-group
-                    label(for="priceRangeHigh")  Maximum price Range 
-                    input.form-control(type="number",id="priceRangeHigh",placeholder="Enter Maximum price Range",name="priceRangeHigh" required)
-                div.form-group
-                    label(for="bidStartDate")  Choose Bid Start Date
-                    input.form-control(type="date",id="bidStartDate",name="bidStartDate" required)
-                div.form-group
-                    label(for="totalBidTime")  Choose Total Bid Time
-                    input.form-control(type="time",id="totalBidTime",name="totalBidTime" required)
-                button.btn.btn-primary(type="submit") Submit
+    div.container 
+        .row 
+            .col-2 
+            .col-8
+                if data 
+                    .alert.alert-info(role='alert') #{data}
+                .card.border-primary
+                    .card-body
+                        .card-header.h3.bg-primary(style="text-align:center;") Issuer On Boarding
+                        
+                        
+                        form.mt-5(action="/issuerpanel",method="post")
+                            div.form-group
+                                label(for="ipo") IPO 
+                                input.form-control(type="text",id="ipo",placeholder="Enter IPO",name="ipo" required) 
+                            div.form-group
+                                label(for="totalSize")  Total Number of Shares 
+                                input.form-control(type="number",id="totalSize",placeholder="Enter Total Number of Shares",name="totalSize" required)
+                            div.form-group
+                                label(for="priceRangeLow")  Minimum price Range 
+                                input.form-control(type="number",id="priceRangeLow",placeholder="Enter Minimum price Range",name="priceRangeLow" required)
+                            div.form-group
+                                label(for="priceRangeHigh")  Maximum price Range 
+                                input.form-control(type="number",id="priceRangeHigh",placeholder="Enter Maximum price Range",name="priceRangeHigh" required)
+                            div.form-group
+                                label(for="bidStartDate")  Choose Bid Start Date
+                                input.form-control(type="date",id="bidStartDate",name="bidStartDate" required)
+                            div.form-group
+                                label(for="totalBidTime")  Choose Total Bid Time
+                                input.form-control(type="number",id="totalBidTime",name="totalBidTime" required)
+                            div.form-group
+                                label(for="lotSize")  Lot Size
+                                input.form-control(type="number",id="lotSize",placeholder="Enter Lot Size",name="lotSize" required)
+                            div.form-group 
+                               
+                                    label(for="agent") Select the Paying Agent
+                                    select.form-control#agent(name='agent')
+                                        if agents
+                                            for item in agents
+                                                option(value=`${item.user_id}`) #{item.user_name}
+                                            
+                                            
+
+                                   
+                            button.btn.btn-primary(type="submit") Submit
+            .col-2
 
 
 script(src='/bootstrap/js/bootstrap.bundle.js')

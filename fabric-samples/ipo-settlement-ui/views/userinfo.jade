@@ -1,0 +1,36 @@
+extends layout
+
+block content
+    div.container   
+          
+        .row 
+            .col-2 
+            .col-8
+                #userinfo
+                //- if data 
+                //-     .alert.alert-info(role='alert') #{data}
+               
+                if userinfo
+                    for item in userinfo
+                       
+                        .card.border-primary.mb-5
+                            .card-body
+                                .card-header.h3.bg-primary(style="text-align:center;") #{item.user_name}
+                        table.table
+                        
+                            tbody
+                                tr
+                                    td 
+                                        h4 Lot Size
+                                    td 
+                                        h4 #{item.lots_bid}
+                                
+                                tr
+                                    td 
+                                        h4 Bid Amount
+                                    td 
+                                        h4 #{item.bid_amount}
+                                    
+                                
+
+                            

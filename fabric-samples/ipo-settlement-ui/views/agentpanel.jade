@@ -2,19 +2,23 @@ extends layout
 
 block content
     div.container
+        if message 
+            .alert.alert-info(role='alert') #{message}
         if data != undefined && data.length > 0
             
             h1 Listed IPO
         
            
             #data
-            
-            for item in data
+            form.mt-5(action="/agentpanel",method="post")            
+
                 label.mt-5(for="ipo") Select an IPO
                 select.form-control#ipo(name='ipo')
-                    option(value=`${item.Record.company}`) #{item.Record.company} IPO
+                    for item in data
 
-            button.btn.btn-primary.mt-5(type="submit") Start an Allotment
+                        option(value=`${item.Key}`) #{item.Record[item.Key].ipoInfo.issuer_name}
+
+                button.btn.btn-primary.mt-5(type="submit") Start an Allotment
 script(src='/bootstrap/js/bootstrap.bundle.js') 
 
                 

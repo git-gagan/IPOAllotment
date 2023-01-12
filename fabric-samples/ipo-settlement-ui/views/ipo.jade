@@ -1,0 +1,61 @@
+extends layout
+
+block content
+    div.container   
+        if data         
+            .row 
+                .col-2 
+                .col-8
+                    //- if data 
+                    //-     .alert.alert-info(role='alert') #{data}
+                    .card.border-primary.mb-5
+                        .card-body
+                            .card-header.h3.bg-primary(style="text-align:center;") #{data[data.ID].ipoInfo.issuer_name}
+                    table.table
+                    
+                        tbody
+                            tr
+                                td 
+                                    h4 Total Shares
+                                td 
+                                    h4 #{data[data.ID].ipoInfo.totalSize}
+                            
+                            tr
+                                td 
+                                    h4 Lot Size
+                                td 
+                                    h4 #{data[data.ID].ipoInfo.lot_size}
+                                
+                            tr  
+                                td 
+                                    h4 Price Range 
+                                td 
+                                    h4 #{data[data.ID].ipoInfo.priceRangeLow} - #{data[data.ID].ipoInfo.priceRangeHigh}
+
+                            tr 
+                                td 
+                                    h4 Total Investors 
+                                td  
+                                    h4 #{data[data.ID].ipoInfo.total_investors}
+
+                            
+                            tr 
+                                td 
+                                    h4 Balance Shares 
+                                td  
+                                    h4 #{data[data.ID].ipoInfo.balance}
+
+                            tr 
+                                td 
+                                    h4 Total Allotment
+                                td  
+                                    h4 #{data[data.ID].ipoInfo.total_allotted}
+
+
+                            tr 
+                                td 
+                                    h4 Wallet Balance
+                                td  
+                                    h4 #{data[data.ID].ipoInfo.wallet_balance}
+                        
+                      

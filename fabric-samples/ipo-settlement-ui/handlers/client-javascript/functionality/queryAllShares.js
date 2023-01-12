@@ -43,7 +43,7 @@ async function queryTransaction(userName) {
          const contract = network.getContract('ipo');
 
         // Evaluate the specified transaction.
-        const result = await contract.evaluateTransaction('queryAllShares');
+        const result = await contract.evaluateTransaction('queryAll');
         console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
         // const isBidTimeOver = await contract.evaluateTransaction('isBidTimeOver');
         // console.log(`Remaining time for bidding: ${isBidTimeOver}`);

@@ -11,11 +11,13 @@ import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../utils/getUserId.js';
 
 
-async function query(userName) {
+async function query(username) {
     try {
-        console.log(process.argv);
-        // let userName = process.argv[2];   // Take username from command line
-
+        var queryResult = '';
+        // console.log(process.argv);
+        // let userName = process.argv[2];
+        // let username = process.argv[2];   // Take username from command line
+        let userName=username
         let user_promise = await getIdFromUsername(userName);
         console.log("USER ID:- ", user_promise);
 
@@ -43,9 +45,11 @@ async function query(userName) {
                 console.log("\n2")
                 // Evaluate the specified transaction.
                 const result = await contract.evaluateTransaction(function_call, user_id);
+                queryResult=JSON.parse(result);
                 console.log(`Transaction has been evaluated, result is: ${result}`);
                 console.log("\nSUCCESS\n");
                 await gateway.disconnect();
+                return queryResult
             }
             else {
                 console.log("\n3")
@@ -72,3 +76,4 @@ async function query(userName) {
 // Disconnect from the gateway.
 
 export {query}
+// query()

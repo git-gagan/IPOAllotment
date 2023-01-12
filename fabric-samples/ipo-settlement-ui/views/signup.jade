@@ -2,26 +2,31 @@ extends layout
 
 block content
     div.container
-        h1 Sign Up
-        - if(message != '') {
-            p #{message}
-        - } else {
-            p 
-        - }
-        form.mt-5(action="/signup",method="post")
-            div.form-group 
-                label(for="identity") Select Your Identity
-                select.form-control#role(name='identity')
-                    option(value="IN") Investor
-                    option(value="IS") Issuer
-                    option(value="AG") Paying Agent
-            div.form-group
-                label(for="username")  Username 
-                input.form-control(type="text",id="username",placeholder="Enter Username",name="username" required)
-            div.form-group
-                label(for="password")  Password 
-                input.form-control(type="password",id="password",placeholder="Password",name="password" required)
-            button.btn.btn-primary(type="submit") Sign Up
+        
+
+        .row 
+            .col-2 
+            .col-8
+                if message 
+                    .alert.alert-info(role='alert') #{message}
+                .card.border-primary
+                    .card-body
+                        .card-header.h3.bg-primary(style="text-align:center;") Sign Up
+                        form.mt-5(action="/signup",method="post")
+                            div.form-group 
+                                label(for="identity") Select Your Identity
+                                select.form-control#role(name='identity')
+                                    option(value="IN") Investor
+                                    option(value="IS") Issuer
+                                    option(value="AG") Paying Agent
+                            div.form-group
+                                label(for="username")  Username 
+                                input.form-control(type="text",id="username",placeholder="Enter Username",name="username" required)
+                            div.form-group
+                                label(for="password")  Password 
+                                input.form-control(type="password",id="password",placeholder="Password",name="password" required)
+                            button.btn.btn-primary(type="submit") Sign Up
+            .col-2
 
 
 script(src='/bootstrap/js/bootstrap.bundle.js')
