@@ -242,6 +242,7 @@ class Ipo extends Contract {
                     continue;
                 }
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id] = {};
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['ipo_name'] = assetJSON[ipo_id]['ipoInfo']['issuer_name'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'] = allocation_info['investorInfo'][key]['amount_invested']/allocation_info['investorInfo'][key]['shares_allotted'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = allocation_info['investorInfo'][key]['amount_invested'];
