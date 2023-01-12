@@ -133,15 +133,10 @@ class Ipo extends Contract {
             let global_users_info_obj = await this.getGlobalInvestorInfo(ctx);
             console.log("Info of all the users:\n", users_info);
             console.log("Global info of all the users:\n", global_users_info_obj);
+            let current_balance = null;
             // Checking if the investor has earlier placed a bid globally in the system or not
             if (user_id in global_users_info_obj[_global_investors_id]){
-                // Investor info is already there globally so we fetch wallet info from there
-                let current_balance = global_users_info_obj[_global_investors_id][user_id]["wallet"]["current_balance"]
-                if (current_balance < bid_amount*lots_bid*lot_size){
-                    console.log("Insufficient Wallet Balance. Please add more money to wallet before placing the bid!");
-                    return -2;
-                }
-                console.log("Sufficient balance in wallet");
+                current_balance = global_users_info_obj[_global_investors_id][user_id]["wallet"]["current_balance"];
                 is_investor_global = true;
             }
             else{
@@ -154,8 +149,14 @@ class Ipo extends Contract {
                 // If the investor does not exist globally, Create an investor object
                 // And Append it to the global temp obj before further processing
                 let new_investor_obj = this.createGlobalInvestorInfo(investor_obj, user_id);
+                current_balance = new_investor_obj[user_id]["wallet"]["current_balance"]
                 temp_investor_obj[user_id] = new_investor_obj[user_id];
             }
+            if (current_balance < bid_amount*lots_bid*lot_size){
+                console.log("Insufficient Wallet Balance. Please add more money to wallet before placing the bid!");
+                return -2;
+            }
+            console.log("Sufficient balance in wallet");
             // Check if the investor has already bid for the current ipo or not
             if (user_id in users_info){
                 console.log("Update needed!");
