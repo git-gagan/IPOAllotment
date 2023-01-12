@@ -34,7 +34,7 @@ async function main() {
         
         console.log(user_id, role_id)
 
-        var ipo_id = "F1";
+        var ipo_id = "M1";
         function createInvestorObject(){
             /*
                 This function creates an investor object during the buy process
