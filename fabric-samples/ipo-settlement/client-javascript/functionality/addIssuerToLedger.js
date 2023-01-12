@@ -57,7 +57,7 @@ async function main() {
                         is_allotted: false
                     },
                     escrowInfo: {
-                        agentId:"AG-Ze",
+                        agentId:"AG-G",
                         total_amount:0,
                         last_transaction:"",
                         refund_amount:"",
