@@ -46,8 +46,8 @@ async function main() {
                         name: userName,
                         transactions: [
                                 {
-                                lots_bid: 1,
-                                bid_amount: 10
+                                lots_bid: 4,
+                                bid_amount: 100
                             }
                         ],
                         shares:{

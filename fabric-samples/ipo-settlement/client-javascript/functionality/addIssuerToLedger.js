@@ -40,9 +40,9 @@ async function main() {
                 [user_id]: {
                     ipoInfo: {
                         issuer_name: userName,
-                        totalSize: 50,
-                        priceRangeLow: 10,
-                        priceRangeHigh: 20,
+                        totalSize: 1000,
+                        priceRangeLow: 100,
+                        priceRangeHigh: 200,
                         total_investors: 0,
                         total_bid: 0,
                         total_allotted: 0,
@@ -50,7 +50,7 @@ async function main() {
                         ipo_announcement_date: today,
                         total_bid_time: 60, // Seconds
                         is_complete: false,
-                        lot_size: 10,
+                        lot_size: 100,
                         has_bidding_started: false,
                         balance: 0,
                         wallet_balance:0,
