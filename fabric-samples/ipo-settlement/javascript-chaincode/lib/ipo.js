@@ -479,8 +479,8 @@ class Ipo extends Contract {
         temp_obj[user_id]['wallet'] = {};
         temp_obj[user_id]['portfolio'] = {};
         // Fill the portfolio and wallet dictionary
-        temp_obj[user_id]['wallet']["initial_wallet_balance"] = 1000; // Default initial wallet balance for every investor
-        temp_obj[user_id]['wallet']["current_balance"] = 1000; // Since no purchase has been made yet
+        temp_obj[user_id]['wallet']["initial_wallet_balance"] = 100000; // Default initial wallet balance for every investor
+        temp_obj[user_id]['wallet']["current_balance"] = 100000; // Since no purchase has been made yet
         temp_obj[user_id]['wallet']["refund_amount"] = '';
         console.log(temp_obj);
         console.log("-----RETURN-----");
