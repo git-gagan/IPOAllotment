@@ -35,7 +35,8 @@ async function IssuertoLedger(username,ipo,totalSize,priceRangeLow,priceRangeHig
 
         function createIssuerObject(){
             let today = new Date();
-            let startDate = new Date(Date.now() + 100*60); // 1 min
+            // let startDate = new Date(Date.now() + 100*60); // 1 min
+            let startDate=new Date(bidStartDate)
             // Create the issuer object which will be passed to the smart contract to be put on the ledger
             return {
                 ID: user_id,
@@ -48,7 +49,7 @@ async function IssuertoLedger(username,ipo,totalSize,priceRangeLow,priceRangeHig
                         total_investors: 0,
                         total_bid: 0,
                         total_allotted: 0,
-                        bid_start_date: new Date(bidStartDate),
+                        bid_start_date: startDate,
                         ipo_announcement_date: today,
                         total_bid_time: parseInt(totalBidTime), // Seconds
                         is_complete: false,

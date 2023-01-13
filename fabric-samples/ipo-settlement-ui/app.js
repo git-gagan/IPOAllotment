@@ -85,42 +85,22 @@ app.get('/enroll', function (req, res){
 app.get('/register', function (req, res){
     res.render("register.jade",{session:req.session.name,role:role_id})
 });
+
+
+
+
 // var user_portfolio=[];
 app.get("/portfolio",function(req,res){
     var promiseQuery = query(req.session.name);
     var portfolios;
-    var user_portfolio=[];
+    
     var promiseValue = async () => {
         const value = await promiseQuery;
         console.log(value);
         portfolios=value[value.length-1].Record.portfolio
         console.log(portfolios)
-        for(let key in portfolios){
-             
-            db.all(`select user_name from tbl_user where user_id = '${key}'`,(err,rows)=>{
-                if(err){
-                    console.log(err)
-                }
-                else {
-                    
-                    rows.forEach(function(row){
-                        user_portfolio.push({
-                            ipo:row.user_name,
-                            totalShares:portfolios[key].totalShares,
-                            totalValue:portfolios[key].totalValue
-                        })
-                    
-                    })
-                }
-
-                // console.log(user_portfolio)
-                console.log("User portfolio",user_portfolio)
-
-                res.render("portfolio.jade",{session:req.session.name,role:role_id,portfolios:user_portfolio})
-
-
-            });
-        }
+        res.render("portfolio.jade",{session:req.session.name,role:role_id,portfolios:portfolios})
+       
 
       
 
@@ -131,11 +111,17 @@ app.get("/portfolio",function(req,res){
 
 app.get("/balance",function(req,res){
     var promiseQuery = query(req.session.name);
-    var balance,portfolio;
+    var balance;
     var promiseValue = async () => {
         const value = await promiseQuery;
         console.log(value);
-        balance=value[value.length-1].Record.wallet.current_balance
+        
+        try {
+            balance=value[value.length-1].Record.wallet.current_balance
+        }
+        catch(err){
+            balance=200000
+        }
         res.render("balance.jade",{session:req.session.name,balance:balance,role:role_id})
     }
     promiseValue();
@@ -143,13 +129,13 @@ app.get("/balance",function(req,res){
 
 app.get('/invoke', function (req, res){
     var share_id=req.query.id
-    var priceRangeHigh=req.query.priceRangeHigh
-    var priceRangeLow=req.query.priceRangeLow
+    
     console.log("Share id :",share_id)
    
 
-    res.render("invoke.jade",{session:req.session.name,role:role_id,id:share_id,priceRangeLow:priceRangeLow,priceRangeHigh:priceRangeHigh})
+    res.render("invoke.jade",{session:req.session.name,role:role_id,id:share_id})
 });
+
 app.get('/query', function (req, res){
     res.render("query.jade",{session:req.session.name,role:role_id})
 });
@@ -288,6 +274,7 @@ app.post("/actionInvoke",function(req,res){
         const value = await promiseInvoke;
         console.log(value);
         res.render("invoke.jade", {data: value,session:req.session.name,role:role_id});
+        
     };
     promiseValue();
 

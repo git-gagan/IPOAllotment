@@ -133,15 +133,10 @@ class Ipo extends Contract {
             let global_users_info_obj = await this.getGlobalInvestorInfo(ctx);
             console.log("Info of all the users:\n", users_info);
             console.log("Global info of all the users:\n", global_users_info_obj);
+            let current_balance = null;
             // Checking if the investor has earlier placed a bid globally in the system or not
             if (user_id in global_users_info_obj[_global_investors_id]){
-                // Investor info is already there globally so we fetch wallet info from there
-                let current_balance = global_users_info_obj[_global_investors_id][user_id]["wallet"]["current_balance"]
-                if (current_balance < bid_amount*lots_bid*lot_size){
-                    console.log("Insufficient Wallet Balance. Please add more money to wallet before placing the bid!");
-                    return -2;
-                }
-                console.log("Sufficient balance in wallet");
+                current_balance = global_users_info_obj[_global_investors_id][user_id]["wallet"]["current_balance"];
                 is_investor_global = true;
             }
             else{
@@ -154,15 +149,21 @@ class Ipo extends Contract {
                 // If the investor does not exist globally, Create an investor object
                 // And Append it to the global temp obj before further processing
                 let new_investor_obj = this.createGlobalInvestorInfo(investor_obj, user_id);
+                current_balance = new_investor_obj[user_id]["wallet"]["current_balance"]
                 temp_investor_obj[user_id] = new_investor_obj[user_id];
             }
+            if (current_balance < bid_amount*lots_bid*lot_size){
+                console.log("Insufficient Wallet Balance. Please add more money to wallet before placing the bid!");
+                return -2;
+            }
+            console.log("Sufficient balance in wallet");
             // Check if the investor has already bid for the current ipo or not
             if (user_id in users_info){
                 console.log("Update needed!");
                 assetJSON[ipo_id]['userInfo'][user_id]['total_invested'] += lots_bid*lot_size*bid_amount;
                 assetJSON[ipo_id]['userInfo'][user_id]['shares']['bid'] += lots_bid*lot_size;
                 assetJSON[ipo_id]['userInfo'][user_id]['transactions'].push(investor_obj[user_id]['transactions'][0]);
-                temp_investor_obj[user_id]['portfolio'][ipo_id]['avg_price_per_share'] = this.getAveragePricePerShare(assetJSON[ipo_id]['userInfo'][user_id]['transactions'], lot_size);
+                // temp_investor_obj[user_id]['portfolio'][ipo_id]['avg_price_per_share'] = this.getAveragePricePerShare(assetJSON[ipo_id]['userInfo'][user_id]['transactions'], lot_size);
                 console.log("Update set up!");
             }
             else{
@@ -172,10 +173,10 @@ class Ipo extends Contract {
                 investor_obj[user_id]['total_invested'] = lots_bid*lot_size*bid_amount;
                 assetJSON[ipo_id]['userInfo'][user_id] = investor_obj[user_id];
                 assetJSON[ipo_id]['ipoInfo']['total_investors'] += 1;
-                temp_investor_obj[user_id]['portfolio'][ipo_id] = {};
-                temp_investor_obj[user_id]['portfolio'][ipo_id]["avg_price_per_share"] = investor_obj[user_id]['transactions'][0]['bid_amount'];
-                temp_investor_obj[user_id]['portfolio'][ipo_id]["totalShares"] = 0;
-                temp_investor_obj[user_id]['portfolio'][ipo_id]["totalValue"] = 0;
+                // temp_investor_obj[user_id]['portfolio'][ipo_id] = {};
+                // temp_investor_obj[user_id]['portfolio'][ipo_id]["avg_price_per_share"] = investor_obj[user_id]['transactions'][0]['bid_amount'];
+                // temp_investor_obj[user_id]['portfolio'][ipo_id]["totalShares"] = 0;
+                // temp_investor_obj[user_id]['portfolio'][ipo_id]["totalValue"] = 0;
                 console.log("Insert set up!");
             }
             // Change in global investorInfo
@@ -225,23 +226,24 @@ class Ipo extends Contract {
             let is_oversubscribed = null;
             if (total_bid > total_size){
                 console.log("\n--- OVERSUBSCRIPTION ---\n");
-                is_oversubscribed = true
-                assetJSON = this.makeAllotment(ipo_id, assetJSON, allocation_info, is_oversubscribed);
+                is_oversubscribed = true;
             }
             else{
-                is_oversubscribed = false
+                is_oversubscribed = false;
                 console.log("\n--- UNDERSUBSCRIPTION ---\n");
-                assetJSON = this.makeAllotment(ipo_id, assetJSON, allocation_info, is_oversubscribed);
             }
+            assetJSON = this.makeAllotment(ipo_id, assetJSON, allocation_info, is_oversubscribed);
             for (let key in global_investor_info[_global_investors_id]){
                 // Updating global investor information
                 console.log(key);
                 console.log(global_investor_info[_global_investors_id]);
                 if (!(key in allocation_info['investorInfo'])){
                     // If investor hasn't bid for this ipo, no need to update global information
-                    console.log("This investor hasn't bid for this ipo...");
+                    console.log("Either this investor hasn't bid for this ipo or hasn't been allotted it!");
                     continue;
                 }
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id] = {};
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['ipo_name'] = assetJSON[ipo_id]['ipoInfo']['issuer_name'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'] = allocation_info['investorInfo'][key]['amount_invested']/allocation_info['investorInfo'][key]['shares_allotted'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = allocation_info['investorInfo'][key]['amount_invested'];
@@ -272,16 +274,18 @@ class Ipo extends Contract {
         if (is_oversubscribed){
             console.log("OVERSUBSCRIBED");
             assetJSON[ipo_id]['escrowInfo']['refund_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount']-allocation_info['totalAmount'];
-            assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = allocation_info['totalAmount']
+            assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = allocation_info['totalAmount'];
+            assetJSON[ipo_id]['ipoInfo']['total_allotted'] = assetJSON[ipo_id]['ipoInfo']['totalSize'];
         }
         else{
             console.log("UNDERSUBSCRIBED");
             assetJSON[ipo_id]['escrowInfo']['refund_amount'] = 0;
             assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount'];
+            assetJSON[ipo_id]['ipoInfo']['total_allotted'] = assetJSON[ipo_id]['ipoInfo']['total_bid'];
         }
         assetJSON[ipo_id]['escrowInfo']['total_amount'] = 0;
+        assetJSON[ipo_id]['ipoInfo']['balance'] = assetJSON[ipo_id]['ipoInfo']['totalSize']-assetJSON[ipo_id]['ipoInfo']['total_allotted'];
         assetJSON[ipo_id]['ipoInfo']['wallet_balance'] += assetJSON[ipo_id]['escrowInfo']['transfer_amount'];
-        assetJSON[ipo_id]['ipoInfo']['total_allotted'] = assetJSON[ipo_id]['ipoInfo']['total_bid'];
         assetJSON[ipo_id]['ipoInfo']['is_allotted'] = true;
         // Now update each invester's info
         let users_info = assetJSON[ipo_id]['userInfo'];
@@ -289,10 +293,18 @@ class Ipo extends Contract {
         for (let key in users_info){
             console.log("KEY:- ", key);
             console.log(assetJSON[ipo_id]['userInfo'][key]);
-            assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = allocation_info['investorInfo'][key]['shares_allotted'];
-            if (is_oversubscribed){
-                console.log("Putting Refund amount of each investor");
-                assetJSON[ipo_id]['userInfo'][key]['refund_amount'] = assetJSON[ipo_id]['userInfo'][key]['total_invested']-allocation_info['investorInfo'][key]['amount_invested'];
+            if (key in allocation_info['investorInfo']){
+                assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = allocation_info['investorInfo'][key]['shares_allotted'];
+                if (is_oversubscribed){
+                    console.log("Putting Refund amount of each investor");
+                    assetJSON[ipo_id]['userInfo'][key]['refund_amount'] = assetJSON[ipo_id]['userInfo'][key]['total_invested']-allocation_info['investorInfo'][key]['amount_invested'];
+                }
+            }
+            else{
+                // Case of oversubscription where this investor got nothing!
+                assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = 0;
+                console.log("Refunding full Amount to the user");
+                assetJSON[ipo_id]['userInfo'][key]['refund_amount'] = assetJSON[ipo_id]['userInfo'][key]['total_invested'];
             }
         }
         return assetJSON;
@@ -467,8 +479,8 @@ class Ipo extends Contract {
         temp_obj[user_id]['wallet'] = {};
         temp_obj[user_id]['portfolio'] = {};
         // Fill the portfolio and wallet dictionary
-        temp_obj[user_id]['wallet']["initial_wallet_balance"] = 1000; // Default initial wallet balance for every investor
-        temp_obj[user_id]['wallet']["current_balance"] = 1000; // Since no purchase has been made yet
+        temp_obj[user_id]['wallet']["initial_wallet_balance"] = 200000; // Default initial wallet balance for every investor
+        temp_obj[user_id]['wallet']["current_balance"] = 200000; // Since no purchase has been made yet
         temp_obj[user_id]['wallet']["refund_amount"] = '';
         console.log(temp_obj);
         console.log("-----RETURN-----");

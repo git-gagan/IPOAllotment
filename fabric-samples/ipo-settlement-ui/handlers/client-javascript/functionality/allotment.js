@@ -49,37 +49,41 @@ async function SharesAllotment(username,ipo_id) {
                 let totalSize = issuer_info[ipo_id]['ipoInfo']['totalSize'];
                 let lotSize = issuer_info[ipo_id]['ipoInfo']['lot_size'];
                 console.log(totalSize, lotSize);
-                // console.log(result[ipo_id]['ipoInfo']['is_allotted'], result[ipo_id]['ipoInfo']['total_bid'])
-                if (!issuer_info[ipo_id]['ipoInfo']['is_allotted']){
-                    // Query the current Db, create a processed dictionary to be passed to the smart contract for allocation
-                    var allocation_dict = await getAllocationData(ipo_id, totalSize, lotSize);
-                    console.log(allocation_dict);
-                    allocation_dict = processAllocationDict(allocation_dict, lotSize);
-                    console.log(allocation_dict);
-                    if (issuer_info[ipo_id]['ipoInfo']['total_bid'] <= totalSize){
-                        console.log("It is the case of Undersubscription");
-                        queryResult="It is the case of Undersubscription"
-                    }
-                    else{
-                        console.log("It is the case of Oversubscription!");
-                        queryResult="It is the case of Oversubscription!"
-                    }
-                    // Evaluate the specified transaction.
-                    const result = await contract.submitTransaction('allotShares', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
-                    console.log(`Transaction has been evaluated, result is: ${result}`);
-                    console.log("\nSUCCESS\n");
+                if (issuer_info[ipo_id]['escrowInfo']['agentId'] != user_id){
+                    console.log("This Agent doesn't deal with this IPO.\nAllocation can't be made!")
+                    queryResult="This Agent doesn't deal with this IPO.\nAllocation can't be made!"
                 }
                 else{
-                    console.log("Allotment Already made for ipo"+ipo_id);
-                    queryResult="Allotment Already made!!"
-                     
+                    // console.log(result[ipo_id]['ipoInfo']['is_allotted'], result[ipo_id]['ipoInfo']['total_bid'])
+                    if (!issuer_info[ipo_id]['ipoInfo']['is_allotted']){
+                        // Query the current Db, create a processed dictionary to be passed to the smart contract for allocation
+                        var allocation_dict = await getAllocationData(ipo_id, totalSize, lotSize);
+                        console.log(allocation_dict);
+                        allocation_dict = processAllocationDict(allocation_dict, lotSize, totalSize);
+                        console.log(allocation_dict);
+                        if (issuer_info[ipo_id]['ipoInfo']['total_bid'] <= totalSize){
+                            console.log("It is the case of Undersubscription");
+                            queryResult="It is the case of Undersubscription"
+                        }
+                        else{
+                            console.log("It is the case of Oversubscription!");
+                            queryResult="It is the case of Oversubscription!"
+                        }
+                        // Evaluate the specified transaction.
+                        const result = await contract.submitTransaction('allotShares', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
+                        console.log(`Transaction has been evaluated, result is: ${result}`);
+                        console.log("\nSUCCESS\n");
+                    }
+                    else{
+                        console.log("Allotment Already made for ipo"+ipo_id);
+                        queryResult="Allotment Already made!!"
+                    }
                 }
                 await gateway.disconnect();
             }
             else {
                 console.log("\n3")
                 console.log("Unauthorized User!");
-                queryResult="Unauthorized User!"
             }
         }
         else{

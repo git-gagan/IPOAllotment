@@ -30,7 +30,7 @@ block content
                         //-                 li.list-group-item.h3 Minimum Order Quantity  #{item.Record[item.Key].ipoInfo.lot_size}    
                         //-                 li.list-group-item.h3 Price Range  #{item.Record[item.Key].ipoInfo.priceRangeLow}  -  #{item.Record[item.Key].ipoInfo.priceRangeHigh}  
                         
-                        a.list-group-item.list-group-item-action.flex-column.align-items-start.active.mt-5(href=`/invoke?id=${item.Key}&priceRangeHigh=${item.Record[item.Key].ipoInfo.priceRangeHigh}&priceRangeLow=${item.Record[item.Key].ipoInfo.priceRangeLow}`)
+                        a.list-group-item.list-group-item-action.flex-column.align-items-start.active.mt-5(href=`/invoke?id=${item.Key}`)
                             .d-flex.w-100.justify-content-between
                             h1.mb-3(style='text-align: center;') #{item.Record[item.Key].ipoInfo.issuer_name}
                             hr(style='border: 5px solid;border-radius: 2px;')

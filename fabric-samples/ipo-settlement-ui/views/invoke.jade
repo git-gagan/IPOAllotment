@@ -5,9 +5,7 @@ block content
         .row 
             .col-2 
             .col-8
-                if data=="-1"
-                    .alert.alert-info(role='alert') Please bid in the price range ${priceRangeLow} - ${priceRangeHigh}!
-                else if data
+                if data
                     .alert.alert-info(role='alert') #{data}
 
                 

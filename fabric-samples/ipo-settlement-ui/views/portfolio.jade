@@ -15,10 +15,16 @@ block content
                        
                         .card.border-primary.mb-5
                             .card-body
-                                .card-header.h3.bg-primary(style="text-align:center;") #{item.ipo}
+                                .card-header.h3.bg-primary(style="text-align:center;") #{item.ipo_name}
                         table.table
                         
                             tbody
+                                tr
+                                    td 
+                                        h4 Average Value Per Share
+                                    td 
+                                        h4 #{item.avg_price_per_share}
+
                                 tr
                                     td 
                                         h4 Total Shares

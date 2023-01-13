@@ -51,7 +51,7 @@ async function invokeTransaction(username,lotQuantity,bidperShare,shareId) {
                         ],
                         shares:{
                             bid: parseInt(lotQuantity),
-                            alloted: 0
+                            allotted: 0
                         },
                         total_invested: 0,
                         refund_amount: 0
@@ -91,7 +91,7 @@ async function invokeTransaction(username,lotQuantity,bidperShare,shareId) {
                 }
                 else if(result == "-1"){
                     console.log("Your bidding amount is not in the expected range!")
-                    queryResult="-1"
+                    queryResult="Your bidding amount is not in the expected range!"
                 }
                 else{
                     console.log("Invalid Bid amount!");
