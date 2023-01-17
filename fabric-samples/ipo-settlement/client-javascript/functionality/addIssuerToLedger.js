@@ -11,6 +11,7 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../utils/getUserId.js';
+import { insertIpo } from '../utils/ipoToDB.js';
 
 async function main() {
     try {
@@ -79,20 +80,28 @@ async function main() {
             if (isAuthUser && role_id == "IS") {
                 var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
                 console.log("\n2")
-                // Evaluate the specified transaction.
-                const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
-                if (result){
-                    console.log(`Issuer has been added to the ledger!`);
-                    console.log("\nSUCCESS\n");
+                // Insert IPO info to DB
+                try{
+                    let ipoDb = await insertIpo(issuer_obj, user_id);
+                    console.log(ipoDb);
+                    // Evaluate the specified transaction.
+                    const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
+                    if (result){
+                        console.log(`Issuer has been added to the ledger!`);
+                        console.log("\nSUCCESS\n");
+                    }
+                    else{
+                        console.log(`Failed to add Issuer to the ledger!`);
+                    }
                 }
-                else{
-                    console.log(`Failed to add Issuer to the ledger!`);
+                catch (error){
+                    console.log("Error Encountered while inserting to DB:-", error);
                 }
                 // console.log(issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'],"\n\n")
-                let start_bidding = await startBid(contract, user_id, issuer_obj);
-                console.log("================")
-                // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
-                let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
+                // let start_bidding = await startBid(contract, user_id, issuer_obj);
+                // console.log("================")
+                // // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
+                // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
                 console.log("OVER")
                 await gateway.disconnect();
                 process.exit(1);
