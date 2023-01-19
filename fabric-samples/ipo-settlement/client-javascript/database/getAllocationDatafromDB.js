@@ -1,17 +1,9 @@
-import sqlite3 from 'sqlite3';
+import { makeDbConnection } from "./dbConnection.js";
 
 async function getAllocationData(ipo_id, totalSize, lotSize) {
     try {
         // Create DB connection
-        let db = new sqlite3.Database('../ipo.db', (err)=>{
-            if (err){
-                console.log("===========");
-                return console.error(err.message);
-            }
-            else{
-                console.log('Connected to the SQlite database.');
-            }
-        })
+        let db = await makeDbConnection();
         let limit = totalSize/lotSize;
         let sql = `select * from tbl_investor_transactions 
                     where ipo_id='${ipo_id}' and is_allotted=0 

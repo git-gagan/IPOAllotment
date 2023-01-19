@@ -8,8 +8,8 @@
 
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
-import { getIdFromUsername } from '../utils/getUserId.js';
-import { getAllocationData } from '../utils/getAllocationDatafromDB.js';
+import { getIdFromUsername } from '../database/getUserId.js';
+import { getAllocationData } from '../database/getAllocationDatafromDB.js';
 
 
 async function main() {

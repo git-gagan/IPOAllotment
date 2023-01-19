@@ -10,11 +10,14 @@
 
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
-import { getIdFromUsername } from '../utils/getUserId.js';
-import { insertIpo } from '../utils/ipoToDB.js';
+import { getIdFromUsername } from '../database/getUserId.js';
+import { insertIpo } from '../database/ipoToDB.js';
 
 async function main() {
     try {
+        // Get allotment principle id from the form
+        let allotment_principle = null;
+
         console.log(process.argv);
         let userName = process.argv[2]; 
 
@@ -55,7 +58,14 @@ async function main() {
                         has_bidding_started: false,
                         balance: 0,
                         wallet_balance:0,
-                        is_allotted: false
+                        is_allotted: false,
+                        ipoParticipants: [],
+                        ipoCreatedTms: today,
+                        ipoModifiedTms: null,
+                        ipoAllotedTms: null,
+                        cusip: null,
+                        isin: null,
+                        ticker: null
                     },
                     escrowInfo: {
                         agentId:"AG-G",
@@ -82,9 +92,11 @@ async function main() {
                 console.log("\n2")
                 // Insert IPO info to DB
                 try{
-                    let ipoDb = await insertIpo(issuer_obj, user_id);
+                    let ipoDb = await insertIpo(issuer_obj, user_id, allotment_principle);
+                    console.log("Issuer added to DB:- ", ipoDb);
                     console.log(ipoDb);
                     // Evaluate the specified transaction.
+                    // let result = 1;
                     const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
                     if (result){
                         console.log(`Issuer has been added to the ledger!`);

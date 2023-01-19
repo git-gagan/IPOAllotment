@@ -10,7 +10,7 @@
 
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
-import { getIdFromUsername } from '../utils/getUserId.js';
+import { getIdFromUsername } from '../database/getUserId.js';
 
 async function main() {
     /*

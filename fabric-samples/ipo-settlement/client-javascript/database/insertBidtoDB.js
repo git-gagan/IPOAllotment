@@ -1,16 +1,9 @@
-import sqlite3 from 'sqlite3';
+import { makeDbConnection } from "./dbConnection.js";
 
 async function insertBid(investor_obj, investor_id, ipo_id) {
     try {
         // Create DB connection
-        let db = new sqlite3.Database('../ipo.db', (err)=>{
-            if (err){
-                return console.error(err.message);
-            }
-            else{
-                console.log('Connected to the SQlite database.');
-            }
-        })
+        let db = await makeDbConnection();
         console.log(db, "------------------");
         let sql = `insert into tbl_investor_transactions
         (investor_id, ipo_id, lots_bid, bid_amount, is_allotted, time_of_bid) 
@@ -41,7 +34,7 @@ async function insertBid(investor_obj, investor_id, ipo_id) {
         return dbpromise;
     } 
     catch (error) {
-        console.error(`Failed to get user information: ${error}`);
+        console.error(`Failed to insert bid information: ${error}`);
         process.exit(1);
     }
 }

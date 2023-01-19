@@ -1,17 +1,10 @@
-import sqlite3 from 'sqlite3';
+import { makeDbConnection } from "./dbConnection.js";
 
 async function getIdFromUsername(user_name) {
     try {
         // Create DB connection
-        let db = new sqlite3.Database('../ipo.db', (err)=>{
-            if (err){
-                console.log("===========");
-                return console.error(err.message);
-            }
-            else{
-                console.log('Connected to the SQlite database.');
-            }
-        })
+        console.log("===============================");
+        let db = await makeDbConnection();
         let sql = `select user_id, role_id from tbl_userrole 
                     where user_id=(
                         select user_id from tbl_user where user_name='${user_name}'
@@ -41,4 +34,4 @@ async function getIdFromUsername(user_name) {
 }
 
 
-export { getIdFromUsername }
+export { getIdFromUsername };

@@ -11,8 +11,8 @@
 
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
-import { getIdFromUsername } from '../utils/getUserId.js';
-import { insertBid } from '../utils/insertBidtoDB.js';
+import { getIdFromUsername } from '../database/getUserId.js';
+import { insertBid } from '../database/insertBidtoDB.js';
 
 
 async function main() {

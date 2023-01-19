@@ -42,7 +42,14 @@
 				"is_complete": false,
 				"has_bidding_started": false,
 				"wallet_ballence": 0,
-				"is_allotted": false
+				"is_allotted": false,
+				"ipoParticipants": [],
+				"ipoCreatedTms": "today()",
+				"ipoModifiedTms": null,
+				"ipoAllotedTms": null,
+				"cusip": null,
+				"isin": null,
+				"ticker": null
 			},
 			"escrowInfo": {
 				"agentId": "",
@@ -54,6 +61,7 @@
 			"userInfo": {
 				"G1": {
 					"name": "Gagan",
+					"investor_type": "",
 					"transactions": [
 						{
 							"lots_bid": 5,
@@ -77,6 +85,7 @@
 				},
 				"N1": {
 					"name": "Gagan",
+					"investor_type": "",
 					"transactions": [
 						{
 							"lots_bid": 5,
