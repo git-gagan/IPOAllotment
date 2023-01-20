@@ -11,7 +11,7 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
-import { insertIpo } from '../database/ipoToDB.js';
+import { insertOrUpdateIpo } from '../database/ipoToDB.js';
 
 async function main() {
     try {
@@ -92,11 +92,10 @@ async function main() {
                 console.log("\n2")
                 // Insert IPO info to DB
                 try{
-                    let ipoDb = await insertIpo(issuer_obj, user_id, allotment_principle);
+                    let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, false, allotment_principle);
                     console.log("Issuer added to DB:- ", ipoDb);
                     console.log(ipoDb);
                     // Evaluate the specified transaction.
-                    // let result = 1;
                     const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
                     if (result){
                         console.log(`Issuer has been added to the ledger!`);

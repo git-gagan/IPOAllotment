@@ -31,15 +31,16 @@ drop table tbl_investor_type;
 CREATE TABLE tbl_investor_info (
     investor_id varchar(50) PRIMARY KEY,
     investor_type int,
-    dp_id int,
+	pan varchar(50) UNIQUE,
+    dp_id int UNIQUE,
     investor_name varchar(50),
     country_domicile varchar(50),
-    demat_ac_no int,
+    demat_ac_no int UNIQUE,
     custodian_id int,
-    bank_account_no int,
+    bank_account_no int UNIQUE,
     ifsc_code varchar(50),
-    lei varchar(50),
-    swift_address varchar(50),
+    lei varchar(50) UNIQUE,
+    swift_address varchar(50) UNIQUE,
     foreign key (investor_type) references tbl_investor_type(investor_type_id)
 );
 

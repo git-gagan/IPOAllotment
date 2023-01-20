@@ -26,8 +26,6 @@ async function main() {
         }
         else{
             user_id = null;
-            user_id = 1;
-            role_id = 'IS';
         }
         
         console.log(user_id, role_id)
