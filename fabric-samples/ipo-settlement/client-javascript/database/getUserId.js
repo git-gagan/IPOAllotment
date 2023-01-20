@@ -5,10 +5,14 @@ async function getIdFromUsername(user_name) {
         // Create DB connection
         console.log("===============================");
         let db = await makeDbConnection();
-        let sql = `select user_id, role_id from tbl_userrole 
-                    where user_id=(
-                        select user_id from tbl_user where user_name='${user_name}'
-                    )`;
+        // let sql = `select user_id, role_id from tbl_userrole 
+        //             where user_id=(
+        //                 select user_id from tbl_user where name='${user_name}'
+        //             )`;
+        let sql = `select tbl_user.user_id, tbl_user.full_name, tbl_userrole.role_id
+                    from tbl_user inner join tbl_userrole 
+                    on tbl_user.user_id=tbl_userrole.user_id
+                    where user_name='${user_name}'`;
         console.log(sql);
         // db.all()/db.get() returns the rows as results unlike db.run()
         const dbpromise = new Promise((resolve, reject)=>{

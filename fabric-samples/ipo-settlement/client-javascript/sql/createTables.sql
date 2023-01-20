@@ -3,9 +3,12 @@
 --- Create table commands
 CREATE table tbl_user(
 	user_id varchar(50) PRIMARY KEY,
-	user_name varchar(50),
-	user_pwd varchar(50)
+	user_name varchar(30) UNIQUE NOT NULL,
+	user_pwd varchar(50),
+	full_name varchar(50)
 );
+
+drop TABLE tbl_user;
 
 CREATE table tbl_role(
 	role_id varchar(50) PRIMARY KEY,
@@ -19,6 +22,7 @@ CREATE TABLE tbl_userrole(
 	FOREIGN KEY (role_id) REFERENCES tbl_role(role_id)
 );
 
+drop TABLE tbl_userrole;
 
 CREATE TABLE tbl_investor_type (
     investor_type_id int PRIMARY KEY,

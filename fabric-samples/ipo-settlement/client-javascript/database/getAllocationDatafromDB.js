@@ -6,7 +6,7 @@ async function getAllocationData(ipo_id, totalSize, lotSize) {
         let db = await makeDbConnection();
         let limit = totalSize/lotSize;
         let sql = `select * from tbl_investor_transactions 
-                    where ipo_id='${ipo_id}' and is_allotted=0 
+                    where ipo_id='${ipo_id}'
                     ORDER BY bid_amount DESC, time_of_bid ASC 
                     limit ${limit}`;
         console.log(sql);

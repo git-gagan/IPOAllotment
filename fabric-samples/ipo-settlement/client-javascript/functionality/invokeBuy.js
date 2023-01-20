@@ -23,16 +23,17 @@ async function main() {
         let user_promise = await getIdFromUsername(process.argv[2]);
         console.log("USER promise:- ", user_promise);
 
-        let user_id, role_id;
+        let user_id, role_id, full_name;
         if (user_promise){
             user_id = user_promise['user_id'];
             role_id = user_promise['role_id'];
+            full_name = user_promise['full_name'];
         }
         else{
             user_id = null;
         }
         
-        console.log(user_id, role_id)
+        console.log(user_id, role_id, full_name)
 
         var ipo_id = "M1";
         function createInvestorObject(){
@@ -44,6 +45,7 @@ async function main() {
                 [user_id]: 
                         {
                         name: userName,
+                        full_name: full_name,
                         transactions: [
                                 {
                                 lots_bid: 4,

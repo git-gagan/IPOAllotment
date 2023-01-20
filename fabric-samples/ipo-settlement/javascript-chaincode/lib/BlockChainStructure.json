@@ -3,6 +3,7 @@
 		"ID": "global_user_info_confidential_",
 		"global_user_info_confidential_": {
 			"G1": {
+				"full_name": "",
 				"wallet": {
 					"initial_wallet_balance": 1000,
 					"current_balance": 0,
@@ -10,11 +11,15 @@
 				},
 				"portfolio": {
 					"M1": {
+						"ipo_name": "",
+						"issuer_username": "",
 						"avg_price_per_share": 10,
 						"totalShares": 15,
 						"totalValue": 150
 					},
 					"F1": {
+						"ipo_name": "",
+						"issuer_username": "",
 						"avg_price_per_share": 10,
 						"totalShares": 15,
 						"totalValue": 150
@@ -28,6 +33,7 @@
 		"M1": {
 			"ipoInfo": {
 				"issuer_name": "",
+				"issuer_fullname": "",
 				"totalSize": "",
 				"priceRangeLow": "",
 				"priceRangeHigh": "",
@@ -53,6 +59,7 @@
 			},
 			"escrowInfo": {
 				"agentId": "",
+				"agentName": "",
 				"total_amount": 0,
 				"last_transaction": "",
 				"refund_amount": "",
@@ -61,6 +68,7 @@
 			"userInfo": {
 				"G1": {
 					"name": "Gagan",
+					"full_name": "",
 					"investor_type": "",
 					"transactions": [
 						{
@@ -85,6 +93,7 @@
 				},
 				"N1": {
 					"name": "Gagan",
+					"full_name": "",
 					"investor_type": "",
 					"transactions": [
 						{

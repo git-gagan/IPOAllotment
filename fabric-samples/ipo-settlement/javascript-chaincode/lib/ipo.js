@@ -243,7 +243,8 @@ class Ipo extends Contract {
                     continue;
                 }
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id] = {};
-                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['ipo_name'] = assetJSON[ipo_id]['ipoInfo']['issuer_name'];
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['ipo_name'] = assetJSON[ipo_id]['ipoInfo']['issuer_fullname'];
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['issuer_username'] = assetJSON[ipo_id]['ipoInfo']['issuer_name'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'] = allocation_info['investorInfo'][key]['amount_invested']/allocation_info['investorInfo'][key]['shares_allotted'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = allocation_info['investorInfo'][key]['amount_invested'];
@@ -477,6 +478,7 @@ class Ipo extends Contract {
         let temp_obj = {};
         temp_obj[user_id] = {};
         temp_obj[user_id]['wallet'] = {};
+        temp_obj[user_id]['full_name'] = investor_obj[user_id]['full_name'];
         temp_obj[user_id]['portfolio'] = {};
         // Fill the portfolio and wallet dictionary
         temp_obj[user_id]['wallet']["initial_wallet_balance"] = 100000; // Default initial wallet balance for every investor

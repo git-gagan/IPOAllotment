@@ -20,16 +20,17 @@ async function main() {
         let user_promise = await getIdFromUsername(process.argv[2]);
         console.log("USER ID:- ", user_promise);
 
-        let user_id, role_id;
+        let user_id, role_id, full_name;
         if (user_promise){
             user_id = user_promise['user_id'];
             role_id = user_promise['role_id'];
+            full_name = user_promise['full_name'];
         }
         else{
             user_id = null;
         }
         
-        console.log(user_id, role_id)
+        console.log(user_id, role_id, full_name)
 
         if(user_id){
             var ipo_id = "M1";
@@ -56,18 +57,24 @@ async function main() {
                         // Query the current Db, create a processed dictionary to be passed to the smart contract for allocation
                         var allocation_dict = await getAllocationData(ipo_id, totalSize, lotSize);
                         console.log(allocation_dict);
-                        allocation_dict = processAllocationDict(allocation_dict, lotSize, totalSize);
-                        console.log(allocation_dict);
-                        if (issuer_info[ipo_id]['ipoInfo']['total_bid'] <= totalSize){
-                            console.log("It is the case of Undersubscription");
+                        if (allocation_dict.length){
+                            allocation_dict = processAllocationDict(allocation_dict, lotSize, totalSize);
+                            console.log(allocation_dict);
+                            if (issuer_info[ipo_id]['ipoInfo']['total_bid'] <= totalSize){
+                                console.log("It is the case of Undersubscription");
+                            }
+                            else{
+                                console.log("It is the case of Oversubscription!");
+                            }
+                            // Evaluate the specified transaction.
+                            const result = await contract.submitTransaction('allotShares', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
+                            console.log(`Transaction has been evaluated, result is: ${result}`);
+                            console.log("\nSUCCESS\n");
                         }
                         else{
-                            console.log("It is the case of Oversubscription!");
+                            console.log("No data of investors!!!");
+                            console.log("Allocation can't be made!")
                         }
-                        // Evaluate the specified transaction.
-                        const result = await contract.submitTransaction('allotShares', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
-                        console.log(`Transaction has been evaluated, result is: ${result}`);
-                        console.log("\nSUCCESS\n");
                     }
                     else{
                         console.log("Allotment Already made for ipo"+ipo_id);
