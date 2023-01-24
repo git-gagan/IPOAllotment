@@ -1,19 +1,16 @@
 import { makeDbConnection } from "./dbConnection.js";
 
-async function insertBid(investor_obj, investor_id, ipo_id) {
+async function insertDmatIpo(investor_id, ipo_id, demat_ac_no) {
     try {
         // Create DB connection
         let db = await makeDbConnection();
         console.log(db, "------------------");
-        let sql = `insert into tbl_investor_transactions
-        (investor_id, ipo_id, lots_bid, bid_amount, time_of_bid) 
-        values(
-            '${investor_id}', 
-            '${ipo_id}', 
-            '${investor_obj[investor_id]['transactions'][0]['lots_bid']}',
-            '${investor_obj[investor_id]['transactions'][0]['bid_amount']}',
-            '${(new Date().toISOString().split('T')).join(" ")}'
-        );`
+        let sql = `insert into tbl_investor_ipo_bid(investor_id, ipo_id, demat_ac_no)
+                    values (
+                        '${investor_id}',
+                        '${ipo_id}',
+                        '${demat_ac_no}'
+                    );`
         const dbpromise = new Promise(
             (resolve, reject) => {
                 db.run(sql, (err) => {
@@ -33,9 +30,9 @@ async function insertBid(investor_obj, investor_id, ipo_id) {
         return dbpromise;
     } 
     catch (error) {
-        console.error(`Failed to insert bid information: ${error}`);
+        console.error(`Failed to insert dmat-ipo information: ${error}`);
         process.exit(1);
     }
 }
 
-export { insertBid };
+export { insertDmatIpo };

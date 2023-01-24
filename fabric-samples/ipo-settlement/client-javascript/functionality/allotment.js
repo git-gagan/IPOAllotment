@@ -10,6 +10,7 @@ import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { getAllocationData } from '../database/getAllocationDatafromDB.js';
+import { dematFromDb } from '../database/getDmatFromDB.js';
 
 
 async function main() {
@@ -33,7 +34,7 @@ async function main() {
         console.log(user_id, role_id, full_name)
 
         if(user_id){
-            var ipo_id = "M1";
+            var ipo_id = "F1";
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
@@ -58,7 +59,7 @@ async function main() {
                         var allocation_dict = await getAllocationData(ipo_id, totalSize, lotSize);
                         console.log(allocation_dict);
                         if (allocation_dict.length){
-                            allocation_dict = processAllocationDict(allocation_dict, lotSize, totalSize);
+                            allocation_dict = await processAllocationDict(allocation_dict, lotSize, totalSize, ipo_id);
                             console.log(allocation_dict);
                             if (issuer_info[ipo_id]['ipoInfo']['total_bid'] <= totalSize){
                                 console.log("It is the case of Undersubscription");
@@ -73,7 +74,7 @@ async function main() {
                         }
                         else{
                             console.log("No data of investors!!!");
-                            console.log("Allocation can't be made!")
+                            console.log("Allocation can't be made!");
                         }
                     }
                     else{
@@ -96,7 +97,7 @@ async function main() {
     }
 }
 
-function processAllocationDict(allocation_dict, lotSize, totalSize){
+async function processAllocationDict(allocation_dict, lotSize, totalSize, ipo_id){
     /* 
     The following function processes the allocation dictionary and 
     returns a processed dictionary to be passed to the smart contract
@@ -112,9 +113,11 @@ function processAllocationDict(allocation_dict, lotSize, totalSize){
             break;
         }
         if (!(allocation_dict[i]['investor_id'] in processed_dict['investorInfo'])){
+            let dmat_info = await dematFromDb(allocation_dict[i]['investor_id'], ipo_id);
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']] = {};
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['shares_allotted'] = 0;
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] = 0;
+            processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['demat_account'] = dmat_info[0]['demat_ac_no'];
         }
         let shares_to_be_allotted = 0;
         let amount_invested = 0;

@@ -32,14 +32,33 @@ CREATE TABLE tbl_investor_type (
 
 drop table tbl_investor_type;
 
+CREATE Table tbl_investor_dmat(
+	id integer PRIMARY KEY AUTOINCREMENT,
+	investor_id varchar(50),
+	demat_ac_no int UNIQUE NOT NULL,
+	dp_id int UNIQUE NOT NULL,
+	FOREIGN KEY (investor_id) REFERENCES tbl_investor_info(investor_id)
+)
+
+drop TABLE tbl_investor_dmat;
+
+CREATE Table tbl_investor_ipo_bid(
+	id integer PRIMARY KEY AUTOINCREMENT,
+	investor_id varchar(50),
+	ipo_id varchar(50),
+	demat_ac_no int NOT NULL,
+	CONSTRAINT uni UNIQUE(investor_id, ipo_id),
+	FOREIGN KEY (investor_id) REFERENCES tbl_investor_info(investor_id)
+)
+
+drop TABLE tbl_investor_ipo_bid;
+
 CREATE TABLE tbl_investor_info (
     investor_id varchar(50) PRIMARY KEY,
     investor_type int,
 	pan varchar(50) UNIQUE,
-    dp_id int UNIQUE,
     investor_name varchar(50),
     country_domicile varchar(50),
-    demat_ac_no int UNIQUE,
     custodian_id int,
     bank_account_no int UNIQUE,
     ifsc_code varchar(50),

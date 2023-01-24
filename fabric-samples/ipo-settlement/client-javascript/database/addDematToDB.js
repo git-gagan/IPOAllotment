@@ -1,19 +1,17 @@
 import { makeDbConnection } from "./dbConnection.js";
 
-async function insertBid(investor_obj, investor_id, ipo_id) {
+async function dematToDb(investor_id, dmat_obj) {
     try {
         // Create DB connection
         let db = await makeDbConnection();
         console.log(db, "------------------");
-        let sql = `insert into tbl_investor_transactions
-        (investor_id, ipo_id, lots_bid, bid_amount, time_of_bid) 
+        let sql = `insert into tbl_investor_dmat
+        (investor_id, demat_ac_no, dp_id) 
         values(
             '${investor_id}', 
-            '${ipo_id}', 
-            '${investor_obj[investor_id]['transactions'][0]['lots_bid']}',
-            '${investor_obj[investor_id]['transactions'][0]['bid_amount']}',
-            '${(new Date().toISOString().split('T')).join(" ")}'
-        );`
+            '${dmat_obj['dmat_ac_no']}',
+            '${dmat_obj['dp_id']}' 
+        )`
         const dbpromise = new Promise(
             (resolve, reject) => {
                 db.run(sql, (err) => {
@@ -23,7 +21,7 @@ async function insertBid(investor_obj, investor_id, ipo_id) {
                         reject(err.message);
                     }
                     else{
-                        console.log("Insertion Successful!");
+                        console.log("New Dmat Account Added!");
                         resolve("Success!");
                     }
                 });
@@ -33,9 +31,9 @@ async function insertBid(investor_obj, investor_id, ipo_id) {
         return dbpromise;
     } 
     catch (error) {
-        console.error(`Failed to insert bid information: ${error}`);
+        console.error(`Failed to add DMAT info: ${error}`);
         process.exit(1);
     }
 }
 
-export { insertBid };
+export { dematToDb };

@@ -158,7 +158,7 @@ async function biddingOver(contract, user_id, issuer_obj){
                         resolve("Bidding hasn't started yet!");
                     }
                 },
-                issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000
+                issuer_obj[user_id]['ipoInfo']['total_bid_time']*2000
             )
         }
     )

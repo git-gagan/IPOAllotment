@@ -248,6 +248,7 @@ class Ipo extends Contract {
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'] = allocation_info['investorInfo'][key]['amount_invested']/allocation_info['investorInfo'][key]['shares_allotted'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
                 global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = allocation_info['investorInfo'][key]['amount_invested'];
+                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['demat_account'] = allocation_info['investorInfo'][key]['demat_account'];
                 if (is_oversubscribed){
                     console.log("refund initiated");
                     global_investor_info[_global_investors_id][key]['wallet']['current_balance'] += assetJSON[ipo_id]['userInfo'][key]['refund_amount'];
