@@ -11,7 +11,7 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
-import { insertOrUpdateIpo } from '../database/ipoToDB.js';
+import { insertOrUpdateIpo, addIpoEligibility } from '../database/ipoToDB.js';
 
 async function main() {
     try {
@@ -35,6 +35,35 @@ async function main() {
         }
         
         console.log(user_id, role_id, full_name)
+
+        // ipo investor eligibility information
+        // To be taken from frontend
+        let ipo_investor_eligibility_list = [
+            {
+                ipo_id: user_id,
+                investor_type_id: 1,
+                min_lot_qty: 2,
+                reserve_shares_percentage: 50
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 2,
+                min_lot_qty: 3,
+                reserve_shares_percentage: 30
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 3,
+                min_lot_qty: 1,
+                reserve_shares_percentage: 20
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 4,
+                min_lot_qty: 5,
+                reserve_shares_percentage: 10
+            }
+        ]
 
         function createIssuerObject(){
             let today = new Date();
@@ -61,7 +90,7 @@ async function main() {
                         balance: 0,
                         wallet_balance:0,
                         is_allotted: false,
-                        ipoParticipants: [],
+                        ipoParticipants: [], 
                         ipoCreatedTms: today,
                         ipoModifiedTms: null,
                         ipoAllotedTms: null,
@@ -97,7 +126,8 @@ async function main() {
                 try{
                     let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, false, allotment_principle);
                     console.log("Issuer added to DB:- ", ipoDb);
-                    console.log(ipoDb);
+                    let eligibilityDb = await addIpoEligibility(ipo_investor_eligibility_list);
+                    console.log(eligibilityDb);
                     // Evaluate the specified transaction.
                     const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
                     if (result){
@@ -158,7 +188,7 @@ async function biddingOver(contract, user_id, issuer_obj){
                         resolve("Bidding hasn't started yet!");
                     }
                 },
-                issuer_obj[user_id]['ipoInfo']['total_bid_time']*2000
+                issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000
             )
         }
     )

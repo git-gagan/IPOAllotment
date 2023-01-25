@@ -15,6 +15,7 @@ import { getIdFromUsername } from '../database/getUserId.js';
 import { insertBid } from '../database/insertBidtoDB.js';
 import { dematFromDb, dematFromInvestorDB } from '../database/getDmatFromDB.js';
 import { insertDmatIpo } from '../database/insertDmatIpo.js';
+import { getIpoEligibleLots } from '../database/getIpoeligibility.js';
 
 
 async function main() {
@@ -52,7 +53,7 @@ async function main() {
                         full_name: full_name,
                         transactions: [
                                 {
-                                lots_bid: 1,
+                                lots_bid: 5,
                                 bid_amount: 100
                             }
                         ],
@@ -74,6 +75,11 @@ async function main() {
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
             if (isAuthUser && role_id == "IN") {
+                let lots_bid_valid = await is_lots_bid_valid(user_id, investor_obj, ipo_id);
+                if (!lots_bid_valid){
+                    console.log("---Failure---");
+                    process.exit(1);
+                }
                 var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
                 console.log("\n2")
                 // Check if the investor is allowed to buy from the given demat
@@ -149,6 +155,29 @@ async function is_demat_valid_for_ipo(investor_id, ipo_id, demat_ac_no){
         }
     }
     return 1;
+}
+
+async function is_lots_bid_valid(investor_id, investor_obj, ipo_id){
+    // To check if the lots which the investor of a particular type wants to bid
+    // for this ipo are allowed or not and if the investor is even eligible to bid
+    let eligible_lots_data = await getIpoEligibleLots(investor_id, ipo_id);
+    let eligible_lots = null;
+    try{
+        eligible_lots = eligible_lots_data[0]['min_lot_qty'];
+        console.log("========",eligible_lots,"========");
+    }
+    catch(error){
+        console.log("No ipo eligibility info available for investor:- ", investor_id);
+        return false;
+    }   
+    if (investor_obj[investor_id]['transactions'][0]['lots_bid'] < eligible_lots){
+        console.log(`Bid not allowed!`);
+        console.log("Investor is not allowed to bid with this quantity of lots!!!");
+        console.log(`Please place a bid of atleast ${eligible_lots} lots`);
+        return false;
+    }
+    console.log("Bidding allowed with this set of lots");
+    return true;
 }
 
 

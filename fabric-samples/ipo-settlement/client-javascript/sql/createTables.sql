@@ -109,10 +109,13 @@ CREATE TABLE tbl_investor_ipo_eligibility(
 	id INTEGER PRIMARY Key AUTOINCREMENT,
 	ipo_id varchar(50),
 	investor_type_id INT,
-	min_lot_size INT,
+	min_lot_qty INT,
+	reserve_shares_percentage int,
 	FOREIGN KEY (ipo_id) REFERENCES tbl_ipo_info(ipo_id),
 	FOREIGN KEY (investor_type_id) REFERENCES tbl_investor_type(investor_type_id)
 );
+
+DROP TABLE tbl_investor_ipo_eligibility;
 
 CREATE TABLE tbl_ipo_bucket(
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
