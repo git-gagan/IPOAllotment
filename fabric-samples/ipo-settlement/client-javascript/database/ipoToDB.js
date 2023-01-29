@@ -106,4 +106,55 @@ async function addIpoEligibility(eligibility_obj) {
     }
 }
 
-export { insertOrUpdateIpo, addIpoEligibility };
+async function addIpoBuckets(bucket_obj) {
+    try {
+        // Create DB connection
+        console.log("-------------------------------------");
+        let db = await makeDbConnection();
+        console.log(db, "------------------");
+        let values = ''
+        for(let i in bucket_obj){
+            values += `('${bucket_obj[i]['ipo_id']}', 
+                        '${bucket_obj[i]['investor_id']}',
+                        ${bucket_obj[i]['investor_type_id']},
+                        ${bucket_obj[i]['no_of_shares']},
+                        ${bucket_obj[i]['priority']}
+                    )`
+            if (i < bucket_obj.length-1){
+                values += ','
+            }
+        }
+        let sql = `insert into tbl_ipo_bucket(
+                ipo_id,
+                investor_id,
+                investor_type_id,
+                no_of_shares,
+                priority
+            )
+            Values ${values}`;
+        console.log(sql);
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.run(sql, (err) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("Execution Successful!");
+                        resolve("Success!");
+                    }
+                });
+            }
+        )
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to insert IPO-Bucket information: ${error}`);
+        process.exit(1);
+    }
+}
+
+export { insertOrUpdateIpo, addIpoEligibility, addIpoBuckets };

@@ -11,7 +11,7 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
-import { insertOrUpdateIpo, addIpoEligibility } from '../database/ipoToDB.js';
+import { insertOrUpdateIpo, addIpoEligibility, addIpoBuckets } from '../database/ipoToDB.js';
 
 async function main() {
     try {
@@ -39,6 +39,7 @@ async function main() {
         // ipo investor eligibility information
         // To be taken from frontend
         let ipo_investor_eligibility_list = [
+            // Assuming all type of investors (10) are allowed to bid
             {
                 ipo_id: user_id,
                 investor_type_id: 1,
@@ -49,23 +50,95 @@ async function main() {
                 ipo_id: user_id,
                 investor_type_id: 2,
                 min_lot_qty: 3,
-                reserve_shares_percentage: 30
+                reserve_shares_percentage: 5
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 3,
                 min_lot_qty: 1,
-                reserve_shares_percentage: 20
+                reserve_shares_percentage: 5
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 4,
                 min_lot_qty: 5,
-                reserve_shares_percentage: 10
+                reserve_shares_percentage: 2
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 5,
+                min_lot_qty: 5,
+                reserve_shares_percentage: 2
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 6,
+                min_lot_qty: 5,
+                reserve_shares_percentage: 1
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 7,
+                min_lot_qty: 2,
+                reserve_shares_percentage: 15
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 8,
+                min_lot_qty: 1,
+                reserve_shares_percentage: 7
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 9,
+                min_lot_qty: 1,
+                reserve_shares_percentage: 8
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 10,
+                min_lot_qty: 3,
+                reserve_shares_percentage: 5
+            }
+        ]
+
+        let ipo_bucket_list = [
+            {
+                ipo_id: user_id,
+                investor_type_id: 3,
+                no_of_shares: 50,
+                priority: 5,
+                investor_id: 'Gol'
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 4,
+                no_of_shares: 100,
+                priority: 2,
+                investor_id: 'YC'
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 5,
+                no_of_shares: 20,
+                priority: 1,
+                investor_id: 'JP'
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 6,
+                no_of_shares: 100,
+                priority: 6,
+                investor_id: 'GS'
             }
         ]
 
         function createIssuerObject(){
+            let ipobucketIds = [];
+            for (let i in ipo_bucket_list){
+                ipobucketIds.push(ipo_bucket_list[i]['investor_id']);
+            }
+            console.log(ipobucketIds);
             let today = new Date();
             let startDate = new Date(Date.now() + 100*10); // 1 min
             // Create the issuer object which will be passed to the smart contract to be put on the ledger
@@ -90,7 +163,7 @@ async function main() {
                         balance: 0,
                         wallet_balance:0,
                         is_allotted: false,
-                        ipoParticipants: [], 
+                        ipoParticipants: ipobucketIds, 
                         ipoCreatedTms: today,
                         ipoModifiedTms: null,
                         ipoAllotedTms: null,
@@ -128,6 +201,8 @@ async function main() {
                     console.log("Issuer added to DB:- ", ipoDb);
                     let eligibilityDb = await addIpoEligibility(ipo_investor_eligibility_list);
                     console.log(eligibilityDb);
+                    let bucketDb = await addIpoBuckets(ipo_bucket_list);
+                    console.log(bucketDb);
                     // Evaluate the specified transaction.
                     const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
                     if (result){
@@ -142,10 +217,10 @@ async function main() {
                     console.log("Error Encountered while inserting to DB:-", error);
                 }
                 // console.log(issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'],"\n\n")
-                let start_bidding = await startBid(contract, user_id, issuer_obj);
-                console.log("================")
-                // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
-                let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
+                // let start_bidding = await startBid(contract, user_id, issuer_obj);
+                // console.log("================")
+                // // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
+                // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
                 console.log("OVER")
                 await gateway.disconnect();
                 process.exit(1);

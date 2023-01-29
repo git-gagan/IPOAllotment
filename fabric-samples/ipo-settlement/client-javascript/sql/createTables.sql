@@ -120,12 +120,16 @@ DROP TABLE tbl_investor_ipo_eligibility;
 CREATE TABLE tbl_ipo_bucket(
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	ipo_id varchar(50),
+	investor_id varchar(50),
 	investor_type_id INT,
 	no_of_shares INT,
 	priority INT,
 	FOREIGN KEY (ipo_id) REFERENCES tbl_ipo_info(ipo_id),
+	FOREIGN KEY (investor_id) REFERENCES tbl_investor_info(investor_id),
 	FOREIGN KEY (investor_type_id) REFERENCES tbl_investor_type(investor_type_id)
 );
+
+drop TABLE tbl_ipo_bucket;
 
 
 
