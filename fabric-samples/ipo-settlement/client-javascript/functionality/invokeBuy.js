@@ -16,6 +16,7 @@ import { insertBid } from '../database/insertBidtoDB.js';
 import { dematFromDb, dematFromInvestorDB } from '../database/getDmatFromDB.js';
 import { insertDmatIpo } from '../database/insertDmatIpo.js';
 import { getIpoEligibleLots } from '../database/getIpoeligibility.js';
+import { getInvestorInfo } from '../database/investorInfo.js';
 
 
 async function main() {
@@ -40,7 +41,8 @@ async function main() {
 
         // Form inputs
         var ipo_id = "F1";
-        var demat_ac_no = "GagDm";
+        var demat_ac_no = "NikDmat";
+        let investor_info_db = await getInvestorInfo(user_id);
         function createInvestorObject(){
             /*
                 This function creates an investor object during the buy process
@@ -51,9 +53,10 @@ async function main() {
                         {
                         name: userName,
                         full_name: full_name,
+                        investor_type_id: investor_info_db['investor_type'],
                         transactions: [
                                 {
-                                lots_bid: 5,
+                                lots_bid: 3,
                                 bid_amount: 100
                             }
                         ],

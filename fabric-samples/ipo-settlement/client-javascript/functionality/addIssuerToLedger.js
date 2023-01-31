@@ -44,19 +44,19 @@ async function main() {
                 ipo_id: user_id,
                 investor_type_id: 1,
                 min_lot_qty: 2,
-                reserve_shares_percentage: 50
+                reserve_shares_percentage: 40
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 2,
                 min_lot_qty: 3,
-                reserve_shares_percentage: 5
+                reserve_shares_percentage: 20
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 3,
                 min_lot_qty: 1,
-                reserve_shares_percentage: 5
+                reserve_shares_percentage: 10
             },
             {
                 ipo_id: user_id,
@@ -80,7 +80,7 @@ async function main() {
                 ipo_id: user_id,
                 investor_type_id: 7,
                 min_lot_qty: 2,
-                reserve_shares_percentage: 15
+                reserve_shares_percentage: 5
             },
             {
                 ipo_id: user_id,
@@ -158,7 +158,7 @@ async function main() {
                         ipo_announcement_date: today,
                         total_bid_time: 60, // Seconds
                         is_complete: false,
-                        lot_size: 100,
+                        lot_size: 50,
                         has_bidding_started: false,
                         balance: 0,
                         wallet_balance:0,
@@ -217,10 +217,10 @@ async function main() {
                     console.log("Error Encountered while inserting to DB:-", error);
                 }
                 // console.log(issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'],"\n\n")
-                // let start_bidding = await startBid(contract, user_id, issuer_obj);
-                // console.log("================")
-                // // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
-                // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
+                let start_bidding = await startBid(contract, user_id, issuer_obj);
+                console.log("================")
+                // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
+                let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
                 console.log("OVER")
                 await gateway.disconnect();
                 process.exit(1);

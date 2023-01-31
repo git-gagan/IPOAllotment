@@ -37,8 +37,8 @@ async function main() {
 
         // Form data to be collected here for dmat update
         let dmat_obj = {
-            "dmat_ac_no": "gagannewDmat2",
-            "dp_id": "!121"
+            "dmat_ac_no": "ad",
+            "dp_id": "!12111"
         }
 
         if(user_id){

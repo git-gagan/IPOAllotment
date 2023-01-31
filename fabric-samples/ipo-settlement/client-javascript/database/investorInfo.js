@@ -1,27 +1,23 @@
 import { makeDbConnection } from "./dbConnection.js";
 
-async function getAllocationData(ipo_id, totalSize, lotSize) {
+async function getInvestorInfo(investor_id) {
     try {
         // Create DB connection
+        console.log("===============================");
         let db = await makeDbConnection();
-        let limit = totalSize/lotSize;
-        let sql = `select * from tbl_investor_transactions 
-                    INNER JOIN tbl_investor_info
-                    ON tbl_investor_info.investor_id=tbl_investor_transactions.investor_id
-                    where ipo_id='${ipo_id}'
-                    ORDER BY bid_amount DESC, time_of_bid ASC 
-                    limit ${limit}`;
+        let sql = `select * from tbl_investor_info where investor_id='${investor_id}'`;
         console.log(sql);
         // db.all()/db.get() returns the rows as results unlike db.run()
         const dbpromise = new Promise((resolve, reject)=>{
-            db.all(sql, (err, rows) => {
+            db.get(sql, (err, row) => {
                 if (err) {
                     console.log("[][][][][][][][][][][][][")
                     reject(err.message);
                 }
                 else {
+                    console.log(row);
                     console.log("Query Successful!");
-                    resolve(rows);
+                    resolve(row);
                 }
             });
         })
@@ -29,10 +25,10 @@ async function getAllocationData(ipo_id, totalSize, lotSize) {
         return dbpromise;
     } 
     catch (error) {
-        console.error(`Failed to get user information: ${error}`);
+        console.error(`Failed to get investor information: ${error}`);
         process.exit(1);
     }
 }
 
 
-export { getAllocationData }
+export { getInvestorInfo };
