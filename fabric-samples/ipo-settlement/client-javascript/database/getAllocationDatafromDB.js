@@ -34,5 +34,33 @@ async function getAllocationData(ipo_id, totalSize, lotSize) {
     }
 }
 
+async function getAllocationPrinciple(ipo_id) {
+    try {
+        // Create DB connection
+        let db = await makeDbConnection();
+        let sql = `select allotment_principle from tbl_ipo_info
+                    where ipo_id='${ipo_id}'`;
+        console.log(sql);
+        // db.all()/db.get() returns the rows as results unlike db.run()
+        const dbpromise = new Promise((resolve, reject)=>{
+            db.get(sql, (err, row) => {
+                if (err) {
+                    console.log("[][][][][][][][][][][][][")
+                    reject(err.message);
+                }
+                else {
+                    console.log("Query Successful!");
+                    resolve(row);
+                }
+            });
+        })
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to get allocation principle from ipo info: ${error}`);
+        process.exit(1);
+    }
+}
 
-export { getAllocationData }
+export { getAllocationData, getAllocationPrinciple };

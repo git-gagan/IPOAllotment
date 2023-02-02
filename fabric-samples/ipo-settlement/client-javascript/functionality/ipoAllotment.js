@@ -8,8 +8,8 @@
 
 import { authorizeUser } from '../utils/userAuth.js';
 import { getIdFromUsername } from '../database/getUserId.js';
-import { getAllocationData } from '../database/getAllocationDatafromDB.js';
-import { processAllocationDict, getSubscriptionInfo } from '../utils/allocationLogic.js';
+import { getAllocationData, getAllocationPrinciple } from '../database/getAllocationDatafromDB.js';
+import { processAllocationDictU, processAllocationDictO, getSubscriptionInfo } from '../utils/allocationLogic.js';
 import { retrieveContract } from '../utils/getContract.js';
 
 
@@ -34,7 +34,7 @@ async function main() {
         console.log(user_id, role_id, full_name)
 
         if(user_id){
-            var ipo_id = "T";
+            var ipo_id = "M1";
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
@@ -80,21 +80,38 @@ async function main() {
                                     // Investors get all they bid for at their price
                                     // No additional checks needed
                                     console.log("Processing Allocation dictionary...\n");
-                                    allocation_dict = await processAllocationDict(allocation_dict, lotSize, totalSize, ipo_id, statusInfo);
-                                    console.log(allocation_dict);
-                                    // Evaluate the specified transaction.
-                                    const result = await contract.submitTransaction('allotShares', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
-                                    console.log(`Transaction has been evaluated, result is: ${result}`);
-                                    console.log("\nSUCCESS\n");
+                                    allocation_dict = await processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_id);
                                 }
                                 else if (status == "O"){
                                     // A case of complete oversubscription
                                     // Investors get shares on the basis of specified allotment principle
+                                    let resultDB = await getAllocationPrinciple(ipo_id);
+                                    let allotment_principle = resultDB['allotment_principle'];
+                                    console.log("Allotment Princple ID:- ", allotment_principle);
+                                    if (allotment_principle == 2 || allotment_principle == 3){
+                                        // OverSubscription FIFO
+                                        console.log("Processing Allocation dictionary...\n");
+                                        allocation_dict = await processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle);
+                                        console.log(allocation_dict);
+                                    }
+                                    else if (allotment_principle == 4 || allotment_principle == 5){
+                                        // OverSubscription Ratio
+                                    }
+                                    else{
+                                        // Should Never Happen
+                                        console.log("Undefined allotment principle :- ", allotment_principle);
+                                        console.log("Can't make allotment till oversubscrption principle is specified!!!");
+                                    }
                                 }
                                 else{
                                     // A case of mixed allotment
                                     // Undersubscription and Oversubscription will be made accorindgly
                                 }
+                                console.log(allocation_dict);
+                                // Evaluate the specified transaction.
+                                const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
+                                console.log(`Transaction has been evaluated, result is: ${result}`);
+                                console.log("\nSUCCESS\n");
                             }
                         }
                         else{

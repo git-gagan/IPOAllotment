@@ -68,7 +68,7 @@ async function addIpoEligibility(eligibility_obj) {
             values += `('${eligibility_obj[i]['ipo_id']}', 
                         ${eligibility_obj[i]['investor_type_id']},
                         ${eligibility_obj[i]['min_lot_qty']},
-                        ${eligibility_obj[i]['reserve_shares_percentage']}
+                        ${eligibility_obj[i]['reserve_lots']}
                     )`
             if (i < eligibility_obj.length-1){
                 values += ','
@@ -78,7 +78,7 @@ async function addIpoEligibility(eligibility_obj) {
                 ipo_id,
                 investor_type_id,
                 min_lot_qty,
-                reserve_shares_percentage
+                reserve_lots
             )
             Values ${values}`;
         console.log(sql);

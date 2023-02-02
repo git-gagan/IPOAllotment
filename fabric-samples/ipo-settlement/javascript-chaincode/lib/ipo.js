@@ -237,18 +237,25 @@ class Ipo extends Contract {
                 // Updating global investor information
                 console.log(key);
                 console.log(global_investor_info[_global_investors_id]);
-                if (!(key in allocation_info['investorInfo'])){
+                if (!(key in assetJSON[ipo_id]['userInfo'])){
                     // If investor hasn't bid for this ipo, no need to update global information
-                    console.log("Either this investor hasn't bid for this ipo or hasn't been allotted it!");
+                    console.log("Investor hasn't bid for this IPO: ",{ipo_id});
                     continue;
                 }
-                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id] = {};
-                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['ipo_name'] = assetJSON[ipo_id]['ipoInfo']['issuer_fullname'];
-                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['issuer_username'] = assetJSON[ipo_id]['ipoInfo']['issuer_name'];
-                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'] = allocation_info['investorInfo'][key]['amount_invested']/allocation_info['investorInfo'][key]['shares_allotted'];
-                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
-                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = allocation_info['investorInfo'][key]['amount_invested'];
-                global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['demat_account'] = allocation_info['investorInfo'][key]['demat_account'];
+                else if (!(key in allocation_info['investorInfo'])){
+                    // Investor bid for the IPO but didn't get it allotted, So initiate refund!
+                    console.log("Investor hasn't been allotted this IPO!");
+                }
+                else{
+                    // Investor bidded and got allotted
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id] = {};
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['ipo_name'] = assetJSON[ipo_id]['ipoInfo']['issuer_fullname'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['issuer_username'] = assetJSON[ipo_id]['ipoInfo']['issuer_name'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'] = allocation_info['investorInfo'][key]['amount_invested']/allocation_info['investorInfo'][key]['shares_allotted'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = allocation_info['investorInfo'][key]['amount_invested'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['demat_account'] = allocation_info['investorInfo'][key]['demat_account'];
+                }
                 if (is_oversubscribed){
                     console.log("refund initiated");
                     global_investor_info[_global_investors_id][key]['wallet']['current_balance'] += assetJSON[ipo_id]['userInfo'][key]['refund_amount'];
@@ -277,7 +284,8 @@ class Ipo extends Contract {
             console.log("OVERSUBSCRIBED");
             assetJSON[ipo_id]['escrowInfo']['refund_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount']-allocation_info['totalAmount'];
             assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = allocation_info['totalAmount'];
-            assetJSON[ipo_id]['ipoInfo']['total_allotted'] = assetJSON[ipo_id]['ipoInfo']['totalSize'];
+            // assetJSON[ipo_id]['ipoInfo']['total_allotted'] = assetJSON[ipo_id]['ipoInfo']['totalSize'];
+            assetJSON[ipo_id]['ipoInfo']['total_allotted'] = allocation_info['totalShares'];
         }
         else{
             console.log("UNDERSUBSCRIBED");
@@ -504,6 +512,98 @@ class Ipo extends Contract {
         }
         console.log(total_price, total_shares);
         return total_price/total_shares;
+    }
+
+    async allotSharesNew(ctx, ipo_id, issuer_info, allocation_dict){
+        /*
+            The allotment functionality allots the shares to the investors &
+            update the ledger depending upon the case of oversubscription or
+            undersubscription. It receives a processed dictionary from the nodejs
+            backend and using that dictionary updates the ledger.
+        */
+        console.log("--- Inside Allotment ---");
+        // let asset = await this.queryIssuer(ctx, ipo_id);
+        let asset = issuer_info;
+        let assetJSON = JSON.parse(asset);
+        let allocation_info = JSON.parse(allocation_dict);
+        let has_bidding_started = assetJSON[ipo_id]['ipoInfo']['has_bidding_started'];
+        let is_complete = assetJSON[ipo_id]['ipoInfo']['is_complete'];
+        if (has_bidding_started && is_complete){
+            let global_investor_info = await this.getGlobalInvestorInfo(ctx);
+            console.log("-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=");
+            console.log(global_investor_info);
+            assetJSON = this.makeAllotmentNew(ipo_id, assetJSON, allocation_info);
+            for (let key in global_investor_info[_global_investors_id]){
+                // Updating global investor information
+                console.log(key);
+                console.log(global_investor_info[_global_investors_id]);
+                if (!(key in assetJSON[ipo_id]['userInfo'])){
+                    // If investor hasn't bid for this ipo, no need to update global information
+                    console.log("Investor hasn't bid for this IPO: ",{ipo_id});
+                    continue;
+                }
+                else if (!(key in allocation_info['investorInfo'])){
+                    // Investor bid for the IPO but didn't get it allotted, So initiate refund!
+                    console.log("Investor hasn't been allotted this IPO!");
+                }
+                else{
+                    // Investor bidded and got allotted
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id] = {};
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['ipo_name'] = assetJSON[ipo_id]['ipoInfo']['issuer_fullname'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['issuer_username'] = assetJSON[ipo_id]['ipoInfo']['issuer_name'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['avg_price_per_share'] = allocation_info['investorInfo'][key]['amount_invested']/allocation_info['investorInfo'][key]['shares_allotted'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalShares'] = allocation_info['investorInfo'][key]['shares_allotted'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['totalValue'] = allocation_info['investorInfo'][key]['amount_invested'];
+                    global_investor_info[_global_investors_id][key]['portfolio'][ipo_id]['demat_account'] = allocation_info['investorInfo'][key]['demat_account'];
+                }
+                console.log("Refund initiated, if ANY: ");
+                global_investor_info[_global_investors_id][key]['wallet']['current_balance'] += assetJSON[ipo_id]['userInfo'][key]['refund_amount'];
+                global_investor_info[_global_investors_id][key]['wallet']['refund_amount'] += `->${assetJSON[ipo_id]['userInfo'][key]['refund_amount']} refunded for ipo ${ipo_id}`;
+            }
+            console.log(assetJSON);
+            await ctx.stub.putState(ipo_id, Buffer.from(JSON.stringify(assetJSON)));
+            console.log("\n\n ----Alloted---- \n\n");
+            // Update global investor information
+            console.log(global_investor_info);
+            await ctx.stub.putState(_global_investors_id, Buffer.from(JSON.stringify(global_investor_info)));
+            console.log("\nGlobal investor info updated!!!");
+            return 1;
+        }
+        return 0;
+    }
+
+    makeAllotmentNew(ipo_id, assetJSON, allocation_info){
+        /*
+            Here, we are creating a global ledger object using allocation_info
+            which will replace the current ledger info for all cases of subscription
+        */
+        console.log("\n---Making Allotment---\n");
+        assetJSON[ipo_id]['escrowInfo']['refund_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount']-allocation_info['totalAmount'];
+        assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = allocation_info['totalAmount'];
+        assetJSON[ipo_id]['ipoInfo']['total_allotted'] = allocation_info['totalShares'];
+        assetJSON[ipo_id]['escrowInfo']['total_amount'] = 0;
+        assetJSON[ipo_id]['ipoInfo']['balance'] = assetJSON[ipo_id]['ipoInfo']['totalSize']-assetJSON[ipo_id]['ipoInfo']['total_allotted'];
+        assetJSON[ipo_id]['ipoInfo']['wallet_balance'] += assetJSON[ipo_id]['escrowInfo']['transfer_amount'];
+        assetJSON[ipo_id]['ipoInfo']['is_allotted'] = true;
+        // Now update each invester's info
+        let users_info = assetJSON[ipo_id]['userInfo'];
+        console.log(users_info);
+        for (let key in users_info){
+            console.log("KEY:- ", key);
+            console.log(assetJSON[ipo_id]['userInfo'][key]);
+            if (key in allocation_info['investorInfo']){
+                assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = allocation_info['investorInfo'][key]['shares_allotted'];
+                console.log("Calculating Refund, if any");
+                assetJSON[ipo_id]['userInfo'][key]['refund_amount'] = assetJSON[ipo_id]['userInfo'][key]['total_invested']-allocation_info['investorInfo'][key]['amount_invested'];
+            }
+            else{
+                // Case of oversubscription where this investor got nothing!
+                assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = 0;
+                console.log("Refunding full Amount to the user");
+                assetJSON[ipo_id]['userInfo'][key]['refund_amount'] = assetJSON[ipo_id]['userInfo'][key]['total_invested'];
+            }
+        }
+        return assetJSON;
     }
 }
 

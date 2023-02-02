@@ -15,9 +15,6 @@ import { insertOrUpdateIpo, addIpoEligibility, addIpoBuckets } from '../database
 
 async function main() {
     try {
-        // Get allotment principle id from the form
-        let allotment_principle = null;
-
         console.log(process.argv);
         let userName = process.argv[2]; 
 
@@ -36,6 +33,9 @@ async function main() {
         
         console.log(user_id, role_id, full_name)
 
+        // Get allotment principle id from the form
+        let allotment_principle = 2;
+
         // ipo investor eligibility information
         // To be taken from frontend
         let ipo_investor_eligibility_list = [
@@ -44,61 +44,61 @@ async function main() {
                 ipo_id: user_id,
                 investor_type_id: 1,
                 min_lot_qty: 2,
-                reserve_shares_percentage: 40
+                reserve_lots: 5
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 2,
                 min_lot_qty: 3,
-                reserve_shares_percentage: 20
+                reserve_lots: 4
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 3,
                 min_lot_qty: 1,
-                reserve_shares_percentage: 10
+                reserve_lots: 3
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 4,
                 min_lot_qty: 5,
-                reserve_shares_percentage: 2
+                reserve_lots: 1
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 5,
                 min_lot_qty: 5,
-                reserve_shares_percentage: 2
+                reserve_lots: 2
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 6,
                 min_lot_qty: 5,
-                reserve_shares_percentage: 1
+                reserve_lots: 2
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 7,
                 min_lot_qty: 2,
-                reserve_shares_percentage: 5
+                reserve_lots: 2
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 8,
                 min_lot_qty: 1,
-                reserve_shares_percentage: 7
+                reserve_lots: 1
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 9,
                 min_lot_qty: 1,
-                reserve_shares_percentage: 8
+                reserve_lots: 0
             },
             {
                 ipo_id: user_id,
                 investor_type_id: 10,
                 min_lot_qty: 3,
-                reserve_shares_percentage: 5
+                reserve_lots: 0
             }
         ]
 
@@ -148,7 +148,7 @@ async function main() {
                     ipoInfo: {
                         issuer_name: userName,
                         issuer_fullname: full_name,
-                        totalSize: 1000,
+                        totalSize: 400,
                         priceRangeLow: 100,
                         priceRangeHigh: 200,
                         total_investors: 0,
@@ -156,9 +156,9 @@ async function main() {
                         total_allotted: 0,
                         bid_start_date: startDate,
                         ipo_announcement_date: today,
-                        total_bid_time: 60, // Seconds
+                        total_bid_time: 600, // Seconds
                         is_complete: false,
-                        lot_size: 50,
+                        lot_size: 20,
                         has_bidding_started: false,
                         balance: 0,
                         wallet_balance:0,
