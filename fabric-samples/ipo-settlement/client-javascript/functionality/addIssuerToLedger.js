@@ -33,8 +33,9 @@ async function main() {
         
         console.log(user_id, role_id, full_name)
 
-        // Get allotment principle id from the form
-        let allotment_principle = 2;
+        // Get allotment principle id, and fixed price from the form
+        let allotment_principle = 3;
+        let fixed_price = 150; // Only required for allotment principle 5
 
         // ipo investor eligibility information
         // To be taken from frontend
@@ -156,7 +157,7 @@ async function main() {
                         total_allotted: 0,
                         bid_start_date: startDate,
                         ipo_announcement_date: today,
-                        total_bid_time: 600, // Seconds
+                        total_bid_time: 180, // Seconds
                         is_complete: false,
                         lot_size: 20,
                         has_bidding_started: false,
@@ -197,7 +198,7 @@ async function main() {
                 console.log("\n2")
                 // Insert IPO info to DB
                 try{
-                    let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, false, allotment_principle);
+                    let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, false, allotment_principle, fixed_price);
                     console.log("Issuer added to DB:- ", ipoDb);
                     let eligibilityDb = await addIpoEligibility(ipo_investor_eligibility_list);
                     console.log(eligibilityDb);

@@ -38,7 +38,7 @@ async function getAllocationPrinciple(ipo_id) {
     try {
         // Create DB connection
         let db = await makeDbConnection();
-        let sql = `select allotment_principle from tbl_ipo_info
+        let sql = `select allotment_principle, fixed_price from tbl_ipo_info
                     where ipo_id='${ipo_id}'`;
         console.log(sql);
         // db.all()/db.get() returns the rows as results unlike db.run()

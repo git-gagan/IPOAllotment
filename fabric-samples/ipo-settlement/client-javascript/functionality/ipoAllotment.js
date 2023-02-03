@@ -9,7 +9,7 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { getAllocationData, getAllocationPrinciple } from '../database/getAllocationDatafromDB.js';
-import { processAllocationDictU, processAllocationDictO, getSubscriptionInfo } from '../utils/allocationLogic.js';
+import { processAllocationDictU, processAllocationDictO, processAllocationDictOR, getSubscriptionInfo } from '../utils/allocationLogic.js';
 import { retrieveContract } from '../utils/getContract.js';
 
 
@@ -34,7 +34,7 @@ async function main() {
         console.log(user_id, role_id, full_name)
 
         if(user_id){
-            var ipo_id = "M1";
+            var ipo_id = "P1";
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
@@ -57,6 +57,7 @@ async function main() {
                         if (!issuer_info[ipo_id]['ipoInfo']['is_allotted']){
                             // Check for the subscription here for each investor_type
                             console.log("Fetching Subscription INFO: ");
+                            let make_allotment = true;
                             let subInfo = await getSubscriptionInfo(issuer_info, ipo_id);
                             console.log(subInfo);
                             let status = subInfo[0];
@@ -86,19 +87,24 @@ async function main() {
                                     // A case of complete oversubscription
                                     // Investors get shares on the basis of specified allotment principle
                                     let resultDB = await getAllocationPrinciple(ipo_id);
+                                    console.log(resultDB);
                                     let allotment_principle = resultDB['allotment_principle'];
+                                    let fixed_price = resultDB['fixed_price'];
                                     console.log("Allotment Princple ID:- ", allotment_principle);
                                     if (allotment_principle == 2 || allotment_principle == 3){
                                         // OverSubscription FIFO
                                         console.log("Processing Allocation dictionary...\n");
                                         allocation_dict = await processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle);
-                                        console.log(allocation_dict);
                                     }
                                     else if (allotment_principle == 4 || allotment_principle == 5){
                                         // OverSubscription Ratio
+                                        allocation_dict = await getAllocationData(ipo_id, totalSize, 1);
+                                        console.log("New Allocation Dictionary:- ", allocation_dict);
+                                        allocation_dict = await processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, fixed_price);
                                     }
                                     else{
                                         // Should Never Happen
+                                        make_allotment = false;
                                         console.log("Undefined allotment principle :- ", allotment_principle);
                                         console.log("Can't make allotment till oversubscrption principle is specified!!!");
                                     }
@@ -108,10 +114,12 @@ async function main() {
                                     // Undersubscription and Oversubscription will be made accorindgly
                                 }
                                 console.log(allocation_dict);
-                                // Evaluate the specified transaction.
-                                const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
-                                console.log(`Transaction has been evaluated, result is: ${result}`);
-                                console.log("\nSUCCESS\n");
+                                if (make_allotment){
+                                    // Evaluate the specified transaction.
+                                    const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
+                                    console.log(`Transaction has been evaluated, result is: ${result}`);
+                                    console.log("\nSUCCESS\n");
+                                }
                             }
                         }
                         else{

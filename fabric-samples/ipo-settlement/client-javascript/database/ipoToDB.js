@@ -1,6 +1,6 @@
 import { makeDbConnection } from "./dbConnection.js";
 
-async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle=null) {
+async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle=null, fixed_price) {
     try {
         // Create DB connection
         console.log("-------------------------------------");
@@ -10,7 +10,7 @@ async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle
         if (!update){
             console.log("Insert Needed---");
             sql = `insert into tbl_ipo_info
-            (ipo_id, isin, cusip, ticker, issuer_name, bid_time, is_complete, has_bidding_started, ipo_announcement_date, bid_start_date, allotment_principle)
+            (ipo_id, isin, cusip, ticker, issuer_name, bid_time, is_complete, has_bidding_started, ipo_announcement_date, bid_start_date, allotment_principle, fixed_price)
             values(
                 '${ipo_id}', 
                 '${issuer_obj[ipo_id]['isin']}',
@@ -22,7 +22,8 @@ async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle
                 '${issuer_obj[ipo_id]['ipoInfo']['has_bidding_started']}',
                 '${issuer_obj[ipo_id]['ipoInfo']['ipo_announcement_date'].toISOString().split('T').join(" ")}',
                 '${issuer_obj[ipo_id]['ipoInfo']['bid_start_date'].toISOString().split('T').join(" ")}',
-                '${allotment_principle}'
+                '${allotment_principle}',
+                '${fixed_price}'
             )`
         }
         else{

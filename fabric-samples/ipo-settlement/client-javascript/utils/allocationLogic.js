@@ -100,21 +100,20 @@ async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_i
         let bid_price = null;
         let shares_to_be_allotted = 0;
         let amount_invested = 0;
-        let shares_demanded = allocation_dict[i]['lots_bid']*lotSize
+        let shares_demanded = allocation_dict[i]['lots_bid']*lotSize;
         let available_shares = statusInfo[allocation_dict[i]['investor_type']]['sharesMaxLimit']-statusInfo[allocation_dict[i]['investor_type']]['sharesAllotted'];
         if (available_shares <= 0){
-            console.log("No more shares available for investor type:- ",allocation_dict[i]['investor_type']);
+            console.log("No more shares available for investor type:- ", allocation_dict[i]['investor_type']);
             continue;
         }
         if (allotment_principle == 2){
             console.log("Oversubscription FIFO Max Price");
-            bid_price = allocation_dict[i]['bid_amount']
+            bid_price = allocation_dict[i]['bid_amount'];
         }
         else{
             console.log("Oversubscription FIFO Avg Price");
             bid_price = statusInfo[allocation_dict[i]['investor_type']]['totalInvestment']/statusInfo[allocation_dict[i]['investor_type']]['sharesBid'];
         }
-        console.log("---\nBid Price = ", bid_price, "\n---");
         if (available_shares >= shares_demanded){
             // If shares available are more than the investors current demand
             shares_to_be_allotted = shares_demanded;
@@ -125,6 +124,9 @@ async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_i
             shares_to_be_allotted = available_shares;
             amount_invested = available_shares*bid_price;
         }
+        console.log("---\nBid Price = ", bid_price);
+        console.log("---\nShares Demanded = ", shares_demanded);
+        console.log("---\nShares Allotted = ", shares_to_be_allotted, "\n---");
         if (!(allocation_dict[i]['investor_id'] in processed_dict['investorInfo'])){
             let dmat_info = await dematFromDb(allocation_dict[i]['investor_id'], ipo_id);
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']] = {};
@@ -137,6 +139,96 @@ async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_i
         processed_dict['totalAmount'] += amount_invested;
         processed_dict['totalShares'] += shares_to_be_allotted;
         statusInfo[allocation_dict[i]['investor_type']]['sharesAllotted'] += shares_to_be_allotted;
+    }
+    return processed_dict;
+}
+
+async function processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, fixed_price){
+    /* 
+    The following function processes the allocation dictionary and 
+    returns a processed dictionary to be passed to the smart contract
+    for the case of complete oversubscription for every investor category
+    */
+    let processed_dict = {
+        "investorInfo": {},
+        "totalAmount": 0,
+        "totalShares": 0
+    };
+    // Temporary dictionary for investor info
+    let temp_investor_dict = {}
+    for(let i in allocation_dict){
+        // Make a comprehensive list of bids investor wise
+        if (!(allocation_dict[i]['investor_id'] in temp_investor_dict)){
+            temp_investor_dict[allocation_dict[i]['investor_id']] = {};
+            temp_investor_dict[allocation_dict[i]['investor_id']]['total_bid'] = allocation_dict[i]['lots_bid']*lotSize;
+            temp_investor_dict[allocation_dict[i]['investor_id']]['investor_type'] = allocation_dict[i]['investor_type'];
+            continue;
+        }
+        temp_investor_dict[allocation_dict[i]['investor_id']]['total_bid'] += allocation_dict[i]['lots_bid']*lotSize;
+    }
+    console.log(temp_investor_dict);
+    for (let key in temp_investor_dict){
+        if (processed_dict['totalShares'] >= totalSize){
+            console.log("No more shares available!");
+            break;
+        }
+        let allocation_ratio = statusInfo[temp_investor_dict[key]['investor_type']]['sharesMaxLimit']/statusInfo[temp_investor_dict[key]['investor_type']]['sharesBid']; // Needed if principle = 4 or 5
+        let bid_price = null;
+        let shares_to_be_allotted = 0;
+        let amount_invested = 0;
+        let shares_demanded = temp_investor_dict[key]['total_bid']*allocation_ratio; // Shares demanded after applying allocation ratio
+        let available_shares = statusInfo[temp_investor_dict[key]['investor_type']]['sharesMaxLimit']-statusInfo[temp_investor_dict[key]['investor_type']]['sharesAllotted'];
+        if (available_shares <= 0){
+            console.log("No more shares available for investor type:- ",allocation_dict[i]['investor_type']);
+            continue;
+        }
+        if (allotment_principle == 4){
+            console.log("Oversubscription Allotment Ratio Avg Price");
+            bid_price = statusInfo[temp_investor_dict[key]['investor_type']]['totalInvestment']/statusInfo[temp_investor_dict[key]['investor_type']]['sharesBid'];
+        }
+        else {
+            bid_price = fixed_price;    // Bid price to be equal to price fixed by issuer for principle 5
+            console.log("Oversubscription Allotment Ratio Fixed Price");
+        }
+        let diff_shares = shares_demanded%lotSize;
+        if (diff_shares != 0){
+            // if shares demanded after applying allocation ratio is not a multiple of lotSize
+            console.log("---\nRounding Off Shares\n---");
+            if (diff_shares >= lotSize/2){
+                // Round off to higher side
+                shares_demanded = (Math.floor((shares_demanded+lotSize)/lotSize))*lotSize;
+            }
+            else{
+                // Round off to lower side
+                shares_demanded = (Math.floor(shares_demanded/lotSize))*lotSize;
+            }
+        }
+        if (available_shares >= shares_demanded){
+            // If shares available are more than the investors current demand
+            shares_to_be_allotted = shares_demanded;
+            amount_invested = shares_demanded*bid_price;
+        }
+        else{
+            // If shares available are less than the demand, allocate whatever is possible
+            shares_to_be_allotted = available_shares;
+            amount_invested = available_shares*bid_price;
+        }
+        console.log(`---\nAllotment Ratio: ${allocation_ratio}`);
+        console.log("\nBid Price = ", bid_price);
+        console.log("\nShares demanded = ", shares_demanded);
+        console.log("\nShares to be allotted = ", shares_to_be_allotted, "\n---");
+        if (!(key in processed_dict['investorInfo'])){
+            let dmat_info = await dematFromDb(key, ipo_id);
+            processed_dict['investorInfo'][key] = {};
+            processed_dict['investorInfo'][key]['shares_allotted'] = 0;
+            processed_dict['investorInfo'][key]['amount_invested'] = 0;
+            processed_dict['investorInfo'][key]['demat_account'] = dmat_info[0]['demat_ac_no'];
+        }
+        processed_dict['investorInfo'][key]['shares_allotted'] += shares_to_be_allotted;
+        processed_dict['investorInfo'][key]['amount_invested'] += amount_invested;
+        processed_dict['totalAmount'] += amount_invested;
+        processed_dict['totalShares'] += shares_to_be_allotted;
+        statusInfo[temp_investor_dict[key]['investor_type']]['sharesAllotted'] += shares_to_be_allotted;
     }
     return processed_dict;
 }
@@ -243,4 +335,4 @@ function getInvestorInvestment(transactions, lot_size){
 }
 
 
-export {processAllocationDictU, processAllocationDictO, getSubscriptionInfo};
+export {processAllocationDictU, processAllocationDictO, processAllocationDictOR, getSubscriptionInfo};
