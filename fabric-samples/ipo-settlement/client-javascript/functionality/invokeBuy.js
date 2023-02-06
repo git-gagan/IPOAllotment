@@ -41,7 +41,7 @@ async function main() {
 
         // Form inputs
         var ipo_id = "P1";
-        var demat_ac_no = "GagDm"; // NikDmat, GagDm, sd, ad :-> testing for 4 users
+        var demat_ac_no = "ad"; // NikDmat, GagDm, sd, ad :-> testing for 4 users
         let investor_info_db = await getInvestorInfo(user_id);
         function createInvestorObject(){
             /*
@@ -56,8 +56,8 @@ async function main() {
                         investor_type_id: investor_info_db['investor_type'],
                         transactions: [
                                 {
-                                lots_bid: 2,
-                                bid_amount: 100
+                                lots_bid: 3,
+                                bid_amount: 200
                             }
                         ],
                         shares:{

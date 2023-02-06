@@ -9,7 +9,7 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { getAllocationData, getAllocationPrinciple } from '../database/getAllocationDatafromDB.js';
-import { processAllocationDictU, processAllocationDictO, processAllocationDictOR, getSubscriptionInfo } from '../utils/allocationLogic.js';
+import { processAllocationDictU, processAllocationDictO, processAllocationDictOR, getSubscriptionInfo, segregateStatusDictionary, mergeAllocationResultDictionaries } from '../utils/allocationLogic.js';
 import { retrieveContract } from '../utils/getContract.js';
 
 
@@ -83,35 +83,68 @@ async function main() {
                                     console.log("Processing Allocation dictionary...\n");
                                     allocation_dict = await processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_id);
                                 }
-                                else if (status == "O"){
-                                    // A case of complete oversubscription
-                                    // Investors get shares on the basis of specified allotment principle
+                                else{
                                     let resultDB = await getAllocationPrinciple(ipo_id);
                                     console.log(resultDB);
                                     let allotment_principle = resultDB['allotment_principle'];
                                     let fixed_price = resultDB['fixed_price'];
                                     console.log("Allotment Princple ID:- ", allotment_principle);
-                                    if (allotment_principle == 2 || allotment_principle == 3){
-                                        // OverSubscription FIFO
-                                        console.log("Processing Allocation dictionary...\n");
-                                        allocation_dict = await processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle);
-                                    }
-                                    else if (allotment_principle == 4 || allotment_principle == 5){
-                                        // OverSubscription Ratio
-                                        allocation_dict = await getAllocationData(ipo_id, totalSize, 1);
-                                        console.log("New Allocation Dictionary:- ", allocation_dict);
-                                        allocation_dict = await processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, fixed_price);
+                                    if (status == "O"){
+                                        // A case of complete oversubscription
+                                        // Investors get shares on the basis of specified allotment principle
+                                        if (allotment_principle == 2 || allotment_principle == 3){
+                                            // OverSubscription FIFO
+                                            console.log("Processing Allocation dictionary...\n");
+                                            allocation_dict = await processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle);
+                                        }
+                                        else if (allotment_principle == 4 || allotment_principle == 5){
+                                            // OverSubscription Ratio
+                                            allocation_dict = await getAllocationData(ipo_id, totalSize, 1);
+                                            console.log("New Allocation Dictionary:- ", allocation_dict);
+                                            allocation_dict = await processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, fixed_price);
+                                        }
+                                        else{
+                                            // Should Never Happen
+                                            make_allotment = false;
+                                            console.log("Undefined allotment principle :- ", allotment_principle);
+                                            console.log("Can't make allotment till oversubscrption principle is specified!!!");
+                                        }
                                     }
                                     else{
-                                        // Should Never Happen
-                                        make_allotment = false;
-                                        console.log("Undefined allotment principle :- ", allotment_principle);
-                                        console.log("Can't make allotment till oversubscrption principle is specified!!!");
+                                        // A case of mixed allotment
+                                        // Undersubscription and Oversubscription will be made accorindgly
+                                        let dictionaryArray = segregateStatusDictionary(statusInfo);
+                                        let underSubStatus = dictionaryArray[0];
+                                        let overSubStatus = dictionaryArray[1];
+                                        console.log(underSubStatus, overSubStatus);
+                                        console.log("Processing UNDERSUB Allocation dictionary...\n");
+                                        let allocation_dict_1 = null;
+                                        let allocation_dict_2 = null;
+                                        allocation_dict_1 = await processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_id, underSubStatus);
+                                        console.log("Processing OVERSUB Allocation dictionary...\n");
+                                        if (allotment_principle == 2 || allotment_principle == 3){
+                                            // OverSubscription FIFO
+                                            console.log("Processing Allocation dictionary...\n");
+                                            allocation_dict_2 = await processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, overSubStatus, allotment_principle);
+                                        }
+                                        else if (allotment_principle == 4 || allotment_principle == 5){
+                                            // OverSubscription Ratio
+                                            allocation_dict = await getAllocationData(ipo_id, totalSize, 1);
+                                            console.log("New Allocation Dictionary:- ", allocation_dict);
+                                            allocation_dict_2 = await processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, overSubStatus, allotment_principle, fixed_price);
+                                        }
+                                        else{
+                                            // Should Never Happen
+                                            make_allotment = false;
+                                            console.log("Undefined allotment principle :- ", allotment_principle);
+                                            console.log("Can't make allotment till oversubscrption principle is specified!!!");
+                                        }
+                                        console.log(allocation_dict_1);
+                                        console.log(allocation_dict_2);
+                                        allocation_dict = mergeAllocationResultDictionaries(allocation_dict_1, allocation_dict_2);
+                                        console.log("Combined Allocation Dict:- ");
+                                        console.log(allocation_dict);
                                     }
-                                }
-                                else{
-                                    // A case of mixed allotment
-                                    // Undersubscription and Oversubscription will be made accorindgly
                                 }
                                 console.log(allocation_dict);
                                 if (make_allotment){

@@ -34,7 +34,7 @@ async function main() {
         console.log(user_id, role_id, full_name)
 
         // Get allotment principle id, and fixed price from the form
-        let allotment_principle = 3;
+        let allotment_principle = 4;
         let fixed_price = 150; // Only required for allotment principle 5
 
         // ipo investor eligibility information

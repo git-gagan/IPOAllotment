@@ -6,7 +6,7 @@
 import { dematFromDb } from '../database/getDmatFromDB.js';
 import { getIpoEligibleObj } from '../database/getIpoeligibility.js';
 
-async function processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_id){
+async function processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_id, statusInfo=null){
     /* 
     The following function processes the allocation dictionary and 
     returns a processed dictionary to be passed to the smart contract 
@@ -52,6 +52,11 @@ async function processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_i
             console.log("No more shares available!");
             break;
         }
+        if (!(statusInfo && allocation_dict[i]['investor_type'] in statusInfo)){
+            // if this investor_type_category is not in the statusInfo category
+            console.log("\n---SKIP---\n");
+            continue;
+        }
         if (!(allocation_dict[i]['investor_id'] in processed_dict['investorInfo'])){
             let dmat_info = await dematFromDb(allocation_dict[i]['investor_id'], ipo_id);
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']] = {};
@@ -96,6 +101,11 @@ async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_i
         if (processed_dict['totalShares'] >= totalSize){
             console.log("No more shares available!");
             break;
+        }
+        if (!(statusInfo && allocation_dict[i]['investor_type'] in statusInfo)){
+            // if this investor_type_category is not in the statusInfo category
+            console.log("\n---SKIP---\n");
+            continue;
         }
         let bid_price = null;
         let shares_to_be_allotted = 0;
@@ -171,6 +181,11 @@ async function processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_
         if (processed_dict['totalShares'] >= totalSize){
             console.log("No more shares available!");
             break;
+        }
+        if (!(statusInfo && temp_investor_dict[key]['investor_type'] in statusInfo)){
+            // if this investor_type_category is not in the statusInfo category
+            console.log("\n---SKIP---\n");
+            continue;
         }
         let allocation_ratio = statusInfo[temp_investor_dict[key]['investor_type']]['sharesMaxLimit']/statusInfo[temp_investor_dict[key]['investor_type']]['sharesBid']; // Needed if principle = 4 or 5
         let bid_price = null;
@@ -323,7 +338,7 @@ async function getSubscriptionInfo(issuer_info, ipo_id){
     return [status, statusInfo];
 }
 
-// Helper Function
+// Helper Functions
 function getInvestorInvestment(transactions, lot_size){
     // This function calculates the total investment made by a particular
     // investor and takes as parameter transactions of that investor
@@ -334,5 +349,43 @@ function getInvestorInvestment(transactions, lot_size){
     return totalInvestment;
 }
 
+function segregateStatusDictionary(statusInfo){
+    // Iterate over the main statusInfo dictionary and divide it 
+    // on the basis of subscription status into 2
+    let od = {};    // Oversubscription Dictionary
+    let ud = {};    // Undersubscription Dictionary
+    for (let key in statusInfo){
+        if (statusInfo[key]['subStatus'] == 'U'){
+            ud[key] = statusInfo[key];
+        }
+        else{
+            od[key] = statusInfo[key];
+        }
+    }
+    return [ud, od];
+}
 
-export {processAllocationDictU, processAllocationDictO, processAllocationDictOR, getSubscriptionInfo};
+function mergeAllocationResultDictionaries(d1, d2){
+    // This function takes 2 allocation dictionaries consisting of
+    // different sub status and merge them into one final result for transaction
+    let processed_dict = {
+        "investorInfo": {},
+        "totalAmount": 0,
+        "totalShares": 0
+    };
+    for (let key in d1['investorInfo']){
+        console.log("-=-=-=-=-=-=-=-=-=--=-=-=");
+        processed_dict['investorInfo'][key] = d1['investorInfo'][key];
+    }
+    for (let key in d2['investorInfo']){
+        console.log("-=-=-=-=-=-=-=-=-=--=-=-=");
+        processed_dict['investorInfo'][key] = d2['investorInfo'][key];
+    }
+    console.log(processed_dict)
+    processed_dict['totalAmount'] = d1['totalAmount'] + d2['totalAmount'];
+    processed_dict['totalShares'] = d1['totalShares'] + d2['totalShares'];
+    return processed_dict;
+}
+
+
+export {processAllocationDictU, processAllocationDictO, processAllocationDictOR, getSubscriptionInfo, segregateStatusDictionary, mergeAllocationResultDictionaries};
