@@ -86,7 +86,7 @@ async function processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_i
     return processed_dict;
 }
 
-async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle){
+async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, issuer_info){
     /* 
     The following function processes the allocation dictionary and 
     returns a processed dictionary to be passed to the smart contract
@@ -124,6 +124,21 @@ async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_i
             console.log("Oversubscription FIFO Avg Price");
             bid_price = statusInfo[allocation_dict[i]['investor_type']]['totalInvestment']/statusInfo[allocation_dict[i]['investor_type']]['sharesBid'];
         }
+        if (!(allocation_dict[i]['investor_id'] in processed_dict['investorInfo'])){
+            let dmat_info = await dematFromDb(allocation_dict[i]['investor_id'], ipo_id);
+            processed_dict['investorInfo'][allocation_dict[i]['investor_id']] = {};
+            processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['shares_allotted'] = 0;
+            processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] = 0;
+            processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['demat_account'] = dmat_info[0]['demat_ac_no'];
+        }
+        let expected_investment_amount = processed_dict['investorInfo'][key]['amount_invested'] + shares_demanded*bid_price;
+        if (expected_investment_amount >= issuer_info[ipo_id]['userInfo'][key]['total_invested']){
+            // If actual amount invested is less than what is getting allotted to the investor
+            console.log("Investor has't invested this much!!! Allot less OR None\n")
+            let money_balance = issuer_info[ipo_id]['userInfo'][key]['total_invested'] - processed_dict['investorInfo'][key]['amount_invested'];
+            // To get shares to be assigned now, divide balance by price of one lot
+            shares_demanded = Math.floor(money_balance/(lotSize*bid_price))*lotSize;
+        }
         if (available_shares >= shares_demanded){
             // If shares available are more than the investors current demand
             shares_to_be_allotted = shares_demanded;
@@ -137,13 +152,6 @@ async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_i
         console.log("---\nBid Price = ", bid_price);
         console.log("---\nShares Demanded = ", shares_demanded);
         console.log("---\nShares Allotted = ", shares_to_be_allotted, "\n---");
-        if (!(allocation_dict[i]['investor_id'] in processed_dict['investorInfo'])){
-            let dmat_info = await dematFromDb(allocation_dict[i]['investor_id'], ipo_id);
-            processed_dict['investorInfo'][allocation_dict[i]['investor_id']] = {};
-            processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['shares_allotted'] = 0;
-            processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] = 0;
-            processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['demat_account'] = dmat_info[0]['demat_ac_no'];
-        }
         processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['shares_allotted'] += shares_to_be_allotted;
         processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] += amount_invested;
         processed_dict['totalAmount'] += amount_invested;
@@ -153,7 +161,7 @@ async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_i
     return processed_dict;
 }
 
-async function processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, fixed_price){
+async function processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, fixed_price, issuer_info){
     /* 
     The following function processes the allocation dictionary and 
     returns a processed dictionary to be passed to the smart contract
@@ -218,10 +226,25 @@ async function processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_
                 shares_demanded = (Math.floor(shares_demanded/lotSize))*lotSize;
             }
         }
+        if (!(key in processed_dict['investorInfo'])){
+            let dmat_info = await dematFromDb(key, ipo_id);
+            processed_dict['investorInfo'][key] = {};
+            processed_dict['investorInfo'][key]['shares_allotted'] = 0;
+            processed_dict['investorInfo'][key]['amount_invested'] = 0;
+            processed_dict['investorInfo'][key]['demat_account'] = dmat_info[0]['demat_ac_no'];
+        }
+        let expected_investment_amount = processed_dict['investorInfo'][key]['amount_invested'] + shares_demanded*bid_price;
+        if (expected_investment_amount >= issuer_info[ipo_id]['userInfo'][key]['total_invested']){
+            // If actual amount invested is less than what is getting allotted to the investor
+            console.log("Investor has't invested this much!!! Allot less OR None\n")
+            let money_balance = issuer_info[ipo_id]['userInfo'][key]['total_invested'] - processed_dict['investorInfo'][key]['amount_invested'];
+            // To get shares to be assigned now, divide balance by price of one lot
+            shares_demanded = Math.floor(money_balance/(lotSize*bid_price))*lotSize;
+        }
         if (available_shares >= shares_demanded){
             // If shares available are more than the investors current demand
             shares_to_be_allotted = shares_demanded;
-            amount_invested = shares_demanded*bid_price;
+            amount_invested = shares_to_be_allotted*bid_price;
         }
         else{
             // If shares available are less than the demand, allocate whatever is possible
@@ -232,13 +255,6 @@ async function processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_
         console.log("\nBid Price = ", bid_price);
         console.log("\nShares demanded = ", shares_demanded);
         console.log("\nShares to be allotted = ", shares_to_be_allotted, "\n---");
-        if (!(key in processed_dict['investorInfo'])){
-            let dmat_info = await dematFromDb(key, ipo_id);
-            processed_dict['investorInfo'][key] = {};
-            processed_dict['investorInfo'][key]['shares_allotted'] = 0;
-            processed_dict['investorInfo'][key]['amount_invested'] = 0;
-            processed_dict['investorInfo'][key]['demat_account'] = dmat_info[0]['demat_ac_no'];
-        }
         processed_dict['investorInfo'][key]['shares_allotted'] += shares_to_be_allotted;
         processed_dict['investorInfo'][key]['amount_invested'] += amount_invested;
         processed_dict['totalAmount'] += amount_invested;

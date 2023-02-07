@@ -95,13 +95,13 @@ async function main() {
                                         if (allotment_principle == 2 || allotment_principle == 3){
                                             // OverSubscription FIFO
                                             console.log("Processing Allocation dictionary...\n");
-                                            allocation_dict = await processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle);
+                                            allocation_dict = await processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, issuer_info);
                                         }
                                         else if (allotment_principle == 4 || allotment_principle == 5){
                                             // OverSubscription Ratio
                                             allocation_dict = await getAllocationData(ipo_id, totalSize, 1);
                                             console.log("New Allocation Dictionary:- ", allocation_dict);
-                                            allocation_dict = await processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, fixed_price);
+                                            allocation_dict = await processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, statusInfo, allotment_principle, fixed_price, issuer_info);
                                         }
                                         else{
                                             // Should Never Happen
@@ -125,13 +125,13 @@ async function main() {
                                         if (allotment_principle == 2 || allotment_principle == 3){
                                             // OverSubscription FIFO
                                             console.log("Processing Allocation dictionary...\n");
-                                            allocation_dict_2 = await processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, overSubStatus, allotment_principle);
+                                            allocation_dict_2 = await processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_id, overSubStatus, allotment_principle, issuer_info);
                                         }
                                         else if (allotment_principle == 4 || allotment_principle == 5){
                                             // OverSubscription Ratio
                                             allocation_dict = await getAllocationData(ipo_id, totalSize, 1);
                                             console.log("New Allocation Dictionary:- ", allocation_dict);
-                                            allocation_dict_2 = await processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, overSubStatus, allotment_principle, fixed_price);
+                                            allocation_dict_2 = await processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_id, overSubStatus, allotment_principle, fixed_price, issuer_info);
                                         }
                                         else{
                                             // Should Never Happen
@@ -149,8 +149,8 @@ async function main() {
                                 console.log(allocation_dict);
                                 if (make_allotment){
                                     // Evaluate the specified transaction.
-                                    const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
-                                    console.log(`Transaction has been evaluated, result is: ${result}`);
+                                    // const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
+                                    // console.log(`Transaction has been evaluated, result is: ${result}`);
                                     console.log("\nSUCCESS\n");
                                 }
                             }
