@@ -149,8 +149,8 @@ async function main() {
                                 console.log(allocation_dict);
                                 if (make_allotment){
                                     // Evaluate the specified transaction.
-                                    // const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
-                                    // console.log(`Transaction has been evaluated, result is: ${result}`);
+                                    const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
+                                    console.log(`Transaction has been evaluated, result is: ${result}`);
                                     console.log("\nSUCCESS\n");
                                 }
                             }

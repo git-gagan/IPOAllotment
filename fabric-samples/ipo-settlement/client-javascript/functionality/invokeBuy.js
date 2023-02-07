@@ -40,7 +40,7 @@ async function main() {
         console.log(user_id, role_id, full_name)
 
         // Form inputs
-        var ipo_id = "P1";
+        var ipo_id = "T";
         var demat_ac_no = "ad"; // NikDmat, GagDm, sd, ad :-> testing for 4 users
         let investor_info_db = await getInvestorInfo(user_id);
         function createInvestorObject(){
