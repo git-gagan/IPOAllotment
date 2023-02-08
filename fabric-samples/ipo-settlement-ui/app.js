@@ -11,7 +11,7 @@ import {query} from "./handlers/client-javascript/functionality/query.js"
 import {queryTransaction} from "./handlers/client-javascript/functionality/queryAllShares.js"
 import {invokeTransaction} from "./handlers/client-javascript/functionality/invokeBuy.js"
 import {IssuertoLedger} from "./handlers/client-javascript/functionality/addIssuerToLedger.js"
-import { getIdFromUsername } from './handlers/client-javascript/utils/getUserId.js';
+import { getIdFromUsername } from './handlers/client-javascript/database/getUserId.js';
 import {SharesAllotment} from "./handlers/client-javascript/functionality/allotment.js";
 
 
@@ -452,7 +452,7 @@ app.post("/login", async function(req,res){
             console.log(role_id)
             req.session.name = req.body.username
             sess=req.session.name;
-            res.render("index.jade",{session:req.session.name,role:role_id});
+            res.render("ongoing-ipo.jade",{session:req.session.name,role:role_id});
         }
         else{
             res.render("login.jade",{message:"please fill out correct details",session:req.session.name,role:role_id});
@@ -529,6 +529,131 @@ app.get("/startBid",function(req,res){
     }; 
     promiseValue();   
 })
+
+
+app.get("/register-step1",function(req,res){
+    var role_type=[]; 
+    db.all("select * from tbl_role_type",(err,rows)=>{
+        if(err){
+            console.log(err)
+        }
+        else {
+            
+            rows.forEach(function(row){
+                role_type.push(
+                    {role_type_id:row.role_type_id,
+                    role_type:row.role_type
+                    })
+              
+            })
+        }
+
+        console.log(role_type)
+       
+        res.render("register-step1.jade",{role_type:role_type})
+
+
+    });
+    
+});
+
+app.post("/register-step1",function(req,res){
+    let role_type=req.body.flexRadioDefault
+    console.log(role_type)
+    res.render("register-step2.jade",{role:role_type})
+   
+    
+});
+
+app.get("/register-investor-step3",function(req,res){
+    res.render("register-investor-step3.jade")
+});
+
+
+app.get("/register-step2",function(req,res){
+    
+    res.render("register-step2.jade")
+});
+
+app.post("/register-step2",function(req,res){
+    let role_type,username,password,fullname
+    role_type=req.body.role
+    username=req.body.username
+    password=req.body.password
+    fullname=req.body.fullname
+    // console.log(role_type)
+
+    db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], (err, row) => {
+        if (err) {
+          res.status(400).json({"error":err.message});
+          console.log(error.message);
+          return;
+       }
+        else if(row){
+            res.render("register-step2.jade",{message:"Username already exist"});
+        }
+        else{
+            let user_id=uuidv4()
+            var promiseRegister,filepath,template;
+            let insert = 'INSERT INTO tbl_user (user_id,user_name, user_pwd,full_name) VALUES (?,?,?,?)';
+            let insert2 = 'INSERT INTO tbl_userrole (user_id,role_id) VALUES (?,?)';
+
+            try {
+               
+                if(role_type=='IN'){
+                    promiseRegister=registerUserInvestor(username);
+                    template="register-investor-step3.jade"
+                   
+                }
+                else if(role_type=='IS'){
+                    promiseRegister=registerUserIssuer(username)
+                    template="register-issuer-step3.jade"
+                   
+                }
+                else if(role_type=='AG'){
+                    promiseRegister=registerUserAgent(username)
+                    
+
+                }
+                
+                var promiseValue = async () => {
+                    const value = await promiseRegister;
+                    
+                };
+                promiseValue();
+               
+                db.run(insert, [user_id,username,password,fullname]);
+                db.run(insert2, [user_id,role_type]);
+               
+                res.render(template,{message:"Successfully registered!!"});
+
+            } catch (error) {
+                console.log(error.message);
+            }
+               
+            }
+        
+      });
+  
+});
+
+
+app.get("/register-issuer-step3",function(req,res){
+    res.render("register-issuer-step3.jade")
+});
+
+
+app.get("/ongoing-ipo",function(req,res){
+    res.render("ongoing-ipo.jade")
+});
+
+app.get("/apply-ipo",function(req,res){
+    res.render("apply-ipo.jade")
+});
+
+app.get("/upcoming-ipo",function(req,res){
+    res.render("upcoming-ipo.jade")
+});
 
 
 app.listen(3000,function (){

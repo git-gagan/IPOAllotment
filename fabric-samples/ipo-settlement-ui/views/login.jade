@@ -1,28 +1,39 @@
 extends layout
 
 block content
-    div.container
-       
-        
+    .container 
         .row 
-            .col-2 
-            .col-8
-                if message 
-                    .alert.alert-info(role='alert') #{message}
-                .card.border-primary
-                    .card-body
-                        .card-header.h3.bg-primary(style="text-align:center;") Log In
-                    
-                        form.mt-5(action="/login",method="post")
+            .col-4
+            .col-4 
+                //- .card 
+                //-     div.card-body
+                .row 
+                    .col-5 
+                    .col-2 
+                        div.person-icon
+                            i.bi.bi-person-circle
+                    .col-5 
+                
+                form(action="/login",method="post")
+                    .row
+                        .col-12
+                            .form-group 
+                                label(for="username") User Name 
+                                input.form-control(type="text",placeholder="username",name="username" required)  
+                            .form-group 
+                                label(for="password") Password
+                                input.form-control(type="password",placeholder="password",name="password" required)
+                            
+                            .row 
+                                .col-4
+                                
+                                .col-4 
+                                    button.btn.btn-lg.button(type="submit") Login
+
+                                .col-4
                         
-                            div.form-group
-                                label(for="username")  Username 
-                                input.form-control(type="text",id="username",placeholder="Enter Username" name="username" required)
-                            div.form-group
-                                label(for="password")  Password 
-                                input.form-control(type="password",id="password",placeholder="Password" name="password" required)
-                            button.btn.btn-primary(type="submit") Log In
-            .col-2
+                
 
-
-script(src='/bootstrap/js/bootstrap.bundle.js')
+            
+            
+    

@@ -1,0 +1,58 @@
+extends layout
+
+block content
+    .container 
+        .row
+            .col-2 
+            .col-8
+                form(action="") 
+                    p Step 3:
+                    
+                    h5.color.mt-4 Bank Details
+                    //- form(action="")
+                    .row 
+                        .col-4
+                            .form-group 
+                                label(for="acctnum") Bank Account Number
+                                input.form-control(type="text")  
+                            .form-group 
+                                label(for="ifsc") Bank IFSC
+                                input.form-control(type="text")  
+                        .col-2
+                        .col-4
+                            .form-group 
+                                label(for="acctholder") Account Holder
+                                input.form-control(type="text")  
+                            .form-group 
+                                label(for="pan") PAN
+                                input.form-control(type="text")  
+
+                    h5.color.mt-4 Demat Account Details
+                    //- form(action="")
+                    .row 
+                        .col-4
+                            .form-group 
+                                label(for="dacctnum") Demat Account Number
+                                input.form-control(type="text")  
+                        
+                        .col-2
+                            
+
+                        .col-4
+                            .form-group 
+                                label(for="dpartid") Demat Participant Id
+                                input.form-control(type="text")  
+
+                    .row.mb-5 
+                        .col-4
+                        .col-1
+                            button.btn.button(type="submit") Close
+                    
+                        .col-1
+                            button.btn.button(type="submit") Submit
+                                
+            .col-2 
+
+
+        
+   

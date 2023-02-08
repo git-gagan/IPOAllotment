@@ -1,0 +1,88 @@
+extends layout
+
+block content
+    .container 
+        .row 
+            .col-1
+            .col-10
+                div
+                    //- .row
+                    //-     .col-10 
+                    //-     .col-2
+                    //-         .person-icon
+                    //-             i.bi.bi-person-square
+                div 
+                    //- .row 
+                    //-     .col-1 
+                    //-     .col-6
+                    h5 YPLUS
+                    P.text-color Yodaplus Technologies Pvt. Ltd.
+
+                    p.color Investor Type
+                    p.text-color Retail Investor
+
+                    p.color Issue Date 
+                    p.text-color 18th-20th Jan 
+
+                    p.color Issue Price Range
+                    p.text-color Rs.100 - Rs.200
+
+                    p.color Lot Size 
+                    p.text-color 50
+
+
+                   
+
+                    .row.mt-5
+                        h6 Payment Details 
+                        .col-4
+                            .form-group 
+                                label(for="acctnum") Account Number
+                                input.form-control(type="text")  
+                        .col-4
+                            .form-group 
+                                label(for="acctholder") Account Holder Name
+                                input.form-control(type="text")  
+                        .col-4
+                            .form-group 
+                                label(for="ifsc") Bank IFSC
+                                input.form-control(type="text")  
+
+                    .row.mt-5 
+                        h6 Bids 
+                        .col-4
+                            .form-group 
+                                label(for="qty") Qty.
+                                input.form-control(type="text")  
+                        .col-4
+                            .form-group 
+                                label(for="price") Price
+                                input.form-control(type="text")  
+
+                    .row.mt-5
+
+                        .col-2
+                            p.text-color Amount Payable
+
+                        .col-8 
+
+                        .col-2 
+                            p.color Rs. 12000
+
+
+                    .row 
+
+                        .col-2 
+                            button.button.btn-lg(type="submit") Close
+                        .col-8 
+                        .col-2 
+                            button.button.btn-lg(type="submit") Submit
+
+
+
+                
+                
+        
+    
+
+        

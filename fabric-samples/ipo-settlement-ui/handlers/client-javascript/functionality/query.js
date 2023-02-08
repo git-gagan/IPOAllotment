@@ -3,33 +3,33 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-
 'use strict';
-
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
-import { getIdFromUsername } from '../utils/getUserId.js';
-
-
+import { getIdFromUsername } from '../database/getUserId.js';
 async function query(username) {
     try {
-        var queryResult = '';
+        let userName=username;
         // console.log(process.argv);
-        // let userName = process.argv[2];
-        // let username = process.argv[2];   // Take username from command line
-        let userName=username
+        // let userName = process.argv[2];   // Take username from command line
         let user_promise = await getIdFromUsername(userName);
         console.log("USER ID:- ", user_promise);
+        let user_id, role_id;
+        if (user_promise){
+            user_id = user_promise['user_id'];
+            role_id = user_promise['role_id'];
+        }
+        else{
+            user_id = null;
+            user_id = 1;
+            role_id = 'IS';
+        }
 
-        let user_id = user_promise['user_id'];
-        let role_id = user_promise['role_id'];
         console.log(user_id, role_id)
-
         if(user_id){
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
-
             if (isAuthUser) {
                 let function_call = "";
                 if (role_id == "IN"){
@@ -44,12 +44,17 @@ async function query(username) {
                 var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
                 console.log("\n2")
                 // Evaluate the specified transaction.
-                const result = await contract.evaluateTransaction(function_call, user_id);
-                queryResult=JSON.parse(result);
-                console.log(`Transaction has been evaluated, result is: ${result}`);
-                console.log("\nSUCCESS\n");
+                let result = await contract.evaluateTransaction(function_call, user_id);
+                result = result.toString();
+                if (result != "0"){
+                    console.log(`Transaction has been evaluated, result is: ${result}`);
+                    console.log("\nSUCCESS\n");
+                }
+                else{
+                    console.log(`The IPO with user_id ${user_id} does not exist!`)
+                    console.log("\nFAILED!\n");
+                }
                 await gateway.disconnect();
-                return queryResult
             }
             else {
                 console.log("\n3")
@@ -64,7 +69,6 @@ async function query(username) {
         process.exit(1);
     }
 }
-
 // const isBidTimeOver = await contract.evaluateTransaction('isBidTimeOver');
 // console.log(`Remaining time for bidding: ${isBidTimeOver}`);
 // const start = await contract.evaluateTransaction('startBidding');
@@ -74,6 +78,4 @@ async function query(username) {
 // const isBidTimeOver1 = await contract.evaluateTransaction('isBidTimeOver');
 // console.log(`Remaining time for bidding: ${isBidTimeOver1}`);
 // Disconnect from the gateway.
-
-export {query}
-// query()
+export {query};

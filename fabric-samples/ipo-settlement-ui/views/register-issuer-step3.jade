@@ -1,0 +1,137 @@
+extends layout
+
+block content
+    .container 
+        .row
+            .col-2 
+            .col-8
+                
+                form(action="") 
+                    p Step 3:
+                    ul#pills-tab.nav.nav-pills.mb-5(role='tablist')
+                        li.nav-item(role='presentation')
+                            button#pills-home-tab.nav-link.active(data-bs-toggle='pill' data-bs-target='#pills-home' type='button' role='tab' aria-controls='pills-home' aria-selected='true') Basic IPO Details
+                        li.nav-item(role='presentation')
+                            button#pills-profile-tab.nav-link(data-bs-toggle='pill' data-bs-target='#pills-profile' type='button' role='tab' aria-controls='pills-profile' aria-selected='false') IPO Buckets
+                        li.nav-item(role='presentation')
+                            button#pills-contact-tab.nav-link(data-bs-toggle='pill' data-bs-target='#pills-contact' type='button' role='tab' aria-controls='pills-contact' aria-selected='false') Investor Classification
+                    #pills-tabContent.tab-content
+                        #pills-home.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='pills-home-tab') 
+                            .row 
+                                .col-4
+                                    .form-group 
+                                        label(for="issuer") Issuer Name
+                                        input.form-control(type="text")  
+                                    .form-group 
+                                        label(for="cusip") CUSIP
+                                        input.form-control(type="text")  
+                                    .form-group 
+                                        label(for="ipoStartDate") IPO Start Date
+                                        input.form-control(type="date")  
+                                    .form-group 
+                                        label(for="totalShares") Total Shares
+                                        input.form-control(type="number")
+                                    .form-group 
+                                        label(for="lowPrice") Low Price
+                                        input.form-control(type="number")
+                                    
+                                .col-1
+                                .col-4
+                                    .form-group 
+                                        label(for="isin") ISIN
+                                        input.form-control(type="text")  
+                                    .form-group 
+                                        label(for="ticker") Ticker
+                                        input.form-control(type="text")
+                                    .form-group 
+                                        label(for="ipoEndDate") IPO End Date
+                                        input.form-control(type="date")
+                                    .form-group 
+                                        label(for="lotSize") Lot Size
+                                        input.form-control(type="number")
+                                    .form-group 
+                                        label(for="highPrice") High Price
+                                        input.form-control(type="number")
+                                    
+                        #pills-profile.tab-pane.fade(role='tabpanel' aria-labelledby='pills-profile-tab') 
+                            .row 
+                                h6 Please add all pre-primary investors, their sale bucket size and priority of allotment
+                            .row 
+                                .col-3
+                                    button.btn(type="button",onClick="addBucket()")
+                                        i.bi.bi-plus-circle-fill    Add Bucket
+                            .row#ipobucket
+
+                            
+
+                                
+                        #pills-contact.tab-pane.fade(role='tabpanel' aria-labelledby='pills-contact-tab')
+                            .row 
+                                h6 Please add all investor categories who are allowed to participate, their reserved quota and minimum lot quantity
+
+                            .row 
+                                .col-4
+                                    button.btn(type="button",onClick="addInvestorCategory()")
+                                        i.bi.bi-plus-circle-fill    Add Investor Category
+                            .row#investorcategory
+
+                    .row.mb-5 
+                        .col-11
+                        
+                        .col-1
+                            button.btn.button(type="submit") Next
+                                
+            .col-2 
+
+
+    script(type="text/javascript").
+        function addInvestorCategory(){
+            document.getElementById("investorcategory").innerHTML+=
+            `<div class="col-4">
+                <div class="form-group">
+                    <label for="investorType">Investor Type</label>
+                    <input class="form-control" type="text" />
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label for="quota">Reserved Quota</label>
+                    <input class="form-control" type="text" />
+                </div>
+            </div>
+            <div class="col-4">
+                 <div class="form-group">
+                    <label for="lotQuantity">Lot Quantity</label>
+                    <input class="form-control" type="text" />
+                </div>   
+            </div>
+            `
+
+        }
+
+
+        function addBucket(){
+            document.getElementById("ipobucket").innerHTML+=
+            `<div class="col-4">
+                <div class="form-group">
+                    <label for="investorType">Investor Type</label>
+                    <input class="form-control" type="text" />
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label for="bucketSize">Bucket Size</label>
+                    <input class="form-control" type="number" placeholder="unit"/>
+                </div>
+            </div>
+            <div class="col-4">
+                 <div class="form-group">
+                    <label for="allocPriority">Allocation Priority</label>
+                    <input class="form-control" type="text" />
+                </div>   
+            </div>
+            `
+
+        }
+
+    

@@ -1,0 +1,50 @@
+extends layout
+
+block content
+    .container 
+        div 
+            .row 
+                .col-2 
+                .col-8 
+                    h3 Open a trading account with YPO and start investing for free
+                    h5.mt-4.color Let’s get started
+                    p.mt-4 Step 1:
+                    .row 
+                        .col-4 
+                        .col-4 
+                            p.text-color Sign up as:
+                            form(action="/register-step1", method="post") 
+                                ul.list-group 
+                                for item in role_type 
+                                    li.list-group-item
+                                        input.form-check-input.me-1(type='radio' name="flexRadioDefault" id="flexRadioDefault1" value=`${item.role_type_id}`)
+                                        |     #{item.role_type}
+                                .row.mb-5 
+                                    .col-11
+                                    .col-1
+                                        button.btn.button(type="submit") Next
+                                
+                            //- .list-group
+                            //-     a.list-group-item.list-group-item-action#IN(type='button',name="IN") Individual Investor
+                            //-     a.list-group-item.list-group-item-action(type='button' ) Angel Investor
+                            //-     a.list-group-item.list-group-item-action(type='button') Promoter 
+                            //-     a.list-group-item.list-group-item-action(type='button') Venturn Capital Firm 
+                            //-     a.list-group-item.list-group-item-action(type='button') Private Equity Firm 
+                            //-     a.list-group-item.list-group-item-action(type='button') Strategic Investor 
+                            //-     a.list-group-item.list-group-item-action(type='button') Family Office 
+                            //-     a.list-group-item.list-group-item-action(type='button' ) Crowdfund 
+                            //-     a.list-group-item.list-group-item-action(type='button') Issuer 
+                            //-     a.list-group-item.list-group-item-action(type='button') Paying Agent
+
+                                
+
+
+
+
+                               
+
+
+                .col-2
+
+        
+   

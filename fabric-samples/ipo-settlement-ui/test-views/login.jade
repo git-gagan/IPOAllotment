@@ -1,0 +1,38 @@
+extends layout
+
+block content
+    .container 
+        .row 
+            .col-4
+            .col-4 
+                //- .card 
+                //-     div.card-body
+                .row 
+                    .col-4 
+                    .col-4 
+                        div.person-icon
+                            i.bi.bi-person-circle
+                    .col-4 
+                
+                form(action="")
+                    .row
+                        .col-12
+                            .form-group 
+                                label(for="username") User Name 
+                                input.form-control(type="text",placeholder="username")  
+                            .form-group 
+                                label(for="password") Password
+                                input.form-control(type="password",placeholder="password")
+                            .row 
+                                .col-4
+                                
+                                .col-4 
+                                    button.btn.btn-lg.button(type="submit") Login
+
+                                .col-4
+                        
+                
+
+            
+            
+    

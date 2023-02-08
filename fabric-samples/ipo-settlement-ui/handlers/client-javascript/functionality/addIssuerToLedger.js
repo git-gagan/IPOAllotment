@@ -10,10 +10,13 @@
 
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
-import { getIdFromUsername } from '../utils/getUserId.js';
-
+import { getIdFromUsername } from '../database/getUserId.js';
+import { insertOrUpdateIpo,addIpoEligibility,addIpoBuckets } from '../database/ipoToDB.js';
 async function IssuertoLedger(username,ipo,totalSize,priceRangeLow,priceRangeHigh,bidStartDate,totalBidTime,lotSize,agent) {
     try {
+         // Get allotment principle id from the form
+         let allotment_principle = null;
+
         // console.log(process.argv);
         // let userName = process.argv[2]; 
         let userName=username
@@ -22,18 +25,122 @@ async function IssuertoLedger(username,ipo,totalSize,priceRangeLow,priceRangeHig
         let user_promise = await getIdFromUsername(userName);
         console.log("USER promise:- ", user_promise);
 
-        let user_id, role_id;
+        let user_id, role_id, full_name;
         if (user_promise){
             user_id = user_promise['user_id'];
             role_id = user_promise['role_id'];
+            full_name = user_promise['full_name'];
         }
         else{
             user_id = null;
         }
         
-        console.log(user_id, role_id)
+        console.log(user_id, role_id, full_name)
+
+        // ipo investor eligibility information
+        // To be taken from frontend
+        let ipo_investor_eligibility_list = [
+            // Assuming all type of investors (10) are allowed to bid
+            {
+                ipo_id: user_id,
+                investor_type_id: 1,
+                min_lot_qty: 2,
+                reserve_shares_percentage: 50
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 2,
+                min_lot_qty: 3,
+                reserve_shares_percentage: 5
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 3,
+                min_lot_qty: 1,
+                reserve_shares_percentage: 5
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 4,
+                min_lot_qty: 5,
+                reserve_shares_percentage: 2
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 5,
+                min_lot_qty: 5,
+                reserve_shares_percentage: 2
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 6,
+                min_lot_qty: 5,
+                reserve_shares_percentage: 1
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 7,
+                min_lot_qty: 2,
+                reserve_shares_percentage: 15
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 8,
+                min_lot_qty: 1,
+                reserve_shares_percentage: 7
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 9,
+                min_lot_qty: 1,
+                reserve_shares_percentage: 8
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 10,
+                min_lot_qty: 3,
+                reserve_shares_percentage: 5
+            }
+        ]
+        
+        let ipo_bucket_list = [
+            {
+                ipo_id: user_id,
+                investor_type_id: 3,
+                no_of_shares: 50,
+                priority: 5,
+                investor_id: 'Gol'
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 4,
+                no_of_shares: 100,
+                priority: 2,
+                investor_id: 'YC'
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 5,
+                no_of_shares: 20,
+                priority: 1,
+                investor_id: 'JP'
+            },
+            {
+                ipo_id: user_id,
+                investor_type_id: 6,
+                no_of_shares: 100,
+                priority: 6,
+                investor_id: 'GS'
+            }
+        ]
+
 
         function createIssuerObject(){
+            let ipobucketIds = [];
+            for (let i in ipo_bucket_list){
+                ipobucketIds.push(ipo_bucket_list[i]['investor_id']);
+            }
+            console.log(ipobucketIds);
             let today = new Date();
             // let startDate = new Date(Date.now() + 100*60); // 1 min
             let startDate=new Date(bidStartDate)
@@ -43,6 +150,7 @@ async function IssuertoLedger(username,ipo,totalSize,priceRangeLow,priceRangeHig
                 [user_id]: {
                     ipoInfo: {
                         issuer_name: ipo,
+                        issuer_fullname: full_name,
                         totalSize: parseInt(totalSize),
                         priceRangeLow: parseInt(priceRangeLow),
                         priceRangeHigh: parseInt(priceRangeHigh),
@@ -56,10 +164,19 @@ async function IssuertoLedger(username,ipo,totalSize,priceRangeLow,priceRangeHig
                         lot_size: parseInt(lotSize),
                         has_bidding_started: false,
                         balance: 0,
-                        wallet_balance:0
+                        wallet_balance:0,
+                        is_allotted: false,
+                        ipoParticipants: ipobucketIds, 
+                        ipoCreatedTms: today,
+                        ipoModifiedTms: null,
+                        ipoAllotedTms: null,
+                        cusip: null,
+                        isin: null,
+                        ticker: null
                     },
                     escrowInfo: {
                         agentId:agent,
+                        agentName: "grow",
                         total_amount:0,
                         last_transaction:"",
                         refund_amount:"",
@@ -81,6 +198,15 @@ async function IssuertoLedger(username,ipo,totalSize,priceRangeLow,priceRangeHig
             if (isAuthUser && role_id == "IS") {
                 var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
                 console.log("\n2")
+                 // Insert IPO info to DB
+                try{
+                    let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, false, allotment_principle);
+                    console.log("Issuer added to DB:- ", ipoDb);
+                    console.log(ipoDb);
+                    let eligibilityDb = await addIpoEligibility(ipo_investor_eligibility_list);
+                    console.log(eligibilityDb);
+                    let bucketDb = await addIpoBuckets(ipo_bucket_list);
+                    console.log(bucketDb);
                 // Evaluate the specified transaction.
                 const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
                 if (result){
@@ -95,12 +221,18 @@ async function IssuertoLedger(username,ipo,totalSize,priceRangeLow,priceRangeHig
                     queryResult=`Failed to add Issuer`
 
                 }
+            }
+            catch (error){
+                console.log("Error Encountered while inserting to DB:-", error);
+            }
                 // console.log(issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'],"\n\n")
-                await gateway.disconnect();
-                let start_bidding = await startBid(contract, user_id, issuer_obj);
-                let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
+                // let start_bidding = await startBid(contract, user_id, issuer_obj);
+                // console.log("================")
+                // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
+                // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
                 console.log("OVER")
                 // process.exit(1);
+                await gateway.disconnect();
                 return queryResult
             }
             else {
