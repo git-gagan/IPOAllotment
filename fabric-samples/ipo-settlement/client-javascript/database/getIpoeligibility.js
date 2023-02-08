@@ -67,4 +67,37 @@ async function getIpoEligibleObj(ipo_id) {
     }
 }
 
-export { getIpoEligibleLots, getIpoEligibleObj };
+async function getIpoInfo() {
+    try {
+        // Create DB connection
+        let db = await makeDbConnection();
+        console.log(db, "------------------");
+        let sql = `select * from tbl_ipo_info 
+                    where is_complete != 'true'
+                    or has_bidding_started != 'true'`;
+        console.log(sql);
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.all(sql, (err, value) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("IPO info fetched!");
+                        resolve(value);
+                    }
+                });
+            }
+        )
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to get ipo info: ${error}`);
+        process.exit(1);
+    }
+}
+
+export { getIpoEligibleLots, getIpoEligibleObj, getIpoInfo };

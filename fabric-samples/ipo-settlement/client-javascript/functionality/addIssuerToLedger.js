@@ -218,10 +218,10 @@ async function main() {
                     console.log("Error Encountered while inserting to DB:-", error);
                 }
                 // console.log(issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'],"\n\n")
-                let start_bidding = await startBid(contract, user_id, issuer_obj);
-                console.log("================")
-                // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
-                let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
+                // let start_bidding = await startBid(contract, user_id, issuer_obj);
+                // console.log("================")
+                // // console.log(issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000);
+                // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
                 console.log("OVER")
                 await gateway.disconnect();
                 process.exit(1);
