@@ -16,6 +16,7 @@ import fs from 'fs';
 
 async function authorizeUser(userName) {
     try {
+        console.log("Username:- ", userName);
         const __dirname = path.resolve(path.dirname(''));
         // load the network configuration
         const ccpPath = path.resolve(__dirname, '..', '..', '..', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');

@@ -131,11 +131,11 @@ async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_i
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] = 0;
             processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['demat_account'] = dmat_info[0]['demat_ac_no'];
         }
-        let expected_investment_amount = processed_dict['investorInfo'][key]['amount_invested'] + shares_demanded*bid_price;
-        if (expected_investment_amount >= issuer_info[ipo_id]['userInfo'][key]['total_invested']){
+        let expected_investment_amount = processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] + shares_demanded*bid_price;
+        if (expected_investment_amount >= issuer_info[ipo_id]['userInfo'][allocation_dict[i]['investor_id']]['total_invested']){
             // If actual amount invested is less than what is getting allotted to the investor
             console.log("Investor has't invested this much!!! Allot less OR None\n")
-            let money_balance = issuer_info[ipo_id]['userInfo'][key]['total_invested'] - processed_dict['investorInfo'][key]['amount_invested'];
+            let money_balance = issuer_info[ipo_id]['userInfo'][allocation_dict[i]['investor_id']]['total_invested'] - processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'];
             // To get shares to be assigned now, divide balance by price of one lot
             shares_demanded = Math.floor(money_balance/(lotSize*bid_price))*lotSize;
         }

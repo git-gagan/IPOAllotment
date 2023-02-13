@@ -37,5 +37,40 @@ async function getIdFromUsername(user_name) {
     }
 }
 
+async function authenticateUser(user_name, password) {
+    try {
+        // Create DB connection
+        console.log("===============================");
+        // let dbPath = "./client-javascript/ipo.db";  // to be called by index.js
+        let dbPath = null;
+        let db = await makeDbConnection(dbPath);
+        // let sql = 'select * from pragma_database_list';
+        let sql = `select *
+                    from tbl_user inner join tbl_userrole
+                    on tbl_user.user_id = tbl_userrole.user_id
+                    where user_name='${user_name}'
+                    and user_pwd='${password}' and role_id='R'`;
+        console.log(sql);
+        // db.all()/db.get() returns the rows as results unlike db.run()
+        const dbpromise = new Promise((resolve, reject)=>{
+            db.get(sql, (err, row) => {
+                if (err) {
+                    console.log("[][][][][][][][][][][][][")
+                    reject(err.message);
+                }
+                else {
+                    console.log("Query Successful!");
+                    resolve(row);
+                }
+            });
+        })
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to get user information: ${error}`);
+        process.exit(1);
+    }
+}
 
-export { getIdFromUsername };
+export { getIdFromUsername, authenticateUser };

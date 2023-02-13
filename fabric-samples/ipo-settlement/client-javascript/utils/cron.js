@@ -22,7 +22,7 @@ var job = schedule('*/10 * * * * *', async function() {
             // Calculate the diff between current time and bid start date
             let diff = bid_start_date - current_time;
             console.log(diff);
-            if (diff < 0){
+            if (diff <= 0){
                 console.log("Start the bid now!");
                 let result = await bidTimer(ipoList[i]['issuer_name'], true);
             }
@@ -33,7 +33,7 @@ var job = schedule('*/10 * * * * *', async function() {
             console.log("------");
             let bid_close_time = bid_start_date.getTime() + ipoList[i]['bid_time']*1000;
             console.log(bid_close_time);
-            if (current_time.getTime() > bid_close_time){
+            if (current_time.getTime() >= bid_close_time){
                 console.log("Close the bid now!");
                 let result = await bidTimer(ipoList[i]['issuer_name'], false, true);
             }

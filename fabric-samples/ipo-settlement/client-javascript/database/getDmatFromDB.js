@@ -62,4 +62,37 @@ async function dematFromInvestorDB(investor_id, demat_ac_no) {
     }
 }
 
-export { dematFromDb, dematFromInvestorDB };
+async function getAllDemats(ipo_id) {
+    try {
+        // Create DB connection
+        let db = await makeDbConnection();
+        console.log(db, "------------------");
+        let sql = `select * from tbl_investor_dmat 
+                    INNER JOIN tbl_investor_ipo_bid on
+                    tbl_investor_dmat.demat_ac_no=tbl_investor_ipo_bid.demat_ac_no
+                    where ipo_id='${ipo_id}'`;
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.all(sql, (err, values) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("Dmats info fetched!");
+                        resolve(values);
+                    }
+                });
+            }
+        )
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to get DMATs info: ${error}`);
+        process.exit(1);
+    }
+}
+
+export { dematFromDb, dematFromInvestorDB, getAllDemats };

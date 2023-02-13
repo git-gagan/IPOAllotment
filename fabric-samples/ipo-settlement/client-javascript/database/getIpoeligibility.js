@@ -67,14 +67,23 @@ async function getIpoEligibleObj(ipo_id) {
     }
 }
 
-async function getIpoInfo() {
+async function getIpoInfo(isin=false) {
     try {
         // Create DB connection
-        let db = await makeDbConnection();
+        let dbPath = null;
+        let sql = '';
+        if (!isin){
+            sql = `select * from tbl_ipo_info 
+                where is_complete != 'true'
+                or has_bidding_started != 'true'`;
+        }
+        else{
+            sql = `select * from tbl_ipo_info 
+                    where isin='${isin}'`;
+            // dbPath = "./client-javascript/ipo.db";
+        }
+        let db = await makeDbConnection(dbPath);
         console.log(db, "------------------");
-        let sql = `select * from tbl_ipo_info 
-                    where is_complete != 'true'
-                    or has_bidding_started != 'true'`;
         console.log(sql);
         const dbpromise = new Promise(
             (resolve, reject) => {
