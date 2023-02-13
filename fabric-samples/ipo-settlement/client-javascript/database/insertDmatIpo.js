@@ -35,4 +35,36 @@ async function insertDmatIpo(investor_id, ipo_id, demat_ac_no) {
     }
 }
 
-export { insertDmatIpo };
+async function updateIpoBidNumber(investor_id, ipo_id, bid_number) {
+    try {
+        // Create DB connection
+        let db = await makeDbConnection();
+        console.log(db, "------------------");
+        let sql = `update tbl_investor_ipo_bid
+                    set num_of_bid=${bid_number}
+                    where investor_id='${investor_id}' and ipo_id='${ipo_id}'`;
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.run(sql, (err) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("Update Successful!");
+                        resolve("Success!");
+                    }
+                });
+            }
+        )
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to update bid number information: ${error}`);
+        process.exit(1);
+    }
+}
+
+export { insertDmatIpo, updateIpoBidNumber };

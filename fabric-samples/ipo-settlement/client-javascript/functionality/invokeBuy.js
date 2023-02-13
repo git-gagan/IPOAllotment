@@ -14,7 +14,7 @@ import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { insertBid } from '../database/insertBidtoDB.js';
 import { dematFromDb, dematFromInvestorDB } from '../database/getDmatFromDB.js';
-import { insertDmatIpo } from '../database/insertDmatIpo.js';
+import { insertDmatIpo, updateIpoBidNumber } from '../database/insertDmatIpo.js';
 import { getIpoEligibleLots } from '../database/getIpoeligibility.js';
 import { getInvestorInfo } from '../database/investorInfo.js';
 
@@ -41,7 +41,7 @@ async function main() {
 
         // Form inputs
         var ipo_id = "F1";
-        var demat_ac_no = "ad"; // NikDmat, GagDm, sd, ad :-> testing for 4 users
+        var demat_ac_no = "sd"; // NikDmat, GagDm, sd, ad :-> testing for 4 users
         let investor_info_db = await getInvestorInfo(user_id);
         function createInvestorObject(){
             /*
@@ -56,7 +56,7 @@ async function main() {
                         investor_type_id: investor_info_db['investor_type'],
                         transactions: [
                                 {
-                                lots_bid: 2,
+                                lots_bid: 3,
                                 bid_amount: 100
                             }
                         ],
@@ -83,6 +83,22 @@ async function main() {
                     console.log("---Failure---");
                     process.exit(1);
                 }
+                // Need to check if the investor hasn't crossed the limit of max 3 allowed bids
+                let num_of_bids = 0;
+                let investor_ipo_bid_info = await dematFromDb(user_id, ipo_id);
+                console.log(investor_ipo_bid_info);
+                if (investor_ipo_bid_info[0]){
+                    if (investor_ipo_bid_info[0]['num_of_bid'] >= 3){
+                        // Max limit exceeded
+                        console.log("You have already bid for " + investor_ipo_bid_info[0]['num_of_bid'] + " times");
+                        console.log("No more bids can be placed");
+                        console.log("Failure");
+                        process.exit(1);
+                    }
+                    else{
+                        num_of_bids = investor_ipo_bid_info[0]['num_of_bid'];
+                    }
+                }
                 var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
                 console.log("\n2")
                 // Check if the investor is allowed to buy from the given demat
@@ -104,6 +120,9 @@ async function main() {
                             let dmatDb = await insertDmatIpo(user_id, ipo_id, demat_ac_no);
                             console.log("=============================================");
                         }
+                        // Update counter in DB
+                        console.log("Updating bid number of investor ",user_id);
+                        let updateDb = await updateIpoBidNumber(user_id, ipo_id, num_of_bids+1);
                         console.log("\nSUCCESS\n");
                     }
                     else if (result == '-2'){

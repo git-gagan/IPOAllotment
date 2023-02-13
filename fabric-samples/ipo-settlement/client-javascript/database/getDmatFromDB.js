@@ -5,7 +5,7 @@ async function dematFromDb(investor_id, ipo_id) {
         // Create DB connection
         let db = await makeDbConnection();
         console.log(db, "------------------");
-        let sql = `select demat_ac_no from tbl_investor_ipo_bid
+        let sql = `select * from tbl_investor_ipo_bid
                     where investor_id='${investor_id}' and ipo_id='${ipo_id}'`;
         const dbpromise = new Promise(
             (resolve, reject) => {

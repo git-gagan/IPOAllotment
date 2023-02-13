@@ -47,6 +47,7 @@ CREATE Table tbl_investor_ipo_bid(
 	investor_id varchar(50),
 	ipo_id varchar(50),
 	demat_ac_no int NOT NULL,
+	num_of_bid int DEFAULT 0,
 	CONSTRAINT uni UNIQUE(investor_id, ipo_id),
 	FOREIGN KEY (investor_id) REFERENCES tbl_investor_info(investor_id)
 )

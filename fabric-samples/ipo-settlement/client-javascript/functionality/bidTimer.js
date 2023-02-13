@@ -101,32 +101,3 @@ async function bidTimer(userName, start=null, close=null) {
 }
 
 export { bidTimer };
-
-// ----------- Low level Fix for timer ------------ //
-
-async function biddingOver(contract, user_id, issuer_obj){
-    var resPromise = new Promise(
-        (resolve, reject) => {
-            let result;
-            setTimeout(
-                async function(){
-                    console.log("Setting is_complete to TRUE\n")
-                    result = await contract.submitTransaction('closeBidding', user_id);
-                    result = result.toString();
-                    console.log(result);
-                    if (result == "1"){
-                        resolve("Bidding Closed!");
-                    }
-                    else if (result == "0"){
-                        resolve("Bidding is already Over!");
-                    }
-                    else{
-                        resolve("Bidding hasn't started yet!");
-                    }
-                },
-                issuer_obj[user_id]['ipoInfo']['total_bid_time']*1000
-            )
-        }
-    )
-    return resPromise;
-}
