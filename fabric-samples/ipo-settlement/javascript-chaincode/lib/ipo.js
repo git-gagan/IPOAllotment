@@ -454,6 +454,43 @@ class Ipo extends Contract {
         return JSON.stringify(allResults);
     }
 
+    async deleteBid(ctx, txn_id, investor_id, ipo_id){
+        /*
+            This function takes the transaction id of the ipo 
+            and deletes that txn
+        */
+        console.log("---Inside Delete Transaction---");
+        let asset = await this.queryIssuer(ctx, ipo_id);
+        asset = JSON.parse(asset);
+        if (!asset){
+            console.log("NOT ASSET:-", asset);
+            return 0;
+        }
+        let lots_bid = 0;
+        let bid_amount = 0;
+        let lot_size = asset[ipo_id]['ipoInfo']['lot_size'];
+        let transactions_array = asset[ipo_id]['userInfo'][investor_id]['transactions'];
+        for(let i in transactions_array){
+            // iterate over each txn in the transactions and find the given txn
+            if (transactions_array[i]['txn_id'] == txn_id){
+                lots_bid = transactions_array[i]['lots_bid'];
+                bid_amount = transactions_array[i]['bid_amount'];
+                transactions_array.splice(i, 1);
+                break;
+            }
+        }
+        asset[ipo_id]['ipoInfo']['balance'] += lots_bid*lot_size;
+        asset[ipo_id]['ipoInfo']['total_bid'] -= lots_bid*lot_size;
+        asset[ipo_id]['userInfo'][investor_id]['transactions'] = transactions_array;
+        asset[ipo_id]['userInfo'][investor_id]['shares']['bid'] -= lots_bid*lot_size;
+        asset[ipo_id]['escrowInfo']['refund_amount'] += lots_bid*lot_size*bid_amount;
+        asset[ipo_id]['escrowInfo']['total_amount'] -= lots_bid*lot_size*bid_amount;
+        console.log("New Asset:- \n", asset);
+        await ctx.stub.putState(ipo_id, Buffer.from(JSON.stringify(asset)));
+        console.log("---Success---")
+        return 1;
+    }
+
     // Global investor information function (confidential)
     async getGlobalInvestorInfo(ctx, investor_id=-1){
         /*
@@ -578,8 +615,8 @@ class Ipo extends Contract {
             which will replace the current ledger info for all cases of subscription
         */
         console.log("\n---Making Allotment---\n");
-        assetJSON[ipo_id]['escrowInfo']['refund_amount'] = assetJSON[ipo_id]['escrowInfo']['total_amount']-allocation_info['totalAmount'];
-        assetJSON[ipo_id]['escrowInfo']['transfer_amount'] = allocation_info['totalAmount'];
+        assetJSON[ipo_id]['escrowInfo']['refund_amount'] += assetJSON[ipo_id]['escrowInfo']['total_amount']-allocation_info['totalAmount'];
+        assetJSON[ipo_id]['escrowInfo']['transfer_amount'] += allocation_info['totalAmount'];
         assetJSON[ipo_id]['ipoInfo']['total_allotted'] = allocation_info['totalShares'];
         assetJSON[ipo_id]['escrowInfo']['total_amount'] = 0;
         assetJSON[ipo_id]['ipoInfo']['balance'] = assetJSON[ipo_id]['ipoInfo']['totalSize']-assetJSON[ipo_id]['ipoInfo']['total_allotted'];
@@ -594,13 +631,13 @@ class Ipo extends Contract {
             if (key in allocation_info['investorInfo']){
                 assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = allocation_info['investorInfo'][key]['shares_allotted'];
                 console.log("Calculating Refund, if any");
-                assetJSON[ipo_id]['userInfo'][key]['refund_amount'] = assetJSON[ipo_id]['userInfo'][key]['total_invested']-allocation_info['investorInfo'][key]['amount_invested'];
+                assetJSON[ipo_id]['userInfo'][key]['refund_amount'] += assetJSON[ipo_id]['userInfo'][key]['total_invested']-allocation_info['investorInfo'][key]['amount_invested'];
             }
             else{
                 // Case of oversubscription where this investor got nothing!
                 assetJSON[ipo_id]['userInfo'][key]['shares']['allotted'] = 0;
                 console.log("Refunding full Amount to the user");
-                assetJSON[ipo_id]['userInfo'][key]['refund_amount'] = assetJSON[ipo_id]['userInfo'][key]['total_invested'];
+                assetJSON[ipo_id]['userInfo'][key]['refund_amount'] += assetJSON[ipo_id]['userInfo'][key]['total_invested'];
             }
         }
         return assetJSON;

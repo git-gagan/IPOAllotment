@@ -81,7 +81,7 @@ async function main() {
                                     // Investors get all they bid for at their price
                                     // No additional checks needed
                                     console.log("Processing Allocation dictionary...\n");
-                                    allocation_dict = await processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_id);
+                                    allocation_dict = await processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_id, statusInfo);
                                 }
                                 else{
                                     let resultDB = await getAllocationPrinciple(ipo_id);

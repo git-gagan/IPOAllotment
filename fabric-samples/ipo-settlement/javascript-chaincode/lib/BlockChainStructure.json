@@ -72,14 +72,17 @@
 					"investor_type_id": "",
 					"transactions": [
 						{
+							"txn_id":"f",
 							"lots_bid": 5,
 							"bid_amount": 10
 						},
 						{
+							"txn_id":"f",
 							"lots_bid": 5,
 							"bid_amount": 10
 						},
 						{
+							"txn_id":"f",
 							"lots_bid": 5,
 							"bid_amount": 10
 						}
@@ -97,14 +100,17 @@
 					"investor_type": "",
 					"transactions": [
 						{
+							"txn_id":"f",
 							"lots_bid": 5,
 							"bid_amount": 10
 						},
 						{
+							"txn_id":"f",
 							"lots_bid": 5,
 							"bid_amount": 10
 						},
 						{
+							"txn_id":"f",
 							"lots_bid": 5,
 							"bid_amount": 10
 						}

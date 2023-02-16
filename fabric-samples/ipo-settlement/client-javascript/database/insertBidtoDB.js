@@ -6,8 +6,9 @@ async function insertBid(investor_obj, investor_id, ipo_id) {
         let db = await makeDbConnection();
         console.log(db, "------------------");
         let sql = `insert into tbl_investor_transactions
-        (investor_id, ipo_id, lots_bid, bid_amount, time_of_bid) 
+        (id, investor_id, ipo_id, lots_bid, bid_amount, time_of_bid) 
         values(
+            '${investor_obj[investor_id]['transactions'][0]['txn_id']}',
             '${investor_id}', 
             '${ipo_id}', 
             '${investor_obj[investor_id]['transactions'][0]['lots_bid']}',

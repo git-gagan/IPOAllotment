@@ -9,6 +9,8 @@
 
 'use strict';
 
+import crypto from 'crypto'   // For UUID generation
+
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
@@ -36,6 +38,8 @@ async function main() {
         else{
             user_id = null;
         }
+
+        let transaction_id = crypto.randomUUID();
         
         console.log(user_id, role_id, full_name)
 
@@ -56,6 +60,7 @@ async function main() {
                         investor_type_id: investor_info_db['investor_type'],
                         transactions: [
                                 {
+                                txn_id: transaction_id,
                                 lots_bid: 3,
                                 bid_amount: 100
                             }

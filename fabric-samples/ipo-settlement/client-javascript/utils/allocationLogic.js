@@ -51,7 +51,8 @@ async function processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_i
         if (processed_dict['totalShares'] >= totalSize){
             console.log("No more shares available!");
             break;
-        }
+        } 
+        console.log(allocation_dict[i]['investor_type'], statusInfo);
         if (!(statusInfo && allocation_dict[i]['investor_type'] in statusInfo)){
             // if this investor_type_category is not in the statusInfo category
             console.log("\n---SKIP---\n");

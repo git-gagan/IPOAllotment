@@ -89,7 +89,7 @@ CREATE TABLE tbl_ipo_info (
 drop TABLE tbl_ipo_info;
 
 CREATE TABLE tbl_investor_transactions (
-	id integer primary key AUTOINCREMENT,
+	id uuid primary key,
 	investor_id varchar(50),
 	ipo_id varchar(50),
 	lots_bid integer,
@@ -97,6 +97,8 @@ CREATE TABLE tbl_investor_transactions (
 	time_of_bid datetime,
 	foreign key (investor_id) references tbl_investor_info(investor_id)
 );
+
+drop TABLE tbl_investor_transactions;
 
 CREATE TABLE tbl_allotment_principle(
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
