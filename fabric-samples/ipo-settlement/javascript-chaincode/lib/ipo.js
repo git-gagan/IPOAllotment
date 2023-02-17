@@ -461,11 +461,11 @@ class Ipo extends Contract {
         */
         console.log("---Inside Delete Transaction---");
         let asset = await this.queryIssuer(ctx, ipo_id);
-        asset = JSON.parse(asset);
         if (!asset){
             console.log("NOT ASSET:-", asset);
             return 0;
         }
+        asset = JSON.parse(asset);
         let lots_bid = 0;
         let bid_amount = 0;
         let lot_size = asset[ipo_id]['ipoInfo']['lot_size'];
@@ -488,6 +488,94 @@ class Ipo extends Contract {
         console.log("New Asset:- \n", asset);
         await ctx.stub.putState(ipo_id, Buffer.from(JSON.stringify(asset)));
         console.log("---Success---")
+        return 1;
+    }
+
+    async updateBid(ctx, txn_id, investor_id, ipo_id, new_lots_bid, new_bid_amount){
+        /*
+            This function takes the transaction id and new bid 
+            of the investor for the ipo and updates the ledger
+        */
+        console.log("---Inside Modify Transaction---");
+        let asset = await this.queryIssuer(ctx, ipo_id);
+        if (!asset){
+            console.log("NOT ASSET:-", asset);
+            return 0;
+        }
+        asset = JSON.parse(asset);
+        let lots_bid = 0;   // Final no of lots
+        let bid_amount = 0;     // Final bid amount
+        let old_lots_bid = 0;
+        let old_bid_amount = 0;
+        let lot_size = asset[ipo_id]['ipoInfo']['lot_size'];
+        let transactions_array = asset[ipo_id]['userInfo'][investor_id]['transactions'];
+        let transaction_index = null;
+        for(let i in transactions_array){
+            // iterate over each txn in the transactions and find the given txn
+            if (transactions_array[i]['txn_id'] == txn_id){
+                console.log("Matched at index:", i);
+                old_lots_bid = transactions_array[i]['lots_bid'];
+                old_bid_amount = transactions_array[i]['bid_amount'];
+                transaction_index = i;
+                break;
+            }
+        }
+        // Check if new bid_amount is allowed
+        if (new_bid_amount < asset[ipo_id]['ipoInfo']['priceRangeLow'] || bid_amount > asset[ipo_id]['ipoInfo']['priceRangeHigh']){
+            // If the current bid_amount of the investor is either too low or too high
+            console.log("Your bidding amount is not in the expected range!");
+            return -1;
+        }
+        let previous_investment = old_bid_amount*old_lots_bid*lot_size;
+        let new_investment = new_bid_amount*new_lots_bid*lot_size;
+        let investment_diff = previous_investment-new_investment;
+        console.log("Investment Difference:-", investment_diff);
+        if (investment_diff >= 0){
+            // if new bid amount is less than old one
+            // investor has ample money and can make a bid
+            asset[ipo_id]['escrowInfo']['refund_amount'] += investment_diff;
+            asset[ipo_id]['escrowInfo']['total_amount'] -= investment_diff;
+            asset[ipo_id]['userInfo'][investor_id]['total_invested'] -= investment_diff;
+            asset[ipo_id]['userInfo'][investor_id]['refund_amount'] += investment_diff;
+        }
+        else{
+            // Check if investor has got funds to place this bid
+            let global_investors_info = await this.getGlobalInvestorInfo(ctx);
+            console.log("Investor INFO:- ", global_investors_info);
+            let current_balance = global_investors_info[_global_investors_id][investor_id]['wallet']['current_balance'];
+            if (investment_diff > current_balance){
+                console.log("Not Sufficient Funds to increment the Bid");
+                return -2;
+            }
+            asset[ipo_id]['escrowInfo']['total_amount'] += -1*investment_diff;
+            asset[ipo_id]['userInfo'][investor_id]['total_invested'] += -1*investment_diff;
+            global_investors_info[_global_investors_id][investor_id]['wallet']['current_balance'] -= -1*investment_diff;
+            console.log("Updating global investor info now");
+            await ctx.stub.putState(_global_investors_id, Buffer.from(JSON.stringify(global_investors_info)));
+            console.log("\nGlobal investor info updated!!!");
+        }
+        lots_bid = new_lots_bid;
+        bid_amount = new_bid_amount;
+        console.log("Updating IPO bid info");
+        if (new_lots_bid > old_lots_bid){
+            asset[ipo_id]['ipoInfo']['balance'] -= (new_lots_bid-old_lots_bid)*lot_size;
+            asset[ipo_id]['ipoInfo']['total_bid'] += (new_lots_bid-old_lots_bid)*lot_size; 
+            asset[ipo_id]['userInfo'][investor_id]['shares']['bid'] += (new_lots_bid-old_lots_bid)*lot_size;
+        }
+        else{
+            asset[ipo_id]['ipoInfo']['balance'] += (old_lots_bid-new_lots_bid)*lot_size;
+            asset[ipo_id]['ipoInfo']['total_bid'] -= (old_lots_bid-new_lots_bid)*lot_size;
+            asset[ipo_id]['userInfo'][investor_id]['shares']['bid'] -= (old_lots_bid-new_lots_bid)*lot_size;
+        }
+        console.log("Updating transactions Array");
+        console.log("Old transactions Array: ", transactions_array);
+        console.log("Transaction Index:- ", transaction_index);
+        transactions_array[transaction_index]['lots_bid'] = lots_bid;
+        transactions_array[transaction_index]['bid_amount'] = bid_amount;
+        asset[ipo_id]['userInfo'][investor_id]['transactions'] = transactions_array;
+        console.log("New Asset:- \n", asset);
+        await ctx.stub.putState(ipo_id, Buffer.from(JSON.stringify(asset)));
+        console.log("---Successfully updated ASSET---");
         return 1;
     }
 

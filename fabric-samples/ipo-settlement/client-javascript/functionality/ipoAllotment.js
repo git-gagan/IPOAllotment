@@ -72,8 +72,19 @@ async function main() {
                             if (!allocation_dict.length || !status){
                                 // No data in DB (status is null or transaction info is empty)
                                 console.log(allocation_dict, status);
-                                console.log("No data of investors!!!");
-                                console.log("Allocation can't be made!");
+                                if (JSON.stringify(statusInfo) == '{}'){
+                                    console.log("No data of investors!!!");
+                                    console.log("Allocation can't be made!");
+                                    make_allotment = false;
+                                }
+                                else{
+                                    allocation_dict = {
+                                        'investorInfo': {},
+                                        'totalAmount':0,
+                                        'totalShares':0
+                                    };
+                                    console.log("Process Refunds Only!");   // Make allotment stays true
+                                }
                             }
                             else{
                                 if (status == "U"){
@@ -147,12 +158,12 @@ async function main() {
                                     }
                                 }
                                 console.log(allocation_dict);
-                                if (make_allotment){
-                                    // Evaluate the specified transaction.
-                                    const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
-                                    console.log(`Transaction has been evaluated, result is: ${result}`);
-                                    console.log("\nSUCCESS\n");
-                                }
+                            }
+                            if (make_allotment){
+                                // Evaluate the specified transaction.
+                                const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
+                                console.log(`Transaction has been evaluated, result is: ${result}`);
+                                console.log("\nSUCCESS\n");
                             }
                         }
                         else{

@@ -39,7 +39,7 @@ async function main() {
             user_id = null;
         }
 
-        let transaction_id = crypto.randomUUID();
+        let transaction_id = '5442e304-eae1-41eb-82ab-f5dc0399ac3a6' //crypto.randomUUID();
         
         console.log(user_id, role_id, full_name)
 
@@ -61,8 +61,8 @@ async function main() {
                         transactions: [
                                 {
                                 txn_id: transaction_id,
-                                lots_bid: 3,
-                                bid_amount: 100
+                                lots_bid: 6,
+                                bid_amount: 200
                             }
                         ],
                         shares:{
