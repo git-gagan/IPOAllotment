@@ -127,6 +127,8 @@ CREATE TABLE tbl_ipo_bucket(
 	investor_type_id INT,
 	no_of_shares INT,
 	priority INT,
+	allotted_shares INT DEFAULT 0,
+	CONSTRAINT uni UNIQUE(investor_id, ipo_id),
 	FOREIGN KEY (ipo_id) REFERENCES tbl_ipo_info(ipo_id),
 	FOREIGN KEY (investor_id) REFERENCES tbl_investor_info(investor_id),
 	FOREIGN KEY (investor_type_id) REFERENCES tbl_investor_type(investor_type_id)

@@ -39,13 +39,13 @@ async function main() {
             user_id = null;
         }
 
-        let transaction_id = '5442e304-eae1-41eb-82ab-f5dc0399ac3a6' //crypto.randomUUID();
+        let transaction_id = '5442e304-eae1-41eb-82ab-f5dc0399ac3b' //crypto.randomUUID();
         
         console.log(user_id, role_id, full_name)
 
         // Form inputs
         var ipo_id = "F1";
-        var demat_ac_no = "sd"; // NikDmat, GagDm, sd, ad :-> testing for 4 users
+        var demat_ac_no = "ad"; // NikDmat, GagDm, sd, ad :-> testing for 4 users
         let investor_info_db = await getInvestorInfo(user_id);
         function createInvestorObject(){
             /*

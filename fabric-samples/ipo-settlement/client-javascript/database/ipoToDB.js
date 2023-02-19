@@ -158,4 +158,72 @@ async function addIpoBuckets(bucket_obj) {
     }
 }
 
-export { insertOrUpdateIpo, addIpoEligibility, addIpoBuckets };
+async function updateIpoBuckets(allotted_shares, ipo_id, investor_id) {
+    try {
+        // Create DB connection
+        console.log("-------------------------------------");
+        let db = await makeDbConnection();
+        console.log(db, "------------------");
+        let sql = `update tbl_ipo_bucket
+                    SET allotted_shares=${allotted_shares}
+                    where ipo_id='${ipo_id}' and investor_id='${investor_id}'`;
+        console.log(sql);
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.run(sql, (err) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("Execution Successful!");
+                        resolve("Success!");
+                    }
+                });
+            }
+        )
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to update IPO-Bucket information: ${error}`);
+        process.exit(1);
+    }
+}
+
+async function getIpoBuckets(ipo_id) {
+    try {
+        // Create DB connection
+        console.log("-------------------------------------");
+        let db = await makeDbConnection();
+        console.log(db, "------------------");
+        let sql = `select * from tbl_ipo_bucket
+                    where ipo_id='${ipo_id}'
+                    order by priority asc`;
+        console.log(sql);
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.all(sql, (err, values) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("ipo bucket info fetched!");
+                        resolve(values);
+                    }
+                });
+            }
+        )
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to get IPO-Bucket information: ${error}`);
+        process.exit(1);
+    }
+}
+
+export { insertOrUpdateIpo, addIpoEligibility, addIpoBuckets, updateIpoBuckets, getIpoBuckets };
