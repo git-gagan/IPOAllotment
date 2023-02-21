@@ -28,17 +28,81 @@ html(lang="en")
         //-                         i.bi.bi-person-square
         nav.navbar.navbar-expand-lg.navbar-light.fixed-top
             .container-fluid
-                a.navbar-brand(href='/') 
-                     img(src="/image/yodaplus-icon.png",width="50", height="50")
-                button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
-                    span.navbar-toggler-icon
-                #navbarText.collapse.navbar-collapse
-                    ul.navbar-nav.me-auto.mb-2.mb-lg-0
-                    -if(session){
-                        .person-icon
-                            i.bi.bi-person-square
+                
+                -if(session && role_id=="IN"){
+                    a.navbar-brand(href='/ongoing-ipo') 
+                        img(src="/image/yodaplus-icon.png",width="50", height="50")
+                    button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
+                        span.navbar-toggler-icon
+                    #navbarText.collapse.navbar-collapse
+                        ul.navbar-nav.me-auto.mb-2.mb-lg-0
+                        .btn-group.dropstart
+                            button.btn(type='button' data-bs-toggle='dropdown' aria-expanded='false')
+                                .person-icon
+                                    i.bi.bi-person-square
+                            ul.dropdown-menu
+                                // Dropdown menu links
+                                li 
+                                a.dropdown-item(href='#') Hi, #{session}
+                                li
+                                hr.dropdown-divider
+                                li
+                                a.dropdown-item(href='/profile') Profile
+                                //- li
+                                //- a.dropdown-item(href='#') Funds
+                                li
+                                a.dropdown-item(href='#') Portfolio
+                                li
+                                a.dropdown-item(href='#') IPO
+                                li
+                                a.dropdown-item(href='/logout') Logout
+                            
 
-                    -}
+                -}else if(session && role_id=="IS"){
+                    a.navbar-brand(href='/issuer-dashboard') 
+                        img(src="/image/yodaplus-icon.png",width="50", height="50")
+                    button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
+                        span.navbar-toggler-icon
+                    #navbarText.collapse.navbar-collapse
+                        ul.navbar-nav.me-auto.mb-2.mb-lg-0
+                        .btn-group.dropstart
+                            button.btn(type='button' data-bs-toggle='dropdown' aria-expanded='false')
+                                .person-icon
+                                    i.bi.bi-person-square
+                            ul.dropdown-menu
+                                // Dropdown menu links
+                                li 
+                                a.dropdown-item(href='#') Hi, #{session}
+                                li
+                                hr.dropdown-divider
+                                //- li 
+                                //- a.dropdown-item(href='/launch-ipo') Launch IPO 
+                                li
+                                a.dropdown-item(href='/logout') Logout
+                -}else if(session && role_id=="AG"){
+                    a.navbar-brand(href='/agent-dashboard') 
+                        img(src="/image/yodaplus-icon.png",width="50", height="50")
+                    button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
+                        span.navbar-toggler-icon
+                    #navbarText.collapse.navbar-collapse
+                        ul.navbar-nav.me-auto.mb-2.mb-lg-0
+                        .btn-group.dropstart
+                            button.btn(type='button' data-bs-toggle='dropdown' aria-expanded='false')
+                                .person-icon
+                                    i.bi.bi-person-square
+                            ul.dropdown-menu
+                                // Dropdown menu links
+                                li 
+                                a.dropdown-item(href='#') Hi, #{session}
+                                li
+                                hr.dropdown-divider
+                               
+                                li
+                                a.dropdown-item(href='/logout') Logout
+                -}else{
+                    a.navbar-brand(href='/') 
+                        img(src="/image/yodaplus-icon.png",width="50", height="50")
+                -}
                     
                             
                     

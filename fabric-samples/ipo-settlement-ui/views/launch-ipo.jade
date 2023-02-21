@@ -1,0 +1,234 @@
+extends layout
+
+-var investor_types=#investor_types
+block content
+    .container 
+        .row
+            .col-2 
+            .col-8
+                
+                form(action="/launch-ipo",method="post") 
+                    
+                    //- ul#pills-tab.nav.nav-pills.mb-5(role='tablist')
+                    //-     li.nav-item(role='presentation')
+                    //-         button#pills-home-tab.nav-link.active(data-bs-toggle='pill' data-bs-target='#pills-home' type='button' role='tab' aria-controls='pills-home' aria-selected='true') Basic IPO Details
+                    //-     li.nav-item(role='presentation')
+                    //-         button#pills-profile-tab.nav-link(data-bs-toggle='pill' data-bs-target='#pills-profile' type='button' role='tab' aria-controls='pills-profile' aria-selected='false') IPO Buckets
+                    //-     li.nav-item(role='presentation')
+                    //-         button#pills-contact-tab.nav-link(data-bs-toggle='pill' data-bs-target='#pills-contact' type='button' role='tab' aria-controls='pills-contact' aria-selected='false') Investor Classification
+                    //- #pills-tabContent.tab-content
+                    //-     #pills-home.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='pills-home-tab') 
+                    .row 
+                        h6 Basic IPO Details 
+
+                        .col-4
+                            .form-group 
+                                label(for="issuer") Issuer Name
+                                input.form-control(type="text",name="issuer")  
+                            .form-group 
+                                label(for="cusip") CUSIP
+                                input.form-control(type="text",name="cusip")  
+                            .form-group 
+                                label(for="ipoStartDate") IPO Start Date
+                                input.form-control(type="date",name="ipoStartDate")  
+                            .form-group 
+                                label(for="totalShares") Total Shares
+                                input.form-control(type="number",name="totalShares")
+                            .form-group 
+                                label(for="lowPrice") Low Price
+                                input.form-control(type="number",name="lowPrice")
+
+                            
+                                
+                            label(for="principle") Allocation Principle (in the case of over-subscription)
+                            select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle")
+                                option(value='')
+                                for principle in principles
+                                    option(value=`${principle.id}`) #{principle.name}
+
+                            label(for="agent") Paying Agent
+                            select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="agent" )
+                                option(value='')
+                                for agent in agents
+                                    option(value=`${agent.user_id}`) #{agent.user_name}
+                                        
+                            
+                        .col-1
+                        .col-4
+                            .form-group 
+                                label(for="isin") ISIN
+                                input.form-control(type="text",name="isin")  
+                            .form-group 
+                                label(for="ticker") Ticker
+                                input.form-control(type="text",name="ticker")
+                            .form-group 
+                                label(for="ipoEndTime") IPO End Time(In Seconds)
+                                input.form-control(type="number",name="ipoEndTime")
+                            .form-group 
+                                label(for="lotSize") Lot Size
+                                input.form-control(type="number",name="lotSize")
+                            .form-group 
+                                label(for="highPrice") High Price
+                                input.form-control(type="number",name="highPrice")
+
+                    .row.mb-5 
+                        .col-11
+                        
+                        .col-1
+                            button.btn.button(type="submit") Next
+                                    
+                        //- #pills-profile.tab-pane.fade(role='tabpanel' aria-labelledby='pills-profile-tab') 
+                    
+                form(action="/add-ipo-buckets", method="post") 
+                    .row 
+                        h6 Please add all pre-primary investors, their sale bucket size and priority of allotment
+
+                    //- form(action="/add-ipo-buckets", method="post") 
+                    .row 
+                        //- .col-3
+                        //-     button.btn(type="button",onClick="addBucket()")
+                        //-         i.bi.bi-plus-circle-fill    Add Bucket
+                        .col-3
+                            label(for="investorType") Investor Type
+                            select.form-control(name='investorTypeBucket',id="investorTypeBucket")
+                                for investor in investor_types
+                                    option(value=`${investor.investor_type_id}`) #{investor.investor_type}
+                        .col-3 
+                            .form-group 
+                                label(for="BucketSize") Bucket Size
+                                input.form-control(type="number",name="BucketSize",id="BucketSize")
+                        .col-3 
+                            .form-group 
+                                label(for="allocPriority") Allocation Priority
+                                input.form-control(type="number",name="allocPriority",id="allocPriority")
+                        .col-3
+                            label(for="investorId") Investor
+                            select.form-control(name='investorId',id="investorId")
+                                for investor in investors
+                                    option(value=`${investor.investor_id}`) #{investor.investor_name}
+                    .row 
+                        .col-4 
+                        .col-4
+                        .col-4 
+                            button.button.btn-lg(type="submit") Add Bucket
+
+
+
+
+
+
+                            //- .row#ipobucket
+
+                            
+
+                                
+                        //- #pills-contact.tab-pane.fade(role='tabpanel' aria-labelledby='pills-contact-tab')
+                form(action="/add-investor-category", method="post") 
+                    .row 
+                        h6 Please add all investor categories who are allowed to participate, their reserved quota and minimum lot quantity
+
+                    //- .row 
+                    //-     .col-4
+
+                    //-         button.btn(type="button",onClick="addInvestorCategory()")
+                    //-             i.bi.bi-plus-circle-fill    Add Investor Category
+                    //-         .row#investorcategory
+
+
+                    .row 
+                        //- .col-3
+                        //-     button.btn(type="button",onClick="addBucket()")
+                        //-         i.bi.bi-plus-circle-fill    Add Bucket
+                        .col-4
+                            label(for="investorType") Investor Type
+                            select.form-control(name='investorType',id="investorType")
+                                for investor in investor_types
+                                    option(value=`${investor.investor_type_id}`) #{investor.investor_type}
+                        .col-4 
+                            .form-group 
+                                label(for="quota") Reserved Quota
+                                input.form-control(type="number",name="quota",id="quota")
+                        .col-4 
+                            .form-group 
+                                label(for="lotQuantity") Lot Quantity
+                                input.form-control(type="number",name="lotQuantity",id="lotQuantity")
+                    .row 
+                        .col-4 
+                        .col-4
+                        .col-4 
+                            button.button.btn-lg(type="submit") Add Investor Category
+
+                    
+                            
+                                
+            .col-2 
+
+
+    script(type="text/javascript").
+        var InvestorCategoryId=1
+        var BucketId=1
+        
+        var investorTypes = !{JSON.stringify(investor_types)};
+        console.log(investorTypes)
+        for(let x in investorTypes){
+            document.getElementsByClassName("investor_types_dropdown").innerHTML=
+            ` <option value="${investorTypes[x].investor_type_id}">${investorTypes[x].investor_type}</option>
+            
+            `
+            console.log(investorTypes[x].investor_type_id)
+            console.log(investorTypes[x].investor_type)
+           
+        }
+        function addInvestorCategory(){
+            
+            
+            document.getElementById("investorcategory").innerHTML+=
+            `<div class="col-4">
+                <div class="form-group">
+                    <label for="investorType">Investor Type</label>
+                    <select class="form-select investor_types_dropdown" aria-label="Default select example" name="ICINType_${InvestorCategoryId}">
+                    </select>
+                 </div>    
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label for="quota">Reserved Quota</label>
+                    <input class="form-control" type="text" name="ICRQ_${InvestorCategoryId}" />
+                </div>
+            </div>
+            <div class="col-4">
+                 <div class="form-group">
+                    <label for="lotQuantity">Lot Quantity</label>
+                    <input class="form-control" type="text" name="ICLQ_${InvestorCategoryId}" />
+                </div>   
+            </div>
+            `
+
+        }
+
+
+        function addBucket(){
+            document.getElementById("ipobucket").innerHTML+=
+            `<div class="col-4">
+                <div class="form-group">
+                    <label for="investorType">Investor Type</label>
+                    <input class="form-control" type="text" name="BIT_${BucketId}"/>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label for="bucketSize">Bucket Size</label>
+                    <input class="form-control" type="number" placeholder="unit" name="BBS_${BucketId}"/>
+                </div>
+            </div>
+            <div class="col-4">
+                 <div class="form-group">
+                    <label for="allocPriority">Allocation Priority</label>
+                    <input class="form-control" type="text" name="BAP_${BucketId}" />
+                </div>   
+            </div>
+            `
+
+        }
+
+    

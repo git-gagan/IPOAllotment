@@ -15,7 +15,7 @@ import { getIdFromUsername } from '../database/getUserId.js';
 import { dematToDb } from '../database/addDematToDB.js';
 
 
-async function addDemat(username) {
+async function addDemat(username,dmat_ac_no,dp_id) {
     try {
         let userName=username;
         // console.log(process.argv);
@@ -38,8 +38,8 @@ async function addDemat(username) {
 
         // Form data to be collected here for dmat update
         let dmat_obj = {
-            "dmat_ac_no": "gagannewDmat2",
-            "dp_id": "!121"
+            "dmat_ac_no": dmat_ac_no,
+            "dp_id": dp_id
         }
 
         if(user_id){

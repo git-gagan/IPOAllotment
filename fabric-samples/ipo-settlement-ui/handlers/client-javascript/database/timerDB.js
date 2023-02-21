@@ -1,21 +1,22 @@
-import sqlite3 from 'sqlite3';
 import { makeDbConnection } from "./dbConnection.js";
 
-async function insertBid(investor_obj, investor_id, ipo_id) {
+async function updateTimers(ipo_id, start=false) {
     try {
         // Create DB connection
         let db = await makeDbConnection();
         console.log(db, "------------------");
-        let sql = `insert into tbl_investor_transactions
-        (id, investor_id, ipo_id, lots_bid, bid_amount, time_of_bid) 
-        values(
-            '${investor_obj[investor_id]['transactions'][0]['txn_id']}',
-            '${investor_id}', 
-            '${ipo_id}', 
-            '${investor_obj[investor_id]['transactions'][0]['lots_bid']}',
-            '${investor_obj[investor_id]['transactions'][0]['bid_amount']}',
-            '${(new Date().toISOString().split('T')).join(" ")}'
-        );`
+        let sql = '';
+        if (start){
+            sql = `update tbl_ipo_info
+                set has_bidding_started='true'
+                where ipo_id='${ipo_id}'`;
+        }
+        else{
+            sql = `update tbl_ipo_info
+                set is_complete='true'
+                where ipo_id='${ipo_id}'`;
+        }
+        console.log(sql);
         const dbpromise = new Promise(
             (resolve, reject) => {
                 db.run(sql, (err) => {
@@ -25,7 +26,7 @@ async function insertBid(investor_obj, investor_id, ipo_id) {
                         reject(err.message);
                     }
                     else{
-                        console.log("Insertion Successful!");
+                        console.log("Timer Info Updated!");
                         resolve("Success!");
                     }
                 });
@@ -35,10 +36,9 @@ async function insertBid(investor_obj, investor_id, ipo_id) {
         return dbpromise;
     } 
     catch (error) {
-        console.error(`Failed to insert bid information: ${error}`);
+        console.error(`Failed to update Timer info: ${error}`);
         process.exit(1);
     }
 }
 
-
-export { insertBid };
+export { updateTimers };

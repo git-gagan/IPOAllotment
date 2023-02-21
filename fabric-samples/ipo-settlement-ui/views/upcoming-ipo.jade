@@ -12,13 +12,18 @@ block content
                     //-         .person-icon
                     //-             i.bi.bi-person-square
                 div
-                    p.h4 Upcoming IPOs
+                    p.h4 Upcoming IPOs(#{upcoming.length})
                     hr
-                    .row 
-                        .col-4 
-                            p.h4 YPLUS
-                            p.h6 Yodaplus Technologies Pvt. Ltd.
-                            p 18th-20th Jan
+                    if upcoming
+                        for ipo in upcoming 
+                            - const month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                            - var bid_start_date=new Date(ipo.bid_start_date)
+                            - var date=bid_start_date.getDate()+"th"+" "+month[bid_start_date.getMonth()]+" "+bid_start_date.getFullYear()
+                            .row 
+                                .col-4 
+                                    p.h4 #{ipo.ticker}
+                                    p.h6 #{ipo.issuer_name}
+                                    p #{date}
                         
 
               

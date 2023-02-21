@@ -58,11 +58,12 @@ CREATE TABLE tbl_ipo_info (
 );
 
 CREATE TABLE tbl_investor_transactions (
-	id integer primary key AUTOINCREMENT,
+	id varchar(50) primary key,
 	investor_id varchar(50),
 	ipo_id varchar(50),
 	lots_bid integer,
 	bid_amount integer,
+	num_of_bid integer,
 	time_of_bid datetime,
 	foreign key (investor_id) references tbl_investor_info(investor_id)
 );

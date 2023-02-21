@@ -9,21 +9,24 @@
 
 'use strict';
 
+import crypto from 'crypto'   // For UUID generation
+
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { insertBid } from '../database/insertBidtoDB.js';
 import { dematFromDb, dematFromInvestorDB } from '../database/getDmatFromDB.js';
-import { insertDmatIpo } from '../database/insertDmatIpo.js';
+import { insertDmatIpo, updateIpoBidNumber } from '../database/insertDmatIpo.js';
 import { getIpoEligibleLots } from '../database/getIpoeligibility.js';
+import { getInvestorInfo } from '../database/investorInfo.js';
 
-async function invokeTransaction(username,lotQuantity,bidperShare,shareId) {
+
+async function invokeBuy(username,ipo_id,demat_ac_no,lotQuantity,bidperShare) {
     try {
         // console.log(process.argv);
-        var queryResult = '';
-        // let userName = process.argv[2];   // Take username from command line
-        let userName=username
-        let user_promise = await getIdFromUsername(userName);
+        let userName = username;   // Take username from command line
+
+        let user_promise = await getIdFromUsername(username);
         console.log("USER promise:- ", user_promise);
 
         let user_id, role_id, full_name;
@@ -35,11 +38,15 @@ async function invokeTransaction(username,lotQuantity,bidperShare,shareId) {
         else{
             user_id = null;
         }
+
+        let transaction_id = crypto.randomUUID() //crypto.randomUUID();
         
         console.log(user_id, role_id, full_name)
-       // Form inputs
-        var ipo_id = "F1";
-        var demat_ac_no = "GagDm";
+
+        // Form inputs
+        var ipo_id = ipo_id;
+        var demat_ac_no = demat_ac_no; // NikDmat, GagDm, sd, ad :-> testing for 4 users
+        let investor_info_db = await getInvestorInfo(user_id);
         function createInvestorObject(){
             /*
                 This function creates an investor object during the buy process
@@ -50,8 +57,10 @@ async function invokeTransaction(username,lotQuantity,bidperShare,shareId) {
                         {
                         name: userName,
                         full_name: full_name,
+                        investor_type_id: investor_info_db['investor_type'],
                         transactions: [
                                 {
+                                txn_id: transaction_id,
                                 lots_bid: parseInt(lotQuantity),
                                 bid_amount: parseInt(bidperShare)
                             }
@@ -68,18 +77,32 @@ async function invokeTransaction(username,lotQuantity,bidperShare,shareId) {
 
         if(user_id){
             // Get the investor object
-            var ipo_id = shareId;
             let investor_obj = createInvestorObject();
             console.log("\n", investor_obj);
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
-
             if (isAuthUser && role_id == "IN") {
                 let lots_bid_valid = await is_lots_bid_valid(user_id, investor_obj, ipo_id);
                 if (!lots_bid_valid){
                     console.log("---Failure---");
                     process.exit(1);
+                }
+                // Need to check if the investor hasn't crossed the limit of max 3 allowed bids
+                let num_of_bids = 0;
+                let investor_ipo_bid_info = await dematFromDb(user_id, ipo_id);
+                console.log(investor_ipo_bid_info);
+                if (investor_ipo_bid_info[0]){
+                    if (investor_ipo_bid_info[0]['num_of_bid'] >= 3){
+                        // Max limit exceeded
+                        console.log("You have already bid for " + investor_ipo_bid_info[0]['num_of_bid'] + " times");
+                        console.log("No more bids can be placed");
+                        console.log("Failure");
+                        process.exit(1);
+                    }
+                    else{
+                        num_of_bids = investor_ipo_bid_info[0]['num_of_bid'];
+                    }
                 }
                 var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
                 console.log("\n2")
@@ -102,6 +125,9 @@ async function invokeTransaction(username,lotQuantity,bidperShare,shareId) {
                             let dmatDb = await insertDmatIpo(user_id, ipo_id, demat_ac_no);
                             console.log("=============================================");
                         }
+                        // Update counter in DB
+                        console.log("Updating bid number of investor ",user_id);
+                        let updateDb = await updateIpoBidNumber(user_id, ipo_id, num_of_bids+1);
                         console.log("\nSUCCESS\n");
                     }
                     else if (result == '-2'){
@@ -111,35 +137,24 @@ async function invokeTransaction(username,lotQuantity,bidperShare,shareId) {
                         console.log("Invalid Bid amount!");
                     }
                 }
-                else if(result == "-1"){
-                    console.log("Your bidding amount is not in the expected range!")
-                    queryResult="Your bidding amount is not in the expected range!"
-                }
                 else{
-                    console.log("Invalid Bid amount!");
                     console.log("Bidding not allowed with this DEMAT account no!");
                     console.log("FAILED!");
-                    queryResult='Invalid Bid amount!'
                 }
-              
                 await gateway.disconnect();
             }
             else {
                 console.log("\n3")
                 console.log("Unauthorized User!");
-                queryResult=`Unauthorized User!`
             }
         }
         else{
             console.log("This user doesn't exist!");
-            queryResult=`This user doesn't exist!`
         }
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
         process.exit(1);
     }
-
-    return queryResult
 }
 
 async function is_demat_valid_for_ipo(investor_id, ipo_id, demat_ac_no){
@@ -169,7 +184,6 @@ async function is_demat_valid_for_ipo(investor_id, ipo_id, demat_ac_no){
     return 1;
 }
 
-
 async function is_lots_bid_valid(investor_id, investor_obj, ipo_id){
     // To check if the lots which the investor of a particular type wants to bid
     // for this ipo are allowed or not and if the investor is even eligible to bid
@@ -194,5 +208,4 @@ async function is_lots_bid_valid(investor_id, investor_obj, ipo_id){
 }
 
 
-
-export {invokeTransaction}
+export {invokeBuy};

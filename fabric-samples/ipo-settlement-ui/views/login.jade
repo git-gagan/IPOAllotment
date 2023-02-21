@@ -17,6 +17,8 @@ block content
                 form(action="/login",method="post")
                     .row
                         .col-12
+                            if message 
+                                .alert.alert-info(role='alert') #{message}
                             .form-group 
                                 label(for="username") User Name 
                                 input.form-control(type="text",placeholder="username",name="username" required)  

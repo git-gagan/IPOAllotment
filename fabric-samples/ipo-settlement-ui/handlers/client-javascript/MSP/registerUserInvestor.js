@@ -21,6 +21,7 @@ async function registerUserInvestor(username) {
         // load the network configuration
         // console.log(process.argv);
         const userName = "IN-" + username;   // Take username from command line
+        console.log(userName)
         // const __dirname = path.resolve(path.dirname(''));
         const ccpPath = path.resolve('..', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
         

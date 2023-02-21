@@ -9,12 +9,15 @@ import {registerUserInvestor} from  "./handlers/client-javascript/MSP/registerUs
 import {registerUserIssuer}  from  "./handlers/client-javascript/MSP/registerUserIssuer.js";
 import {query} from "./handlers/client-javascript/functionality/query.js"
 import {queryTransaction} from "./handlers/client-javascript/functionality/queryAllShares.js"
-import {invokeTransaction} from "./handlers/client-javascript/functionality/invokeBuy.js"
+import {invokeBuy} from "./handlers/client-javascript/functionality/invokeBuy.js"
 import {IssuertoLedger} from "./handlers/client-javascript/functionality/addIssuerToLedger.js"
 import { getIdFromUsername } from './handlers/client-javascript/database/getUserId.js';
 import {SharesAllotment} from "./handlers/client-javascript/functionality/allotment.js";
-
-
+import { ipoAllotment } from "./handlers/client-javascript/functionality/ipoAllotment.js";
+import {makeDbConnection} from "./handlers/client-javascript/database/dbConnection.js";
+import { OngoingIpoInfo } from "./handlers/client-javascript/database/OngoingIpoInfo.js";
+import { UpcomingIpoInfo } from "./handlers/client-javascript/database/UpcomingIpoInfo.js";
+import { getIpoInfo } from "./handlers/client-javascript/database/getIpo.js";
 // var invoke = require("./handlers/invoke");
 // var query = require("./handlers/query");
 // var startBid=require("./handlers/startBid");
@@ -28,6 +31,16 @@ import fs from 'fs';
 
 
 import { v4 as uuidv4 } from 'uuid';
+import { Console } from "console";
+import { getAllInvestorInfo, getInvestorInfo } from "./handlers/client-javascript/database/investorInfo.js";
+import { getdemat } from "./handlers/client-javascript/database/getDmatFromDB.js";
+import { getAllotmentPrinciple } from "./handlers/client-javascript/database/getAllotmentPrinciple.js";
+import { getIpoBucket } from "./handlers/client-javascript/database/getIpoBucket.js";
+import { getInvestorClassification } from "./handlers/client-javascript/database/getInvestorClassification.js";
+import { addDemat } from "./handlers/client-javascript/functionality/addDemat.js";
+import { getAgents } from "./handlers/client-javascript/database/getAgents.js";
+import { getInvestorTypes } from "./handlers/client-javascript/database/getInvestorTypes.js";
+import { getOverSubAllotmentPrinciple } from "./handlers/client-javascript/database/getOverSubAllotmentPrinciple.js";
 
 /////////////////////////////////////////
 // Express setup
@@ -73,17 +86,17 @@ let db = new sqlite3.Database('ipo.db', (err)=>{
 // VIEWS
 app.get('/', function (req, res){
     if(req.session.name){
-        res.render("index.jade",{session:req.session.name,role:role_id})
+        res.render("index.jade",{session:req.session.name,role_id:role_id})
     }
     else{
         res.render("index.jade")
     }
 });
 app.get('/enroll', function (req, res){
-    res.render("enroll.jade",{session:req.session.name,role:role_id})
+    res.render("enroll.jade",{session:req.session.name,role_id:role_id})
 });
 app.get('/register', function (req, res){
-    res.render("register.jade",{session:req.session.name,role:role_id})
+    res.render("register.jade",{session:req.session.name,role_id:role_id})
 });
 
 
@@ -99,7 +112,7 @@ app.get("/portfolio",function(req,res){
         console.log(value);
         portfolios=value[value.length-1].Record.portfolio
         console.log(portfolios)
-        res.render("portfolio.jade",{session:req.session.name,role:role_id,portfolios:portfolios})
+        res.render("portfolio.jade",{session:req.session.name,role_id:role_id,portfolios:portfolios})
        
 
       
@@ -122,7 +135,7 @@ app.get("/balance",function(req,res){
         catch(err){
             balance=200000
         }
-        res.render("balance.jade",{session:req.session.name,balance:balance,role:role_id})
+        res.render("balance.jade",{session:req.session.name,balance:balance,role_id:role_id})
     }
     promiseValue();
 });
@@ -133,14 +146,14 @@ app.get('/invoke', function (req, res){
     console.log("Share id :",share_id)
    
 
-    res.render("invoke.jade",{session:req.session.name,role:role_id,id:share_id})
+    res.render("invoke.jade",{session:req.session.name,role_id:role_id,id:share_id})
 });
 
 app.get('/query', function (req, res){
-    res.render("query.jade",{session:req.session.name,role:role_id})
+    res.render("query.jade",{session:req.session.name,role_id:role_id})
 });
 app.get('/signup', function (req, res){
-    res.render("signup.jade",{session:req.session.name,role:role_id})
+    res.render("signup.jade",{session:req.session.name,role_id:role_id})
 });
 // app.post('/invoke',function(req,res){
 //     var share=req.body.custId
@@ -175,7 +188,7 @@ app.get('/issuerpanel', function (req, res){
 
             console.log(agents)
             console.log("All Agents :",agents)
-            res.render("issuerpanel.jade",{session:req.session.name,role:role_id,agents:agents})
+            res.render("issuerpanel.jade",{session:req.session.name,role_id:role_id,agents:agents})
 
 
         });
@@ -192,7 +205,7 @@ app.post("/agentpanel",function(req,res){
     var promiseValue = async () => {
         const value = await promiseQuery;
         console.log(value);
-        res.render("agentpanel.jade",{session:req.session.name,role:role_id,message:value})
+        res.render("agentpanel.jade",{session:req.session.name,role_id:role_id,message:value})
          
         
         
@@ -209,7 +222,7 @@ app.get("/ipo",function(req,res){
     var promiseValue = async () => {
         const value = await promiseQuery;
         console.log(value);
-        res.render("ipo.jade",{session:req.session.name,data:value,role:role_id,message:""})
+        res.render("ipo.jade",{session:req.session.name,data:value,role_id:role_id,message:""})
     }
     promiseValue();
 });
@@ -255,7 +268,7 @@ app.get('/agentpanel', function (req, res){
     var promiseValue = async () => {
         const value = await promiseQuery;
         console.log(value);
-        res.render("agentpanel.jade",{session:req.session.name,data:value,role:role_id,message:""})
+        res.render("agentpanel.jade",{session:req.session.name,data:value,role_id:role_id,message:""})
     }
     promiseValue();
 
@@ -273,7 +286,7 @@ app.post("/actionInvoke",function(req,res){
     var promiseValue = async () => {
         const value = await promiseInvoke;
         console.log(value);
-        res.render("invoke.jade", {data: value,session:req.session.name,role:role_id});
+        res.render("invoke.jade", {data: value,session:req.session.name,role_id:role_id});
         
     };
     promiseValue();
@@ -324,7 +337,7 @@ app.get('/userinfo',  async function (req, res){
             console.log(userinfo)
             if(userinfo){
                 console.log(userinfo)
-                res.render("userinfo.jade",{session:req.session.name,role:role_id,userinfo:userinfo})
+                res.render("userinfo.jade",{session:req.session.name,role_id:role_id,userinfo:userinfo})
 
             }
 
@@ -352,7 +365,7 @@ app.post("/signup",function (req, res) {
           return;
        }
         else if(row){
-            res.render("signup.jade",{message:"Username already exist",session:req.session.name,role:role_id});
+            res.render("signup.jade",{message:"Username already exist",session:req.session.name,role_id:role_id});
         }
         else{
             let user_id=uuidv4()
@@ -385,7 +398,7 @@ app.post("/signup",function (req, res) {
                 db.run(insert, [user_id,username,password]);
                 db.run(insert2, [user_id,identity]);
                
-                res.render("login.jade",{message:"Successfully registered!!",session:req.session.name,role:role_id});
+                res.render("login.jade",{message:"Successfully registered!!",session:req.session.name,role_id:role_id});
 
             } catch (error) {
                 console.log(error.message);
@@ -397,11 +410,11 @@ app.post("/signup",function (req, res) {
 
 });
 app.get('/login', function (req, res){
-    res.render("login.jade",{session:req.session.name,role:role_id})
+    res.render("login.jade",{session:req.session.name,role_id:role_id})
 });
 
 app.get("/registerauthority",function(req,res){
-    res.render("registerauthority.jade",{session:req.session.name,role:role_id})
+    res.render("registerauthority.jade",{session:req.session.name,role_id:role_id})
 })
 
 
@@ -410,7 +423,7 @@ app.post("/registerauthority",function(req,res){
     var password=req.body.password;
     var role=req.body.authority;
     console.log(username,password,role)
-    res.render("registerauthority.jade",{session:req.session.name,role:role_id})
+    res.render("registerauthority.jade",{session:req.session.name,role_id:role_id})
 })
 
 
@@ -424,6 +437,8 @@ app.post("/registerauthority",function(req,res){
 
 app.post("/login", async function(req,res){
     var data;
+    var template;
+    var value;
     db.get(`SELECT * FROM tbl_user where user_name = ? and user_pwd = ?`, [req.body.username,req.body.password], async (err, row) => {
         console.log(row);
         if(err){
@@ -444,18 +459,95 @@ app.post("/login", async function(req,res){
             if (user_promise){
                
                 role_id = user_promise['role_id'];
+                if(role_id=="IN"){
+                    template="ongoing-ipo.jade"
+                    req.session.name = req.body.username
+                    sess=req.session.name;
+                    var ongoing=await OngoingIpoInfo();
+                    console.log(ongoing);
+                    res.render(template,{session:req.session.name,role_id:role_id,ongoing:ongoing});
+                }
+                else if(role_id=="IS"){
+                    req.session.name = req.body.username
+                    sess=req.session.name;
+                    let user_promise=await getIdFromUsername(req.session.name);
+                    let user_id=user_promise["user_id"]
+                    let ipoInfo=await getIpoInfo(user_id)
+                    if(ipoInfo){
+                        template="issuer-dashboard.jade"
+                        console.log(ipoInfo)
+                        console.log(ipoInfo.bid_start_date)
+                        var date=new Date(ipoInfo.bid_start_date)
+                        const yyyy = date.getFullYear();
+                        let mm = date.getMonth() + 1; // Months start at 0!
+                        let dd = date.getDate();
+
+                        if (dd < 10) dd = '0' + dd;
+                        if (mm < 10) mm = '0' + mm;
+
+                        const formattedDate = dd + '-' + mm + '-' + yyyy;
+                        console.log(formattedDate)
+                        let allotmentPrinciple=await getAllotmentPrinciple(ipoInfo.allotment_principle)
+                        let ipoBucket=await getIpoBucket(user_id)
+                        console.log(ipoBucket)
+                        let investorClassification=await getInvestorClassification(user_id)
+                        console.log(investorClassification)
+                        res.render(template,{session:req.session.name,role_id:role_id,ipoInfo:ipoInfo,bid_start_date:formattedDate,
+                            allotment_principle:allotmentPrinciple.name,ipoBucket:ipoBucket,investorClassification:investorClassification});
+                    }
+                    else{
+                        template="launch-ipo.jade"
+                        
+                        var agents=await getAgents()
+                        console.log(agents)
+                        
+                        var investor_types=await getInvestorTypes()
+                        console.log(investor_types)
+                        
+                        
+                        var principles=await getOverSubAllotmentPrinciple()
+                        console.log(principles)
+
+                        var investors=await getAllInvestorInfo()
+                        console.log(investors)
+    
+                        res.render(template,{session:req.session.name,role_id:role_id,principles:principles,agents:agents,
+                            investor_types:investor_types,investors:investors})
+                    
+                                    
+                    }
+                    
+                }
+                else if(role_id=="AG"){
+                    var promiseQuery = query(req.body.username);
+                    var promiseValue = async () => {
+                        value = await promiseQuery;
+                        console.log("IPO : ",value);
+                        template="agent-dashboard.jade"
+                        console.log(role_id)
+                        req.session.name = req.body.username
+                        sess=req.session.name;
+                        res.render(template,{session:req.session.name,role_id:role_id,data:value})
+                        
+                        // template="agent-dashboard.jade"
+
+                    }
+                    promiseValue();
+                   
+                    
+                }
             }
             else{
                 role_id = null;
             }
             
-            console.log(role_id)
-            req.session.name = req.body.username
-            sess=req.session.name;
-            res.render("ongoing-ipo.jade",{session:req.session.name,role:role_id});
+            // console.log(role_id)
+            // req.session.name = req.body.username
+            // sess=req.session.name;
+            // res.render(template,{session:req.session.name,role_id:role_id,data:value});
         }
         else{
-            res.render("login.jade",{message:"please fill out correct details",session:req.session.name,role:role_id});
+            res.render("login.jade",{message:"please fill out correct details",session:req.session.name,role_id:role_id});
         }
         
       });
@@ -516,6 +608,53 @@ app.get('/actionQuery', function (req, res){
 });
 
 
+app.post("/update-issuer",function(req,res){
+    var value;
+    var promiseInvoke = IssuertoLedger(req.session.name,req.body.issuename,req.body.isin,req.body.cusip,
+        req.body.ticker,req.body.totalShares,req.body.lowPrice,req.body.highPrice,req.body.ipoStartDate,req.body.ipoEndTime,req.body.lotSize,req.body.agent,req.body.principle);
+      
+    var promiseValue = async () => {
+
+        value = await promiseInvoke;
+        console.log(value);
+       
+        res.render("issuer-dashboard.jade",{session:req.session.name,role_id:role_id});
+
+
+
+}
+    promiseValue();
+
+});
+
+app.post("/add-demat",async function(req,res){
+    let dmat_ac_no=req.body.demataccno
+    let dp_id=req.body.dpid
+    let adddDemat=await addDemat(req.session.name,dmat_ac_no,dp_id)
+    let user=await getIdFromUsername(req.session.name)
+    console.log(user)
+    let investor=await getInvestorInfo(user.user_id)
+    console.log(investor)
+    let demat=await getdemat(user.user_id)
+    console.log(demat)
+    var promiseQuery = query(req.session.name);
+    var balance;
+    var promiseValue = async () => {
+        const value = await promiseQuery;
+        console.log(value);
+        
+        try {
+            balance=value[value.length-1].Record.wallet.current_balance
+        }
+        catch(err){
+            balance=100000
+        }
+    res.render("profile.jade",{session:req.session.name,role_id:role_id,user:user,investor:investor,demat:demat,balance:balance})
+        
+    }
+    promiseValue();
+    
+});
 
 
 app.get("/startBid",function(req,res){
@@ -550,15 +689,16 @@ app.get("/register-step1",function(req,res){
 
         console.log(role_type)
        
-        res.render("register-step1.jade",{role_type:role_type})
+        res.render("register-step1.jade",{role_type:role_type,session:req.session.name,role_id:role_id})
 
 
     });
     
 });
 
+var role_type;
 app.post("/register-step1",function(req,res){
-    let role_type=req.body.flexRadioDefault
+    role_type=req.body.flexRadioDefault
     console.log(role_type)
     res.render("register-step2.jade",{role:role_type})
    
@@ -566,18 +706,169 @@ app.post("/register-step1",function(req,res){
 });
 
 app.get("/register-investor-step3",function(req,res){
-    res.render("register-investor-step3.jade")
+    res.render("register-investor-step3.jade",{session:req.session.name,role_id:role_id})
 });
 
+app.post("/register-investor-step3",async function(req,res){
+    let acctnum,ifsc,acctholder,pan,dacctnum,dpartid,investor_type_id,username,full_name
+    acctnum=req.body.acctnum
+    ifsc=req.body.ifsc
+    acctholder=req.body.acctholder
+    pan=req.body.pan
+    dacctnum=req.body.dacctnum
+    dpartid=req.body.dpartid
+    investor_type_id=req.body.investor_type_id
+    username=req.body.username
+
+
+    let user_promise = await getIdFromUsername(username);
+    console.log("USER promise:- ", user_promise);
+
+    let user_id, user_name;
+    if (user_promise){
+        user_id = user_promise['user_id'];
+        full_name=user_promise['full_name'];
+    }
+    else{
+        user_id = null;
+        full_name=null;
+    }
+    
+    
+
+
+    console.log(user_id)
+    console.log(investor_type_id)
+    console.log(full_name)
+
+    let insert_investor_info = 'INSERT INTO tbl_investor_info (investor_id,investor_type, pan,investor_name,bank_account_no,ifsc_code,lei,swift_address) VALUES (?,?,?,?,?,?,?,?)';
+    let insert_investor_dmat='INSERT INTO tbl_investor_dmat (investor_id,demat_ac_no,dp_id) values(?,?,?)'
+    let id=uuidv4()
+
+    db.run(insert_investor_info,[user_id,investor_type_id,pan,full_name,acctnum,ifsc])
+    db.run(insert_investor_dmat,[user_id,dacctnum,dpartid])
+    res.render("login.jade",{session:req.session.name,role_id:role_id})
+    
+});
+
+app.get("/issuer-dashboard",function(req,res){
+    res.render("issuer-dashboard.jade",{session:req.session.name,role_id:role_id})
+});
 
 app.get("/register-step2",function(req,res){
     
-    res.render("register-step2.jade")
+    res.render("register-step2.jade",{session:req.session.name,role:role_type,role_id:role_id})
 });
 
-app.post("/register-step2",function(req,res){
-    let role_type,username,password,fullname
+
+async function getInvestorTypeId(role_type) {
+    try {
+        // Create DB connection
+        
+        console.log("===============================");
+        let db = await makeDbConnection();
+         // let sql = `select user_id, role_id from tbl_userrole 
+        //             where user_id=(
+        //                 select user_id from tbl_user where name='${user_name}'
+        //             )`;
+        let sql = `select * from tbl_investor_type where investor_type='${role_type}'`;
+        console.log(sql);
+        // db.all()/db.get() returns the rows as results unlike db.run()
+        const dbpromise = new Promise((resolve, reject)=>{
+            db.get(sql, (err, row) => {
+                if (err) {
+                    console.log("[][][][][][][][][][][][][")
+                    reject(err.message);
+                }
+                else {
+                    console.log(row);
+                    console.log("Query Successful!");
+                    resolve(row);
+                }
+            });
+        })
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to get user information: ${error}`);
+        process.exit(1);
+    }
+}
+
+
+async function getRoleTypeId(role_type) {
+    try {
+        // Create DB connection
+        
+        console.log("===============================");
+        let db = await makeDbConnection();
+         // let sql = `select user_id, role_id from tbl_userrole 
+        //             where user_id=(
+        //                 select user_id from tbl_user where name='${user_name}'
+        //             )`;
+        let sql = `select * from tbl_role_type where role_type='${role_type}'`;
+        console.log(sql);
+        // db.all()/db.get() returns the rows as results unlike db.run()
+        const dbpromise = new Promise((resolve, reject)=>{
+            db.get(sql, (err, row) => {
+                if (err) {
+                    console.log("[][][][][][][][][][][][][")
+                    reject(err.message);
+                }
+                else {
+                    console.log(row);
+                    console.log("Query Successful!");
+                    resolve(row);
+                }
+            });
+        })
+        db.close();
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to get user information: ${error}`);
+        process.exit(1);
+    }
+}
+
+app.post("/register-step2",async function(req,res){
+    let role_type,username,password,fullname,role_type_id,investor_type_id
+    var template;
+
     role_type=req.body.role
+
+    let role_type_promise=await getRoleTypeId(role_type)
+   
+
+    
+    if (role_type_promise){
+        
+        role_type_id = role_type_promise['role_type_id'];
+        
+    }
+    else{
+        role_type_id = null;
+    }
+
+  
+    
+
+    let investor_type_promise=await getInvestorTypeId(role_type)
+   
+
+    
+    if (investor_type_promise){
+        
+        investor_type_id = investor_type_promise['investor_type_id'];
+        
+    }
+    else{
+        investor_type_id = null;
+    }
+
+  
+    
     username=req.body.username
     password=req.body.password
     fullname=req.body.fullname
@@ -594,24 +885,28 @@ app.post("/register-step2",function(req,res){
         }
         else{
             let user_id=uuidv4()
-            var promiseRegister,filepath,template;
+            console.log(username,password,fullname)
+            var promiseRegister,filepath;
             let insert = 'INSERT INTO tbl_user (user_id,user_name, user_pwd,full_name) VALUES (?,?,?,?)';
             let insert2 = 'INSERT INTO tbl_userrole (user_id,role_id) VALUES (?,?)';
 
             try {
                
-                if(role_type=='IN'){
+                if(role_type_id=='IN'){
+                    
                     promiseRegister=registerUserInvestor(username);
                     template="register-investor-step3.jade"
                    
-                }
-                else if(role_type=='IS'){
-                    promiseRegister=registerUserIssuer(username)
-                    template="register-issuer-step3.jade"
                    
                 }
-                else if(role_type=='AG'){
+                else if(role_type_id=='IS'){
+                    promiseRegister=registerUserIssuer(username)
+                    template="login.jade"
+                   
+                }
+                else if(role_type_id=='AG'){
                     promiseRegister=registerUserAgent(username)
+                    template="login.jade"
                     
 
                 }
@@ -623,9 +918,11 @@ app.post("/register-step2",function(req,res){
                 promiseValue();
                
                 db.run(insert, [user_id,username,password,fullname]);
-                db.run(insert2, [user_id,role_type]);
                
-                res.render(template,{message:"Successfully registered!!"});
+                db.run(insert2, [user_id,role_type_id]);
+                console.log(template)
+                console.log("Investor Type Id:",investor_type_id)
+                res.render(template,{message:"Successfully registered!!",session:req.session.name,role_id:role_id,investor_type_id:investor_type_id,username:username});
 
             } catch (error) {
                 console.log(error.message);
@@ -637,22 +934,265 @@ app.post("/register-step2",function(req,res){
   
 });
 
+app.get("/profile",async function(req,res){
+    let user=await getIdFromUsername(req.session.name)
+    console.log(user)
+    let investor=await getInvestorInfo(user.user_id)
+    console.log(investor)
+    let demat=await getdemat(user.user_id)
+    console.log(demat)
+    var promiseQuery = query(req.session.name);
+    var balance;
+    var promiseValue = async () => {
+        const value = await promiseQuery;
+        console.log(value);
+        
+        try {
+            balance=value[value.length-1].Record.wallet.current_balance
+        }
+        catch(err){
+            balance=100000
+        }
+    res.render("profile.jade",{session:req.session.name,role_id:role_id,user:user,investor:investor,demat:demat,balance:balance})
+        
+    }
+    promiseValue();
+});
 
-app.get("/register-issuer-step3",function(req,res){
-    res.render("register-issuer-step3.jade")
+app.get("/holdings",function(req,res){
+    res.render("holdings.jade",{session:req.session.name,role_id:role_id})
+});
+
+app.get("/agent-dashboard",function(req,res){
+    var promiseQuery = query(req.session.name);
+    var promiseValue = async () => {
+        const value = await promiseQuery;
+        console.log("IPO : ",value);
+        res.render("agent-dashboard.jade",{session:req.session.name,role_id:role_id})
+    }
+    promiseValue();
+
+    
+});
+
+app.post("/agent-dashboard",function(req,res){
+    var ipo_id=req.body.ipo
+    var action=req.body.action
+    if(action=="1"){
+        var promiseQuery = ipoAllotment(req.session.name,ipo_id);
+        var promiseValue = async () => {
+            const value = await promiseQuery;
+            console.log(value);
+            res.render("agent-dashboard.jade",{session:req.session.name,role_id:role_id,message:value})
+        }
+        promiseValue();
+    }
+    
+})
+
+app.get("/launch-ipo",async function(req,res){
+    var agents=await getAgents()
+    console.log(agents)
+    
+    var investor_types=await getInvestorTypes()
+    console.log(investor_types)
+    
+    
+    var principles=await getOverSubAllotmentPrinciple()
+    console.log(principles)
+
+    var investors=await getAllInvestorInfo()
+    console.log(investors)
+
+    res.render("launch-ipo.jade",{session:req.session.name,role_id:role_id,principles:principles,agents:agents,investor_types:investor_types})
+
+    
 });
 
 
-app.get("/ongoing-ipo",function(req,res){
-    res.render("ongoing-ipo.jade")
+app.post("/launch-ipo",function(req,res){
+    var value;
+    console.log("IPO Buckets:",ipo_buckets)
+    console.log("Investor Categories",investor_categories)
+    var promiseInvoke = IssuertoLedger(req.session.name,req.body.issuer,req.body.isin,req.body.cusip,
+        req.body.ticker,req.body.totalShares,req.body.lowPrice,req.body.highPrice,req.body.ipoStartDate,
+        req.body.ipoEndTime,req.body.lotSize,req.body.agent,req.body.principle,ipo_buckets,investor_categories);
+      
+    var promiseValue = async () => {
+
+        value = await promiseInvoke;
+        console.log(value);
+
+        let user_promise=await getIdFromUsername(req.session.name);
+                    let user_id=user_promise["user_id"]
+                    let ipoInfo=await getIpoInfo(user_id)
+                    if(ipoInfo){
+                        let template="issuer-dashboard.jade"
+                        console.log(ipoInfo)
+                        console.log(ipoInfo.bid_start_date)
+                        var date=new Date(ipoInfo.bid_start_date)
+                        const yyyy = date.getFullYear();
+                        let mm = date.getMonth() + 1; // Months start at 0!
+                        let dd = date.getDate();
+
+                        if (dd < 10) dd = '0' + dd;
+                        if (mm < 10) mm = '0' + mm;
+
+                        const formattedDate = dd + '-' + mm + '-' + yyyy;
+                        console.log(formattedDate)
+                        let allotmentPrinciple=await getAllotmentPrinciple(ipoInfo.allotment_principle)
+                        let ipoBucket=await getIpoBucket(user_id)
+                        console.log(ipoBucket)
+                        let investorClassification=await getInvestorClassification(user_id)
+                        console.log(investorClassification)
+                        res.render(template,{session:req.session.name,role_id:role_id,ipoInfo:ipoInfo,bid_start_date:formattedDate,
+                            allotment_principle:allotmentPrinciple.name,
+                            ipoBucket:ipoBucket,investorClassification:investorClassification});
+                    }
+       
+        // res.render("issuer-dashboard.jade",{session:req.session.name,role_id:role_id});
+
+
+
+}
+    promiseValue();
+
+
 });
 
-app.get("/apply-ipo",function(req,res){
-    res.render("apply-ipo.jade")
+var investor_categories=[]
+app.post("/add-investor-category",async function(req,res){
+
+    let investor_type=req.body.investorType
+    let quota=req.body.quota
+    let lot_quantity=req.body.lotQuantity
+    
+    let user_promise=await getIdFromUsername(req.session.name)
+    let user_id=user_promise["user_id"]
+
+    investor_categories.push({
+        ipo_id: user_id,
+        investor_type_id: investor_type,
+        min_lot_qty: lot_quantity,
+        reserve_lots: quota
+           
+    });
+
+    console.log("Investor Categories",investor_categories)
+
+    
+    var agents=await getAgents()
+    console.log(agents)
+    
+    var investor_types=await getInvestorTypes()
+    console.log(investor_types)
+    
+    
+    var principles=await getOverSubAllotmentPrinciple()
+    console.log(principles)
+
+    var investors=await getAllInvestorInfo()
+    console.log(investors)
+
+    res.render("launch-ipo.jade",{session:req.session.name,role_id:role_id,principles:principles,agents:agents,
+        investor_types:investor_types,investors:investors})
+
+
+    
+
+
 });
 
-app.get("/upcoming-ipo",function(req,res){
-    res.render("upcoming-ipo.jade")
+var ipo_buckets=[]
+app.post("/add-ipo-buckets",async function(req,res){
+    let investor_type=req.body.investorTypeBucket
+    let bucket_size=req.body.BucketSize
+    let alloc_priority=req.body.allocPriority
+    let investor_id=req.body.investorId
+    let user_promise=await getIdFromUsername(req.session.name)
+    let user_id=user_promise["user_id"]
+    ipo_buckets.push({
+        ipo_id:user_id,
+        investor_type_id:investor_type,
+        no_of_shares:bucket_size,
+        priority:alloc_priority,
+        investor_id:investor_id
+    });
+
+    console.log("IPO Buckets",ipo_buckets)
+
+    
+    var agents=await getAgents()
+    console.log(agents)
+    
+    var investor_types=await getInvestorTypes()
+    console.log(investor_types)
+    
+    
+    var principles=await getOverSubAllotmentPrinciple()
+    console.log(principles)
+
+    var investors=await getAllInvestorInfo()
+    console.log(investors)
+
+    res.render("launch-ipo.jade",{session:req.session.name,role_id:role_id,principles:principles,agents:agents,
+        investor_types:investor_types,investors:investors})
+
+
+    
+
+
+});
+
+
+app.get("/ongoing-ipo",async function(req,res){
+    let ongoing=await OngoingIpoInfo();
+    console.log(ongoing);
+
+    res.render("ongoing-ipo.jade",{session:req.session.name,role_id:role_id,ongoing:ongoing})
+});
+
+
+app.post("/apply",async function(req,res){
+    let ipo_id=req.body.ipo_id;
+    console.log(ipo_id)
+    var ipo=await getIpoInfo(ipo_id)
+    console.log(ipo)
+    let user=await getIdFromUsername(req.session.name)
+    console.log(user)
+    let demat=await getdemat(user.user_id)
+    console.log(demat)
+    res.render("apply-ipo.jade",{session:req.session.name,role_id:role_id,ipo:ipo,demat:demat})
+});
+
+app.get("/apply-ipo",async function(req,res){
+    let user=await getIdFromUsername(req.session.name)
+    console.log(user)
+    let demat=await getdemat(user.user_id)
+    console.log(demat)
+    res.render("apply-ipo.jade",{session:req.session.name,role_id:role_id,demat:demat})
+});
+
+app.post("/apply-ipo",async function(req,res){
+    let demat=req.body.demat
+    let qty=req.body.qty
+    let price=req.body.price
+    let ipo_id=req.body.ipo_id
+    console.log(demat,qty,price)
+    var Buy=await invokeBuy(req.session.name,ipo_id,demat,qty,price)
+    console.log(Buy)
+    let ongoing=await OngoingIpoInfo();
+    console.log(ongoing);
+    res.render("ongoing-ipo.jade",{session:req.session.name,role_id:role_id,ongoing:ongoing})
+
+
+
+});
+
+app.get("/upcoming-ipo",async function(req,res){
+    let upcoming=await UpcomingIpoInfo();
+    console.log(upcoming)
+    res.render("upcoming-ipo.jade",{session:req.session.name,role_id:role_id,upcoming:upcoming})
 });
 
 

@@ -1,0 +1,87 @@
+extends layout
+
+block content
+    .container 
+        .row 
+            .col-4
+            .col-4 
+                .row 
+                    .col-5 
+                    .col-2 
+                        .person-icon
+                            i.bi.bi-person-circle
+                        
+                    .col-5
+                .row 
+                    .col-3
+                    .col-6
+                        h5.mt-3.color.center #{user.full_name}
+                    .col-3
+                .row 
+                    .col-3 
+                    .col-6
+                        h6.mt-2.center.color #{user.user_name}
+        .row.mt-5 
+            .col-2
+            .col-4
+                //- p.text-color Email
+                p.text-color PAN 
+               
+                hr
+                p.text-color Bank Account 
+                p.text-color IFSC
+
+               
+            .col-2
+            .col-4 
+                //- p.text-color aasawarib@gmail.com
+                p.text-color #{investor.pan}
+               
+                p.text-color #{investor.bank_account_no}
+                p.text-color #{investor.ifsc_code}
+
+                
+        .row.mt-5 
+            for dmat in demat 
+                .row
+                    .col-2 
+                    .col-4 
+                        p.text-color Demat
+                        p.text-color Depository Participant Id
+                    
+                    .col-2 
+                    .col-4 
+                        p.text-color #{dmat.demat_ac_no}
+                        p.text-color #{dmat.dp_id}
+
+        .row.mt-5 
+            .col-2 
+            .col-4 
+                p.text-color Funds 
+            .col-2 
+            .col-4
+                p.text-color #{balance}
+        form(action="/add-demat", method="post") 
+            .row.mt-5
+                .row 
+                    .col-2
+                    .col-4
+                        p.text-color Add Demat
+                .row 
+                     
+                    .col-2
+                    .col-4
+                        .form-group 
+                            label(for="demataccno") Demat Account Number
+                            input.form-control(type="text" name="demataccno")
+                    .col-2 
+                    .col-4 
+                        .form-group 
+                            label(for="dpid") Demat Participant ID
+                            input.form-control(type="text" name="dpid")
+                .row 
+                    .col-2 
+                    .col-4 
+                        button.button.btn-lg(type="submit") Add
+                    
+       

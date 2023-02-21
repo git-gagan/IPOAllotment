@@ -8,13 +8,13 @@ import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { json } from 'express';
-async function query(username) {
+async function query() {
     try {
-        let userName=username;
+        // let userName=username;
         var queryResult="";
         
-        // console.log(process.argv);
-        // let userName = process.argv[2];   // Take username from command line
+        console.log(process.argv);
+        let userName = process.argv[2];   // Take username from command line
         let user_promise = await getIdFromUsername(userName);
         console.log("USER ID:- ", user_promise);
         let user_id, role_id;
@@ -83,4 +83,4 @@ async function query(username) {
 // const isBidTimeOver1 = await contract.evaluateTransaction('isBidTimeOver');
 // console.log(`Remaining time for bidding: ${isBidTimeOver1}`);
 // Disconnect from the gateway.
-export {query};
+query();

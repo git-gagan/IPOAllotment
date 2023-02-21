@@ -5,27 +5,29 @@ block content
         .row
             .col-2 
             .col-8
-                form(action="/upcoming-ipo" method="post") 
+                form(action="/register-investor-step3" method="post") 
                     p Step 3:
                     
                     h5.color.mt-4 Bank Details
                     //- form(action="")
                     .row 
                         .col-4
+                            input(type="hidden", name="investor_type_id",value=`${investor_type_id}`)
+                            input(type="hidden",name="username",value=`${username}`)
                             .form-group 
                                 label(for="acctnum") Bank Account Number
-                                input.form-control(type="text" required)  
+                                input.form-control(type="text" name="acctnum" required)  
                             .form-group 
                                 label(for="ifsc") Bank IFSC
-                                input.form-control(type="text" required)  
+                                input.form-control(type="text" name="ifsc" required)  
                         .col-2
                         .col-4
                             .form-group 
                                 label(for="acctholder") Account Holder
-                                input.form-control(type="text" required)  
+                                input.form-control(type="text" name="acctholder" required)  
                             .form-group 
                                 label(for="pan") PAN
-                                input.form-control(type="text" required)  
+                                input.form-control(type="text" name="pan" required)  
 
                     h5.color.mt-4 Demat Account Details
                     //- form(action="")
@@ -33,7 +35,7 @@ block content
                         .col-4
                             .form-group 
                                 label(for="dacctnum") Demat Account Number
-                                input.form-control(type="text" required)  
+                                input.form-control(type="text" name="dacctnum" required)  
                         
                         .col-2
                             
@@ -41,7 +43,7 @@ block content
                         .col-4
                             .form-group 
                                 label(for="dpartid") Demat Participant Id
-                                input.form-control(type="text" required)  
+                                input.form-control(type="text" name="dpartid" required)  
 
                     .row.mb-5 
                         .col-4

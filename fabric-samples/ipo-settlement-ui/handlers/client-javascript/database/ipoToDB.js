@@ -1,6 +1,6 @@
 import { makeDbConnection } from "./dbConnection.js";
 
-async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle=null) {
+async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle=null, fixed_price) {
     try {
         // Create DB connection
         console.log("-------------------------------------");
@@ -10,19 +10,24 @@ async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle
         if (!update){
             console.log("Insert Needed---");
             sql = `insert into tbl_ipo_info
-            (ipo_id, isin, cusip, ticker, issuer_name, bid_time, is_complete, has_bidding_started, ipo_announcement_date, bid_start_date, allotment_principle)
+            (ipo_id, isin, cusip, ticker, issuer_name, bid_time, is_complete, has_bidding_started, ipo_announcement_date, bid_start_date, allotment_principle, fixed_price,
+                lot_size,priceRangeLow,priceRangeHigh)
             values(
                 '${ipo_id}', 
-                '${issuer_obj[ipo_id]['isin']}',
-                '${issuer_obj[ipo_id]['cusip']}',
-                '${issuer_obj[ipo_id]['ticker']}',
+                '${issuer_obj[ipo_id]['ipoInfo']['isin']}',
+                '${issuer_obj[ipo_id]['ipoInfo']['cusip']}',
+                '${issuer_obj[ipo_id]['ipoInfo']['ticker']}',
                 '${issuer_obj[ipo_id]['ipoInfo']['issuer_name']}', 
                 '${issuer_obj[ipo_id]['ipoInfo']['total_bid_time']}',
                 '${issuer_obj[ipo_id]['ipoInfo']['is_complete']}',
                 '${issuer_obj[ipo_id]['ipoInfo']['has_bidding_started']}',
                 '${issuer_obj[ipo_id]['ipoInfo']['ipo_announcement_date'].toISOString().split('T').join(" ")}',
                 '${issuer_obj[ipo_id]['ipoInfo']['bid_start_date'].toISOString().split('T').join(" ")}',
-                '${allotment_principle}'
+                '${allotment_principle}',
+                '${fixed_price}',
+                '${issuer_obj[ipo_id]['ipoInfo']['lot_size']}',
+                '${issuer_obj[ipo_id]['ipoInfo']['priceRangeLow']}',
+                '${issuer_obj[ipo_id]['ipoInfo']['priceRangeHigh']}'
             )`
         }
         else{
@@ -68,7 +73,7 @@ async function addIpoEligibility(eligibility_obj) {
             values += `('${eligibility_obj[i]['ipo_id']}', 
                         ${eligibility_obj[i]['investor_type_id']},
                         ${eligibility_obj[i]['min_lot_qty']},
-                        ${eligibility_obj[i]['reserve_shares_percentage']}
+                        ${eligibility_obj[i]['reserve_lots']}
                     )`
             if (i < eligibility_obj.length-1){
                 values += ','
@@ -78,7 +83,7 @@ async function addIpoEligibility(eligibility_obj) {
                 ipo_id,
                 investor_type_id,
                 min_lot_qty,
-                reserve_shares_percentage
+                reserve_lots
             )
             Values ${values}`;
         console.log(sql);

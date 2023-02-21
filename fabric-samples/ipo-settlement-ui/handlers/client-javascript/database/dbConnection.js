@@ -1,9 +1,11 @@
 import sqlite3 from 'sqlite3';
-
-async function makeDbConnection(){
+async function makeDbConnection(path=null){
     try {
         // Create DB connection
-        let db = new sqlite3.Database('./ipo.db', (err)=>{
+        if (!path){
+            path = './ipo.db'
+        }
+        let db = new sqlite3.Database(path, (err)=>{
             if (err){
                 console.log("===========");
                 return console.error(err.message);

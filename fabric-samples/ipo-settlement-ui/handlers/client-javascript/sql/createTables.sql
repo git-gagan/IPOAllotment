@@ -69,21 +69,9 @@ CREATE TABLE tbl_investor_info (
 
 DROP TABLE tbl_investor_info;
 
-CREATE TABLE tbl_ipo_info (
-	ipo_id varchar(50) PRIMARY KEY,
-	issuer_name varchar(50),
-	ISIN varchar(50),
-	CUSIP varchar(50),
-	ticker varchar(50),
-	bid_time integer,
-	is_complete integer,
-	has_bidding_started INTEGER,
-	bid_start_date datetime,
-	ipo_announcement_date datetime,
-	allotment_principle integer,
-	foreign key (ipo_id) references tbl_user(user_id),
-	FOREIGN KEY (allotment_principle) REFERENCES tbl_allotment_principle(id)
-);
+CREATE TABLE tbl_ipo_info ( 	ipo_id varchar(50) PRIMARY KEY, 	issuer_name varchar(50), 	ISIN varchar(50), 	CUSIP varchar(50), 	ticker varchar(50), 	bid_time integer, 	is_complete integer, 	has_bidding_started INTEGER, 	bid_start_date datetime, 	ipo_announcement_date datetime, 	allotment_principle integer,
+fixed_price integer,
+ foreign key (ipo_id) references tbl_user(user_id), 	FOREIGN KEY (allotment_principle) REFERENCES tbl_allotment_principle(id) );
 
 drop TABLE tbl_ipo_info;
 
@@ -110,7 +98,7 @@ CREATE TABLE tbl_investor_ipo_eligibility(
 	ipo_id varchar(50),
 	investor_type_id INT,
 	min_lot_qty INT,
-	reserve_shares_percentage int,
+	reserve_lots int,
 	FOREIGN KEY (ipo_id) REFERENCES tbl_ipo_info(ipo_id),
 	FOREIGN KEY (investor_type_id) REFERENCES tbl_investor_type(investor_type_id)
 );

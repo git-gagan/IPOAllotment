@@ -1,0 +1,57 @@
+extends layout
+
+block content
+    .container 
+        if message 
+            .alert.alert-info(role='alert') #{message}
+        if data != undefined && data.length > 0
+            .row
+                .col-2 
+                .col-8 
+                    h5.color.center Agent Name 
+                    h6.text-color.center Agent Id
+                    h5.color IPO
+                    hr
+                    form(action="/agent-dashboard",method="post")
+                        .row 
+                            .col-4
+                                label.mt-5(for="ipo") Select an IPO
+                                select.form-control#ipo(name='ipo')
+                                    for item in data
+
+                                        option(value=`${item.Key}`) #{item.Record[item.Key].ipoInfo.issuer_name}
+
+                                        
+                            .col-4 
+                                .dropdown
+                                    label.mt-5(for="action") Select an Action
+                                    select.form-control#ipo(name='action')
+                                        option(value="1") Allocate 
+                                        option(value="2") Escrow Account Info 
+                            .col-4
+                        .row 
+                            .col-12
+                        .row 
+                            .col-12
+                        .row
+                            .col-12
+                        .row 
+                            .col-10 
+                            .col-2 
+                                button.btn.button(type="submit") Submit
+                        hr
+                        .row 
+                            .col-1
+                            //- .col-5
+                            //-     p.text-color Issue Name 
+                            //-     p.text-color Total Amount
+                            //-     p.text-color Allocation Status
+                            //-     p.text-color Refund Status
+                            //- .col-5
+                            //-     p.text-color XYZ
+                            //-     p.text-color 1200 INR
+                            //-     p.text-color Complete,In Progress,Pending
+                            //-     p.text-color Complete,In Progress,Pending
+                            .col-1
+
+            .col-2
