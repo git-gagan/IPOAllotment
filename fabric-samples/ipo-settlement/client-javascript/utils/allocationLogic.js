@@ -83,6 +83,7 @@ async function processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_i
         processed_dict['investorInfo'][allocation_dict[i]['investor_id']]['amount_invested'] += amount_invested;
         processed_dict['totalAmount'] += amount_invested;
         processed_dict['totalShares'] += shares_to_be_allotted;
+        statusInfo[allocation_dict[i]['investor_type']]['sharesAllotted'] += shares_to_be_allotted;
     }
     return processed_dict;
 }

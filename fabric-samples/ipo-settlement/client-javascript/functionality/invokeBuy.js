@@ -39,7 +39,7 @@ async function main() {
             user_id = null;
         }
 
-        let transaction_id = '5442e304-eae1-41eb-82ab-f5dc0399ac3b' //crypto.randomUUID();
+        let transaction_id = '5442e304-eae1-41eb-82ab-f5dc0399ac3b4' //crypto.randomUUID();
         
         console.log(user_id, role_id, full_name)
 
@@ -61,8 +61,8 @@ async function main() {
                         transactions: [
                                 {
                                 txn_id: transaction_id,
-                                lots_bid: 6,
-                                bid_amount: 200
+                                lots_bid: 2,
+                                bid_amount: 100
                             }
                         ],
                         shares:{
@@ -91,7 +91,7 @@ async function main() {
                 // Need to check if the investor hasn't crossed the limit of max 3 allowed bids
                 let num_of_bids = 0;
                 let investor_ipo_bid_info = await dematFromDb(user_id, ipo_id);
-                console.log(investor_ipo_bid_info);
+                console.log("=> ", investor_ipo_bid_info);
                 if (investor_ipo_bid_info[0]){
                     if (investor_ipo_bid_info[0]['num_of_bid'] >= 3){
                         // Max limit exceeded

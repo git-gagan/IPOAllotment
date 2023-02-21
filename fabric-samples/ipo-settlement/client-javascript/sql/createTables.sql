@@ -82,6 +82,10 @@ CREATE TABLE tbl_ipo_info (
 	bid_start_date datetime,
 	ipo_announcement_date datetime,
 	allotment_principle integer,
+	fixed_price integer,
+	lot_size integer,
+	priceRangeLow integer,
+	priceRangeHigh integer,
 	foreign key (ipo_id) references tbl_user(user_id),
 	FOREIGN KEY (allotment_principle) REFERENCES tbl_allotment_principle(id)
 );
@@ -99,6 +103,18 @@ CREATE TABLE tbl_investor_transactions (
 );
 
 drop TABLE tbl_investor_transactions;
+
+CREATE TABLE tbl_investor_type_allotment_info (
+	id integer PRIMARY KEY AUTOINCREMENT,
+	ipo_id varchar(50),
+	investor_type_id integer,
+	allotted_shares integer,
+	CONSTRAINT uni UNIQUE(ipo_id, investor_type_id),
+	FOREIGN KEY (ipo_id) REFERENCES tbl_ipo_info(ipo_id),
+	FOREIGN KEY (investor_type_id) REFERENCES tbl_investor_type(investor_type_id)
+)
+
+drop TABLE tbl_investor_type_allotment_info;
 
 CREATE TABLE tbl_allotment_principle(
 	id INTEGER PRIMARY KEY AUTOINCREMENT,

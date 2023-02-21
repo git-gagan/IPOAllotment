@@ -9,7 +9,7 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { getAllocationData, getAllocationPrinciple } from '../database/getAllocationDatafromDB.js';
-import { getIpoBuckets, updateIpoBuckets } from '../database/ipoToDB.js';
+import { getIpoBuckets, updateIpoBuckets, insert_investor_type_allocation } from '../database/ipoToDB.js';
 import { processAllocationDictU, processAllocationDictO, processAllocationDictOR, getSubscriptionInfo, segregateStatusDictionary, mergeAllocationResultDictionaries } from '../utils/allocationLogic.js';
 import { retrieveContract } from '../utils/getContract.js';
 
@@ -166,6 +166,7 @@ async function main() {
                                 console.log(`Transaction has been evaluated, result is: ${result}`);
                                 // Update bucket info 
                                 await updateIpoBucketInfo(allocation_dict, ipo_id);
+                                await insert_investor_type_allocation(statusInfo, ipo_id)
                                 console.log("\nSUCCESS\n");
                             }
                         }
