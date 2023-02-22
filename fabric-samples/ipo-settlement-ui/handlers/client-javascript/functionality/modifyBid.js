@@ -14,7 +14,7 @@ import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { getIpoEligibleLots } from '../database/getIpoeligibility.js';
 import { getBid,updateBidinDb } from '../database/editBidDb.js';
-
+import {getIpoInfo} from "../database/getIpo.js"
 
 async function modifyBid(username,txnid,lots_bid,bid_amount) {
     try {
@@ -48,7 +48,9 @@ async function modifyBid(username,txnid,lots_bid,bid_amount) {
                 let res = await is_txn_valid(txn_id, user_id);
                 let is_valid_transaction = res[0];
                 let ipo_id = res[1];    // Should not be NULL if txn is valid
-                let lots_bid_valid = await is_lots_bid_valid(user_id, new_lots_bid, ipo_id);
+                let ipoInfo=await getIpoInfo(ipo_id)
+                if(ipoInfo.is_complete=='false'){
+                    let lots_bid_valid = await is_lots_bid_valid(user_id, new_lots_bid, ipo_id);
                 if(!is_valid_transaction || !lots_bid_valid){
                     console.log("---Failure---");
                     process.exit(1);
@@ -75,6 +77,10 @@ async function modifyBid(username,txnid,lots_bid,bid_amount) {
                     console.log("Insufficient funds to place the bid");
                 }
                 await gateway.disconnect();
+                }
+                else{
+                    console.log("Modify Bid Not Allowed!!")
+                }
             }
             else {
                 console.log("\n3")

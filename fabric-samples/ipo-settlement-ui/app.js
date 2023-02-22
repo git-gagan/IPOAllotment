@@ -41,6 +41,10 @@ import { addDemat } from "./handlers/client-javascript/functionality/addDemat.js
 import { getAgents } from "./handlers/client-javascript/database/getAgents.js";
 import { getInvestorTypes } from "./handlers/client-javascript/database/getInvestorTypes.js";
 import { getOverSubAllotmentPrinciple } from "./handlers/client-javascript/database/getOverSubAllotmentPrinciple.js";
+import { updateIpoIdentifiers } from "./handlers/client-javascript/functionality/updateIpoIdentifiers.js";
+import { getInvestorTransactions } from "./handlers/client-javascript/database/getInvestorTransactions.js";
+import { modifyBid } from "./handlers/client-javascript/functionality/modifyBid.js";
+import { deleteBid } from "./handlers/client-javascript/functionality/deleteBid.js";
 
 /////////////////////////////////////////
 // Express setup
@@ -608,24 +612,47 @@ app.get('/actionQuery', function (req, res){
 });
 
 
-app.post("/update-issuer",function(req,res){
-    var value;
-    var promiseInvoke = IssuertoLedger(req.session.name,req.body.issuename,req.body.isin,req.body.cusip,
-        req.body.ticker,req.body.totalShares,req.body.lowPrice,req.body.highPrice,req.body.ipoStartDate,req.body.ipoEndTime,req.body.lotSize,req.body.agent,req.body.principle);
-      
-    var promiseValue = async () => {
+app.post("/update-issuer",async function(req,res){
+   let cusip=req.body.cusip
+   let ticker=req.body.ticker
+   let isin=req.body.isin
 
-        value = await promiseInvoke;
-        console.log(value);
-       
-        res.render("issuer-dashboard.jade",{session:req.session.name,role_id:role_id});
+   let updateIpo=await updateIpoIdentifiers(req.session.name,isin,cusip,ticker)
+   console.log(updateIpo)
+
+   let user_promise=await getIdFromUsername(req.session.name);
+   let user_id=user_promise["user_id"]
+   let ipoInfo=await getIpoInfo(user_id)
+   if(ipoInfo){
+       let template="issuer-dashboard.jade"
+       console.log(ipoInfo)
+       console.log(ipoInfo.bid_start_date)
+       var date=new Date(ipoInfo.bid_start_date)
+       const yyyy = date.getFullYear();
+       let mm = date.getMonth() + 1; // Months start at 0!
+       let dd = date.getDate();
+
+       if (dd < 10) dd = '0' + dd;
+       if (mm < 10) mm = '0' + mm;
+
+       const formattedDate = dd + '-' + mm + '-' + yyyy;
+       console.log(formattedDate)
+       let allotmentPrinciple=await getAllotmentPrinciple(ipoInfo.allotment_principle)
+       let ipoBucket=await getIpoBucket(user_id)
+       console.log(ipoBucket)
+       let investorClassification=await getInvestorClassification(user_id)
+       console.log(investorClassification)
+       res.render(template,{session:req.session.name,role_id:role_id,ipoInfo:ipoInfo,bid_start_date:formattedDate,
+           allotment_principle:allotmentPrinciple.name,
+           ipoBucket:ipoBucket,investorClassification:investorClassification,message:updateIpo});
+   }
 
 
-
-}
-    promiseValue();
 
 });
+
+
+
 
 app.post("/add-demat",async function(req,res){
     let dmat_ac_no=req.body.demataccno
@@ -1151,6 +1178,43 @@ app.get("/ongoing-ipo",async function(req,res){
 
     res.render("ongoing-ipo.jade",{session:req.session.name,role_id:role_id,ongoing:ongoing})
 });
+
+
+app.get("/applied-ipo",async function(req,res){
+    let user=await getIdFromUsername(req.session.name)
+    console.log(user)
+    
+    let investor_transactions=await getInvestorTransactions(user.user_id)
+    console.log(investor_transactions)
+
+   
+
+    res.render("applied-ipo.jade",{session:req.session.name,role_id:role_id,user:user,investor_transactions:investor_transactions})
+
+});
+
+app.post("/modify-bid",async function(req,res){
+    let transaction_id=req.body.modify_transaction_id
+    let bid_amount=req.body.bid_amount
+    let lots_applied=req.body.lots_applied
+
+    let modify_bid=await modifyBid(req.session.name,transaction_id,lots_applied,bid_amount)
+    console.log(modify_bid)
+
+    res.redirect("/ongoing-ipo")
+});
+
+
+app.post("/delete-bid",async function(req,res){
+    let transaction_id=req.body.delete_transaction_id
+    
+
+    let delete_bid=await deleteBid(req.session.name,transaction_id)
+    console.log(delete_bid)
+
+    res.redirect("/ongoing-ipo")
+});
+
 
 
 app.post("/apply",async function(req,res){

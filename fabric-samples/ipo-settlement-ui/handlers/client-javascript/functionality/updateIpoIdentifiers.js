@@ -13,13 +13,14 @@ import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { insertOrUpdateIpo } from '../database/ipoToDB.js';
 
-async function updateIpoIdentifiers(username) {
+async function updateIpoIdentifiers(username,isin,cusip,ticker) {
     try {
+        var queryResult=""
         // get ISIN, CUSIP and TICKER from the issuer
         let issuer_obj = {
-            "isin": "XYZ",
-            "cusip": "QWERTY",
-            "ticker": "MSFT"
+            "isin": isin,
+            "cusip": cusip,
+            "ticker": ticker
         }
 
         let userName=username
@@ -85,6 +86,8 @@ async function updateIpoIdentifiers(username) {
                     else{
                         console.log(`The cusip, isin and ticker for IPO: ${user_id} already EXISTS!!!`);
                         console.log("No further updates allowed!")
+                        queryResult="No further updates allowed!"
+                        
                     }
                 }
                 else{
@@ -93,7 +96,7 @@ async function updateIpoIdentifiers(username) {
                 }
                 console.log("OVER")
                 await gateway.disconnect();
-                process.exit(1);
+                // process.exit(1);
             }
             else {
                 console.log("\n3")

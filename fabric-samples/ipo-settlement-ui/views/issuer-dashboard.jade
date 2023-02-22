@@ -5,6 +5,9 @@ block content
         .row
             .col-2 
             .col-8 
+                if message 
+                    .alert.alert-info(role='alert') #{message} 
+
                 h3.color.center #{ipoInfo.ticker}
                 #accordionExample.accordion
                     .accordion-item
@@ -64,6 +67,11 @@ block content
                                                 .form-group 
                                                     label(for="principle") Allocation Principle
                                                     input.form-control(type="text",name="principle" value=`${allotment_principle}` readonly)
+                                            .col-3 
+                                                .form-group
+                                                    label(for="") 
+                                                    button.btn.button.btn-lg(type="submit") Next
+
 
                     .accordion-item
                         h2#headingTwo.accordion-header

@@ -1,0 +1,69 @@
+extends layout
+
+block content
+    .container 
+        .row 
+            .col-4
+            .col-4 
+                .row 
+                    .col-5 
+                    .col-2 
+                        .person-icon
+                            i.bi.bi-person-circle
+                        
+                    .col-5
+                .row 
+                    .col-3
+                    .col-6
+                        h5.mt-3.color.center #{user.full_name}
+                    .col-3
+                .row 
+                    .col-3 
+                    .col-6
+                        h6.mt-2.center.color #{user.user_name}
+        .row 
+            .col-1
+            .col-10
+                
+                div
+                    p.h4 IPOs Applied
+                    hr
+                    for investor_transaction in investor_transactions
+                        
+                        form(action="/modify-bid", method="post") 
+                            .row 
+                                .col-4 
+                                    input(type="hidden", name="modify_transaction_id" value=`${investor_transaction.id}`)
+                                    p.h4 #{investor_transaction.ticker}
+                                    p.h6 #{investor_transaction.issuer_name}
+                                    p.h6 Invested #{investor_transaction.lots_bid*investor_transaction.lot_size*investor_transaction.bid_amount} Rs.
+                                .col-6 
+                                .col-2
+                                    .form-group 
+                                        label(for="bid_amount") Bid Amount
+                                        input.form-control(type="text",name="bid_amount" value=`${investor_transaction.bid_amount}`)    
+                                    .form-group 
+                                        label(for="lots_applied") Lots Applied
+                                        input.form-control(type="text",name="lots_applied" value=`${investor_transaction.lots_bid}`)    
+                                    //- p.h6 Bid Amount #{investor_transaction.bid_amount}
+                                    //- p.text-color Lots Applied: #{investor_transaction.lots_bid}
+                            .row 
+                                .col-4
+                                .col-4
+                                    //- input(type="hidden", name="ipo_id" value=`${ipo.ipo_id}`)
+                                    button.button.btn-lg(type="submit" name="modify") Modify
+                                
+                        
+                        form(action="/delete-bid", method="post") 
+                            
+                            .row
+                                .col-4
+                                    input(type="hidden", name="delete_transaction_id" value=`${investor_transaction.id}`)
+
+                                .col-4
+                                    //- input(type="hidden", name="ipo_id" value=`${ipo.ipo_id}`)
+                                    button.button.btn-lg(type="submit" name="delete") Delete
+                                        
+
+
+                    

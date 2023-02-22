@@ -13,13 +13,14 @@ import { getBid, deleteBidFromDb } from '../database/editBidDb.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 
-async function main() {
+async function deleteBid(username,txnid) {
     try {
-        console.log(process.argv);
-        let userName = process.argv[2];   // Take username from command line
-        let txn_id = process.argv[3];   // Get transaction_id from frontend
+        // console.log(process.argv);
+        // let userName = process.argv[2];   // Take username from command line
+        let userName=username
+        let txn_id = txnid;   // Get transaction_id from frontend
 
-        let user_promise = await getIdFromUsername(process.argv[2]);
+        let user_promise = await getIdFromUsername(userName);
         console.log("USER promise:- ", user_promise);
 
         let user_id, role_id, full_name;
@@ -87,4 +88,4 @@ async function is_txn_valid(txn_id, investor_id, ipo_id){
     return [true, bid[0]['ipo_id']];
 }
 
-main();
+export {deleteBid}
