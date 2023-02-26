@@ -31,7 +31,7 @@ html(lang="en")
                 
                 -if(session && role_id=="IN"){
                     a.navbar-brand(href='/ongoing-ipo') 
-                        img(src="/image/yodaplus-icon.png",width="50", height="50")
+                        img(src="/image/yodaplus-icon.png", height="50")
                     button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
                         span.navbar-toggler-icon
                     #navbarText.collapse.navbar-collapse
@@ -60,7 +60,7 @@ html(lang="en")
 
                 -}else if(session && role_id=="IS"){
                     a.navbar-brand(href='/issuer-dashboard') 
-                        img(src="/image/yodaplus-icon.png",width="50", height="50")
+                        img(src="/image/yodaplus-icon.png", height="50")
                     button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
                         span.navbar-toggler-icon
                     #navbarText.collapse.navbar-collapse
@@ -81,7 +81,7 @@ html(lang="en")
                                 a.dropdown-item(href='/logout') Logout
                 -}else if(session && role_id=="AG"){
                     a.navbar-brand(href='/agent-dashboard') 
-                        img(src="/image/yodaplus-icon.png",width="50", height="50")
+                        img(src="/image/yodaplus-icon.png", height="50")
                     button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
                         span.navbar-toggler-icon
                     #navbarText.collapse.navbar-collapse
@@ -101,14 +101,13 @@ html(lang="en")
                                 a.dropdown-item(href='/logout') Logout
                 -}else{
                     a.navbar-brand(href='/') 
-                        img(src="/image/yodaplus-icon.png",width="50", height="50")
+                        img(src="/image/yodaplus-icon.png", height="50")
                 -}
                     
                             
                     
 
-        main.container
-            block content
+        block content
 
        
     script(src='https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js' integrity='sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p' crossorigin='anonymous')
