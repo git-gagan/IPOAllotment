@@ -180,3 +180,15 @@ button {
     font-size: larger;
     font-weight: bold;
 }
+
+.text-yoda {
+    color: #227969;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.text-left {
+    text-align: left !important;
+}
