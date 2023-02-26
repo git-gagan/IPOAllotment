@@ -725,7 +725,7 @@ app.get("/register-step1",function(req,res){
 
 var role_type;
 app.post("/register-step1",function(req,res){
-    role_type=req.body.flexRadioDefault
+    role_type=req.body.role_type_dropdown
     console.log(role_type)
     res.render("register-step2.jade",{role:role_type})
    
