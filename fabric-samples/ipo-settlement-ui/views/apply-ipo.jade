@@ -2,97 +2,78 @@ extends layout
 
 block content
     .container 
-        .row 
-            .col-1
-            .col-10
-                div
-                    //- .row
-                    //-     .col-10 
-                    //-     .col-2
-                    //-         .person-icon
-                    //-             i.bi.bi-person-square
-                div 
-                    //- .row 
-                    //-     .col-1 
-                    //-     .col-6
-                    - const month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-                    - var bid_start_date=new Date(ipo.bid_start_date)
-                    - var date=bid_start_date.getDate()+"th"+" "+month[bid_start_date.getMonth()]+" "+bid_start_date.getFullYear()
-                    h5 #{ipo.ticker}
-                    P.text-color #{ipo.issuer_name}
+        .row.mb-5
+            .col-12.d-flex.justify-content-center
+                .row.mt-5.w-75
+                    .col-12
+                        div 
+                            - const month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                            - var bid_start_date=new Date(ipo.bid_start_date)
+                            - var date=bid_start_date.getDate()+"th"+" "+month[bid_start_date.getMonth()]+" "+bid_start_date.getFullYear()
+                            h5 #{ipo.ticker}
+                            p.text-color #{ipo.issuer_name}
 
-                    //- p.color Investor Type
-                    //- p.text-color Retail Investor
+                            //- p.color Investor Type
+                            //- p.text-color Retail Investor
 
-                    p.color Issue Date 
-                    p.text-color #{date}
+                            span.color Issue Date 
+                            h5.text-color #{date}
 
-                    p.color Issue Price Range
-                    p.text-color Rs.#{ipo.priceRangeLow} - Rs.#{ipo.priceRangeHigh}
+                            span.color Issue Price Range
+                            h5.text-color Rs.#{ipo.priceRangeLow} - Rs.#{ipo.priceRangeHigh}
 
-                    p.color Lot Size 
-                    p.text-color #{ipo.lot_size}
+                            span.color Lot Size 
+                            h5.text-color #{ipo.lot_size}
 
 
-                   
-                    form(action="/apply-ipo", method="post") 
-                        .row.mt-5
-                            h6 Payment Details 
-                            input(type="hidden", name="ipo_id",value=`${ipo.ipo_id}`)
-                            //- .col-4
-                            //-     .form-group 
-                            //-         label(for="acctnum") Account Number
-                            //-         input.form-control(type="text")  
-                            //- .col-4
-                            //-     .form-group 
-                            //-         label(for="acctholder") Account Holder Name
-                            //-         input.form-control(type="text")  
-                            //- .col-4
-                            //-     .form-group 
-                            //-         label(for="ifsc") Bank IFSC
-                            //-         input.form-control(type="text")  
-                        .row
-                            .col-4
-                                //- .form-group 
-                                //-     label(for="demat") Demat Number
-                                //-     input.form-control(type="text" name="demat")  
-                                .form-group
+                        
+                            form(action="/apply-ipo", method="post") 
+                                .row.mt-5
+                                    span.h5 Payment Details 
+                                    input(type="hidden", name="ipo_id",value=`${ipo.ipo_id}`)
+                                    //- .col-4
+                                    //-     .form-group 
+                                    //-         label(for="acctnum") Account Number
+                                    //-         input.form-control(type="text")  
+                                    //- .col-4
+                                    //-     .form-group 
+                                    //-         label(for="acctholder") Account Holder Name
+                                    //-         input.form-control(type="text")  
+                                    //- .col-4
+                                    //-     .form-group 
+                                    //-         label(for="ifsc") Bank IFSC
+                                    //-         input.form-control(type="text")
+
+                                    
                                     label(for="demat") Demat Number
-                                        select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="demat" required)
+                                        select.form-select.form-select-lg(aria-label='.form-select-lg example' name="demat" required)
                                             option(value='')
                                             for dmat in demat
                                                 option(value=`${dmat.demat_ac_no}`) #{dmat.demat_ac_no} 
 
-                        .row.mt-5 
-                            h6 Bids 
-                            .col-4
-                                .form-group 
-                                    label(for="qty") Qty.
-                                    input.form-control(type="text" name="qty" onchange="Amount()" id="qty")  
-                            .col-4
-                                .form-group 
-                                    label(for="price") Price
-                                    input.form-control(type="text" name="price" onchange="Amount()" id="price")  
-                            
+                                .row.mt-3 
+                                    span.h5.mb-2 Bids 
+                                    .col-6
+                                        label.mt-0(for="qty") Qty.
+                                        input.form-control(type="text" name="qty" onchange="Amount()" id="qty")  
+                                    .col-6
+                                        label.mt-0(for="price") Price
+                                        input.form-control(type="text" name="price" onchange="Amount()" id="price")  
+                                    
 
-                        .row.mt-5
+                                .row.mt-5
 
-                            .col-2
-                                p.text-color Amount Payable
-
-                            .col-8 
-
-                            .col-2 
-                                p.color#total Rs. 
+                                    .col-6.text-left
+                                        p.text-color Amount Payable
+                                    .col-6.text-right
+                                        p.color#total Rs. 
 
 
-                        .row 
-
-                            .col-2 
-                                button.button.btn-lg(type="submit") Close
-                            .col-8 
-                            .col-2 
-                                button.button.btn-lg(type="submit") Submit
+                                .row 
+                                    .col-6.text-left
+                                        button.button.btn-lg(type="reset") Close
+                                    .col-6.text-right
+                                        button.button.btn-lg(type="submit") Submit
 
     script(type="text/javascript").
         function Amount(){
