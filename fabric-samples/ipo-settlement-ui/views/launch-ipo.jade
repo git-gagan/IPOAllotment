@@ -2,90 +2,15 @@ extends layout
 
 -var investor_types=#investor_types
 block content
+
     .container 
-        .row
-            .col-2 
-            .col-8
-                form(action="/add-ipo-buckets", method="post") 
-                    .row 
-                        h6 Please add all pre-primary investors, their sale bucket size and priority of allotment
-
-                    //- form(action="/add-ipo-buckets", method="post") 
-                    .row 
-                        //- .col-3
-                        //-     button.btn(type="button",onClick="addBucket()")
-                        //-         i.bi.bi-plus-circle-fill    Add Bucket
-                        .col-3
-                            label(for="investorType") Investor Type
-                            select.form-control(name='investorTypeBucket',id="investorTypeBucket")
-                                for investor in investor_types
-                                    option(value=`${investor.investor_type_id}`) #{investor.investor_type}
-                        .col-3 
-                            .form-group 
-                                label(for="BucketSize") Bucket Size
-                                input.form-control(type="number",name="BucketSize",id="BucketSize")
-                        .col-3 
-                            .form-group 
-                                label(for="allocPriority") Allocation Priority
-                                input.form-control(type="number",name="allocPriority",id="allocPriority")
-                        .col-3
-                            label(for="investorId") Investor
-                            select.form-control(name='investorId',id="investorId")
-                                for investor in investors
-                                    option(value=`${investor.investor_id}`) #{investor.investor_name}
-                    .row 
-                        .col-4 
-                        .col-4
-                        .col-4 
-                            button.button.btn-lg(type="submit") Add Bucket
-
-
-
-
-
-
-                            //- .row#ipobucket
-
-                            
-
-                                
-                        //- #pills-contact.tab-pane.fade(role='tabpanel' aria-labelledby='pills-contact-tab')
-                form(action="/add-investor-category", method="post") 
-                    .row 
-                        h6 Please add all investor categories who are allowed to participate, their reserved quota and minimum lot quantity
-
-                    //- .row 
-                    //-     .col-4
-
-                    //-         button.btn(type="button",onClick="addInvestorCategory()")
-                    //-             i.bi.bi-plus-circle-fill    Add Investor Category
-                    //-         .row#investorcategory
-
-
-                    .row 
-                        //- .col-3
-                        //-     button.btn(type="button",onClick="addBucket()")
-                        //-         i.bi.bi-plus-circle-fill    Add Bucket
-                        .col-4
-                            label(for="investorType") Investor Type
-                            select.form-control(name='investorType',id="investorType")
-                                for investor in investor_types
-                                    option(value=`${investor.investor_type_id}`) #{investor.investor_type}
-                        .col-4 
-                            .form-group 
-                                label(for="quota") Reserved Quota
-                                input.form-control(type="number",name="quota",id="quota")
-                        .col-4 
-                            .form-group 
-                                label(for="lotQuantity") Lot Quantity
-                                input.form-control(type="number",name="lotQuantity",id="lotQuantity")
-                    .row 
-                        .col-4 
-                        .col-4
-                        .col-4 
-                            button.button.btn-lg(type="submit") Add Investor Category
-
-                
+        nav(style="margin-top:2rem")
+            #nav-tab.nav.nav-tabs(role='tablist')
+                a#basic-ipo-details-tab.nav-link.active(data-bs-toggle='tab' href='#basic-ipo-details' role='tab' aria-controls='basic-ipo-details' aria-selected='true') Basic IPO Details
+                a#nav-ipo-bucket-tab.nav-link(data-bs-toggle='tab' href='#nav-ipo-bucket' role='tab' aria-controls='nav-ipo-bucket' aria-selected='false') IPO Buckets
+                a#nav-investor-classification-tab.nav-link(data-bs-toggle='tab' href='#nav-investor-classification' role='tab' aria-controls='nav-investor-classification' aria-selected='false') Invester Classification
+        #nav-tabContent.tab-content
+            #basic-ipo-details.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='basic-ipo-details-tab')
                 form(action="/launch-ipo",method="post") 
                     
                     //- ul#pills-tab.nav.nav-pills.mb-5(role='tablist')
@@ -158,10 +83,65 @@ block content
                                     
                         //- #pills-profile.tab-pane.fade(role='tabpanel' aria-labelledby='pills-profile-tab') 
                     
-                    
-                            
-                                
-            .col-2 
+            #nav-ipo-bucket.tab-pane.fade(role='tabpanel' aria-labelledby='nav-ipo-bucket-tab')
+                form(action="/add-ipo-buckets", method="post") 
+                    .row 
+                        h6 Please add all pre-primary investors, their sale bucket size and priority of allotment
+
+                    //- form(action="/add-ipo-buckets", method="post") 
+                    .row 
+                        //- .col-3
+                        //-     button.btn(type="button",onClick="addBucket()")
+                        //-         i.bi.bi-plus-circle-fill    Add Bucket
+                        .col-3
+                            label(for="investorType") Investor Type
+                            select.form-control(name='investorTypeBucket',id="investorTypeBucket")
+                                for investor in investor_types
+                                    option(value=`${investor.investor_type_id}`) #{investor.investor_type}
+                        .col-3 
+                            .form-group 
+                                label(for="BucketSize") Bucket Size
+                                input.form-control(type="number",name="BucketSize",id="BucketSize")
+                        .col-3 
+                            .form-group 
+                                label(for="allocPriority") Allocation Priority
+                                input.form-control(type="number",name="allocPriority",id="allocPriority")
+                        .col-3
+                            label(for="investorId") Investor
+                            select.form-control(name='investorId',id="investorId")
+                            if investors
+                                for investor in investors
+                                    option(value=`${investor.investor_id}`) #{investor.investor_name}
+                                    //- option(value=`${investor.investor_id}`) #{investor.investor_name}
+                    .row 
+                        .col-4 
+                        .col-4
+                        .col-4 
+                            button.button.btn-lg(type="submit") Add Bucket
+            #nav-investor-classification.tab-pane.fade(role='tabpanel' aria-labelledby='nav-investor-classification-tab')
+                form(action="/add-investor-category", method="post") 
+                    .row 
+                        h6 Please add all investor categories who are allowed to participate, their reserved quota and minimum lot quantity
+                    .row 
+                        .col-4
+                            label(for="investorType") Investor Type
+                            select.form-control(name='investorType',id="investorType")
+                                for investor in investor_types
+                                    option(value=`${investor.investor_type_id}`) #{investor.investor_type}
+                        .col-4 
+                            .form-group 
+                                label(for="quota") Reserved Quota
+                                input.form-control(type="number",name="quota",id="quota")
+                        .col-4 
+                            .form-group 
+                                label(for="lotQuantity") Lot Quantity
+                                input.form-control(type="number",name="lotQuantity",id="lotQuantity")
+                    .row 
+                        .col-4 
+                        .col-4
+                        .col-4 
+                            button.button.btn-lg(type="submit") Add Investor Category
+
 
 
     script(type="text/javascript").

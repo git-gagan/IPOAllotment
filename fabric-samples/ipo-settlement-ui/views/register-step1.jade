@@ -2,23 +2,23 @@ extends layout
 
 block content
     .container 
-        div 
-            .row 
+        div.row
                 .col-2 
-                .col-8 
-                    h3 Open a trading account with YPO and start investing for free
-                    h5.mt-4.color Let’s get started
-                    p.mt-4 Step 1:
-                    .row 
-                        .col-4 
-                        .col-4 
-                            p.text-color Sign up as:
+                .col-12
+                    h3.text-center  Open a trading account with YPO and start investing for free
+                    h5.mt-4.color.text-center  Let's get started
+                    
+                    .row
+                        .col-4
+                        .col-4.text-left
+                            
                             form(action="/register-step1", method="post") 
-                                ul.list-group 
-                                for item in role_type 
-                                    li.list-group-item
-                                        input.form-check-input.me-1(type='radio' name="flexRadioDefault" id="flexRadioDefault1" value=`${item.role_type}`)
-                                        |     #{item.role_type}
+                                p.mt-4 Step 1:
+                                p.text-color Sign up as:
+                                select.form-select(name="role_type_dropdown", required="true")
+                                    option(value="") Select Option
+                                    for item in role_type 
+                                        option(value="#{item.role_type}") #{item.role_type}
                                 .row.mb-5 
                                     .col-11
                                     .col-1

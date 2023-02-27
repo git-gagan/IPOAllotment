@@ -2,86 +2,56 @@ extends layout
 
 block content
     .container 
+        .row
+            .col-12.text-center
+                h1.display-1.text-yoda
+                    i.bi.bi-person-circle
+                h3.mt-3.color.center #{user.full_name}
+                h6.mt-2.center.color #{user.user_name}
         .row 
-            .col-4
-            .col-4 
-                .row 
-                    .col-5 
-                    .col-2 
-                        .person-icon
-                            i.bi.bi-person-circle
-                        
-                    .col-5
-                .row 
-                    .col-3
-                    .col-6
-                        h5.mt-3.color.center #{user.full_name}
-                    .col-3
-                .row 
-                    .col-3 
-                    .col-6
-                        h6.mt-2.center.color #{user.user_name}
-        .row.mt-5 
-            .col-2
-            .col-4
-                //- p.text-color Email
-                p.text-color PAN 
-               
-                hr
-                p.text-color Bank Account 
-                p.text-color IFSC
+            .col-12.d-flex.justify-content-center
+                .row.mt-5.w-75
 
-               
-            .col-2
-            .col-4 
-                //- p.text-color aasawarib@gmail.com
-                p.text-color #{investor.pan}
-               
-                p.text-color #{investor.bank_account_no}
-                p.text-color #{investor.ifsc_code}
+                    .col-6.text-left
+                        //- p.text-color Email
+                        p.text-color PAN 
+                        p.text-color Bank Account 
+                        p.text-color IFSC
+                    .col-6.text-right
+                        //- p.text-color aasawarib@gmail.com
+                        p.text-color #{investor.pan}
+                        p.text-color #{investor.bank_account_no}
+                        p.text-color #{investor.ifsc_code}
+                    hr
+                    for dmat in demat 
+                        .col-6.text-left
+                            p.text-color Demat
+                            p.text-color Depository Participant Id
 
-                
-        .row.mt-5 
-            for dmat in demat 
-                .row
-                    .col-2 
-                    .col-4 
-                        p.text-color Demat
-                        p.text-color Depository Participant Id
-                    
-                    .col-2 
-                    .col-4 
-                        p.text-color #{dmat.demat_ac_no}
-                        p.text-color #{dmat.dp_id}
-
-        .row.mt-5 
-            .col-2 
-            .col-4 
-                p.text-color Funds 
-            .col-2 
-            .col-4
-                p.text-color #{balance}
-        form(action="/add-demat", method="post") 
-            .row.mt-5
-                .row 
-                    .col-2
-                    .col-4
-                        p.text-color Add Demat
-                .row 
-                     
-                    .col-2
-                    .col-4
-                        .form-group 
-                            label(for="demataccno") Demat Account Number
-                            input.form-control(type="text" name="demataccno")
-                    .col-2 
-                    .col-4 
-                        .form-group 
-                            label(for="dpid") Demat Participant ID
-                            input.form-control(type="text" name="dpid")
-                .row 
-                    .col-2 
-                    .col-4 
-                        button.button.btn-lg(type="submit") Add
-                    
+                        .col-6.text-right
+                            p.text-color #{dmat.demat_ac_no}
+                            p.text-color #{dmat.dp_id}
+                        hr
+                    .col-6.text-left
+                        p.text-color Funds 
+                    .col-6.text-right
+                        p.text-color #{balance}
+                    hr
+        
+                    form(action="/add-demat", method="post") 
+                        .col-6
+                            p.text-color Add Demat
+                        .row
+                            .col-6
+                                .form-group 
+                                    label(for="demataccno") Demat Account Number
+                                    input.form-control(type="text" name="demataccno", required='true')
+                            .col-6
+                                .form-group 
+                                    label(for="dpid") Demat Participant ID
+                                    input.form-control(type="text" name="dpid", required='true')
+                        .row 
+                            .col-12.text-right
+                                button.button.btn-lg(type="submit",style='margin-bottom:2rem') Add
+                                
        
