@@ -12,6 +12,3 @@ organizations/peerOrganizations/*
 system-genesis-block/*
 *.tar.gz
 log.txt
-!organizations/peerOrganizations/org1.example.com
-!organizations/peerOrganizations/org2.example.com
-!organizations/peerOrganizations/org3.example.com
