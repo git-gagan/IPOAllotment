@@ -91,7 +91,9 @@ function generateOrg3() {
     infoln "Generating certificates using Fabric CA"
     ${CONTAINER_CLI_COMPOSE} -f ${COMPOSE_FILE_CA_BASE} -f $COMPOSE_FILE_CA_ORG3 up -d 2>&1
 
+    infoln "\n==================================================\n"
     . fabric-ca/registerEnroll.sh
+    infoln "\n==================================================\n"
 
     sleep 10
 
@@ -175,6 +177,31 @@ function networkDown () {
     ./network.sh down
 }
 
+## Call the script to deploy a chaincode to the channel
+function deployCC() {
+  export PATH=${PWD}/../../bin:$PATH
+  export FABRIC_CFG_PATH=$PWD/../../config/
+  export CORE_PEER_TLS_ENABLED=true
+  export CORE_PEER_LOCALMSPID="Org3MSP"
+  export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+  export CORE_PEER_MSPCONFIGPATH=${PWD}/../organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+  export CORE_PEER_ADDRESS=localhost:11051
+  infoln "Inside Deploy CC...."
+  # scripts/deployCC.sh $CHANNEL_NAME $CC_NAME $CC_SRC_PATH $CC_SRC_LANGUAGE $CC_VERSION $CC_SEQUENCE $CC_INIT_FCN $CC_END_POLICY $CC_COLL_CONFIG $CLI_DELAY $MAX_RETRY $VERBOSE
+  peer lifecycle chaincode package ipo.tar.gz --path ../../ipo-settlement/javascript-chaincode/ --lang node  --label ipo_1
+  infoln "CC packaged.."
+  peer lifecycle chaincode install ipo.tar.gz
+  PACKAGE_ID=$(peer lifecycle chaincode calculatepackageid ${CC_NAME}.tar.gz)
+  infoln "CC installed.."
+  infoln "Got package id ${PACKAGE_ID} !"
+  peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" --channelID mychannel --name ipo --version 1 --package-id $PACKAGE_ID --sequence 1 --init-required
+  infoln "Approved for Organization"
+
+  if [ $? -ne 0 ]; then
+    fatalln "Deploying chaincode failed"
+  fi
+}
+
 # Using crpto vs CA. default is cryptogen
 CRYPTO="cryptogen"
 # timeout duration - the duration the CLI should wait for a response from
@@ -184,6 +211,18 @@ CLI_TIMEOUT=10
 CLI_DELAY=3
 # channel name defaults to "mychannel"
 CHANNEL_NAME="mychannel"
+# chaincode language defaults to "NA"
+CC_SRC_LANGUAGE="NA"
+# chaincode name defaults to "NA"
+CC_NAME="NA"
+# chaincode path defaults to "NA"
+CC_SRC_PATH="NA"
+# endorsement policy defaults to "NA". This would allow chaincodes to use the majority default policy.
+CC_END_POLICY="NA"
+# collection configuration defaults to "NA"
+CC_COLL_CONFIG="NA"
+# chaincode init function defaults to "NA"
+CC_INIT_FCN="NA"
 # use this as the docker compose couch file
 COMPOSE_FILE_COUCH_BASE=compose/compose-couch-org3.yaml
 COMPOSE_FILE_COUCH_ORG3=compose/${CONTAINER_CLI}/docker-compose-couch-org3.yaml
@@ -193,6 +232,12 @@ COMPOSE_FILE_ORG3=compose/${CONTAINER_CLI}/docker-compose-org3.yaml
 # certificate authorities compose file
 COMPOSE_FILE_CA_BASE=compose/compose-ca-org3.yaml
 COMPOSE_FILE_CA_ORG3=compose/${CONTAINER_CLI}/docker-compose-ca-org3.yaml
+# chaincode init function defaults to "NA"
+CC_INIT_FCN="NA"
+# Chaincode version
+CC_VERSION="1.0"
+# Chaincode definition sequence
+CC_SEQUENCE=1
 # database
 DATABASE="leveldb"
 
@@ -231,12 +276,40 @@ while [[ $# -ge 1 ]] ; do
     CLI_TIMEOUT="$2"
     shift
     ;;
+  -ccn )
+    CC_NAME="$2"
+    shift
+    ;;
+  -ccp )
+    CC_SRC_PATH="$2"
+    shift
+    ;;
+  -ccl )
+    CC_SRC_LANGUAGE="$2"
+    shift
+    ;;
+  -cci )
+    CC_INIT_FCN="$2"
+    shift
+    ;;
   -d )
     CLI_DELAY="$2"
     shift
     ;;
   -s )
     DATABASE="$2"
+    shift
+    ;;
+  -r )
+    MAX_RETRY="$2"
+    shift
+    ;;
+  -ccs )
+    CC_SEQUENCE="$2"
+    shift
+    ;;
+  -ccv )
+    CC_VERSION="$2"
     shift
     ;;
   -verbose )
@@ -260,6 +333,8 @@ elif [ "$MODE" == "down" ]; then
   EXPMODE="Stopping network"
 elif [ "$MODE" == "generate" ]; then
   EXPMODE="Generating certs and organization definition for Org3"
+elif [ "$MODE" == "deployCC" ]; then
+  infoln "Deploy CC for Org3"
 else
   printHelp
   exit 1
@@ -273,6 +348,9 @@ elif [ "${MODE}" == "down" ]; then ## Clear the network
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
   generateOrg3
   generateOrg3Definition
+elif [ "$MODE" == "deployCC" ]; then
+  infoln "deploying chaincode on channel '${CHANNEL_NAME}'"
+  deployCC
 else
   printHelp
   exit 1

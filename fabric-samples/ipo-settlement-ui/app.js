@@ -96,14 +96,19 @@ app.get('/register', function (req, res) {
 
 
 app.get("/portfolio", function (req, res) {
+    
+    if (!req.session.name){
+        return res.redirect('/login')
+    }
     var promiseQuery = query(req.session.name);
+    console.log(promiseQuery);
     var portfolios;
 
     var promiseValue = async () => {
         const value = await promiseQuery;
-        console.log(value);
+        console.log("Value:-", value);
         portfolios = value[value.length - 1].Record.portfolio
-        console.log(portfolios)
+        console.log("Portfolios:-", portfolios);
         res.render("portfolio.jade", { session: req.session.name, role_id: role_id, portfolios: portfolios })
     }
     promiseValue();
@@ -495,7 +500,6 @@ app.post("/login", async function (req, res) {
 app.get("/logout", function (req, res) {
     req.session.destroy(function (error) {
         console.log("Session Destroyed")
-
     })
     res.render("index.jade");
 });
@@ -590,6 +594,9 @@ app.post("/update-issuer", async function (req, res) {
 
 
 app.post("/add-demat", async function (req, res) {
+    if (!req.session.name){
+        res.redirect('/login')
+    }
     let dmat_ac_no = req.body.demataccno
     let dp_id = req.body.dpid
     let adddDemat = await addDemat(req.session.name, dmat_ac_no, dp_id)
@@ -882,6 +889,11 @@ app.post("/register-step2", async function (req, res) {
 });
 
 app.get("/profile", async function (req, res) {
+    console.log("Request Object Session Name:- ", req.session.name);
+    if (!req.session.name){
+        console.log("Redirect to LOGIN");
+        return res.redirect('/login')
+    }
     let user = await getIdFromUsername(req.session.name)
     console.log(user)
     let investor = await getInvestorInfo(user.user_id)
@@ -1096,6 +1108,9 @@ app.get("/ongoing-ipo", async function (req, res) {
 
 
 app.get("/applied-ipo", async function (req, res) {
+    if (!req.session.name){
+        return res.redirect('/login')
+    }
     let user = await getIdFromUsername(req.session.name)
     console.log(user)
 
@@ -1133,6 +1148,9 @@ app.post("/delete-bid", async function (req, res) {
 
 
 app.post("/apply", async function (req, res) {
+    if (!req.session.name){
+        return res.redirect('/login')
+    }
     let ipo_id = req.body.ipo_id;
     console.log(ipo_id)
     var ipo = await getIpoInfo(ipo_id)
@@ -1146,6 +1164,9 @@ app.post("/apply", async function (req, res) {
 
 
 app.get("/apply-ipo", async function (req, res) {
+    if (!req.session.name){
+        return res.redirect('/login')
+    }
     let user = await getIdFromUsername(req.session.name)
     console.log(user)
     let demat = await getdemat(user.user_id)

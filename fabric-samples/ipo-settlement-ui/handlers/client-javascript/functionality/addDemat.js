@@ -64,7 +64,7 @@ async function addDemat(username,dmat_ac_no,dp_id) {
         }
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
-        process.exit(1);
+        // process.exit(1);
     }
 }
 
