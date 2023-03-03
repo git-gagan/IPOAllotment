@@ -7,7 +7,7 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
-import { json } from 'express';
+
 async function query(username) {
     try {
         let userName=username;
@@ -45,8 +45,11 @@ async function query(username) {
                     function_call = "queryAgent"
                 }
                 var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
+                // console.log(contract);
                 console.log("\n2")
                 // Evaluate the specified transaction.
+                console.log("Function to be called:- ", function_call);
+                console.log("Id calling the function:- ", user_id, userName);
                 let result = await contract.evaluateTransaction(function_call, user_id);
                 result = result.toString();
                 if (result != "0"){
@@ -71,16 +74,8 @@ async function query(username) {
         }
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
-        process.exit(1);
+        // process.exit(1);
     }
 }
-// const isBidTimeOver = await contract.evaluateTransaction('isBidTimeOver');
-// console.log(`Remaining time for bidding: ${isBidTimeOver}`);
-// const start = await contract.evaluateTransaction('startBidding');
-// console.log(start.toString());
-// const start1 = await contract.evaluateTransaction('startBidding');
-// console.log(start1.toString());
-// const isBidTimeOver1 = await contract.evaluateTransaction('isBidTimeOver');
-// console.log(`Remaining time for bidding: ${isBidTimeOver1}`);
-// Disconnect from the gateway.
+
 export {query};
