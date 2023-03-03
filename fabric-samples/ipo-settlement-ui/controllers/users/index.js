@@ -1,4 +1,6 @@
 import db from '../../configurations/sqliteConnection.js'
+import url from 'url'
+import { getRoleTypeId, getInvestorTypeId } from '../../utils/index.js'
 
 export const registerStep1 = (req, res) => {
     let role_type = [];
@@ -22,39 +24,41 @@ export const registerStep1 = (req, res) => {
 
 export const postRegisterStep1 = (req, res) => {
     let role_type = req.body.role_type_dropdown
-    res.render("register-step2.jade", { role: role_type })
+    res.redirect(url.format({
+        pathname: '/users/register-step2',
+        query: {
+            role: role_type
+        }
+    }))
 }
 
 export const registerStep2 = (req, res) => {
-    res.render("register-step2.jade", { session: req.session.name, role: role_type, role_id: role_id })
+    res.render("register-step2.jade", {
+        role: req.query.role
+    })
 }
 
 export const postRegisterStep2 = async (req, res) => {
-    let role_type, username, password, fullname, role_type_id, investor_type_id
-    var template;
+    let role_type = req.body.role;
+    let username = req.body.username;
+    let password = req.body.password;
+    let fullname = req.body.fullname;
+    let role_type_id = null;
+    let investor_type_id = null;
+    let template;
 
-    role_type = req.body.role
+
 
     let role_type_promise = await getRoleTypeId(role_type)
     if (role_type_promise) {
-
         role_type_id = role_type_promise['role_type_id'];
-
-    }
-    else {
-        role_type_id = null;
     }
 
     let investor_type_promise = await getInvestorTypeId(role_type)
     if (investor_type_promise) {
         investor_type_id = investor_type_promise['investor_type_id'];
     }
-    else {
-        investor_type_id = null;
-    }
-    username = req.body.username
-    password = req.body.password
-    fullname = req.body.fullname
+
     // console.log(role_type)
     db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], (err, row) => {
         if (err) {

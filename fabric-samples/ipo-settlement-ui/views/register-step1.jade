@@ -12,13 +12,13 @@ block content
                         .col-4
                         .col-4.text-left
                             
-                            form(action="/register-step1", method="post") 
+                            form(action="/users/register-step1", method="post") 
                                 p.mt-4 Step 1:
                                 p.text-color Sign up as:
                                 select.form-select(name="role_type_dropdown", required="true")
                                     option(value="") Select Option
                                     for item in role_type 
-                                        option(value="#{item.role_type}") #{item.role_type}
+                                        option(value="#{item.role_type_id}") #{item.role_type}
                                 .row.mb-5 
                                     .col-11
                                     .col-1
@@ -35,16 +35,6 @@ block content
                             //-     a.list-group-item.list-group-item-action(type='button' ) Crowdfund 
                             //-     a.list-group-item.list-group-item-action(type='button') Issuer 
                             //-     a.list-group-item.list-group-item-action(type='button') Paying Agent
-
-                                
-
-
-
-
-                               
-
-
-                .col-2
 
         
    
