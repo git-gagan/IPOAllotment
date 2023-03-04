@@ -56,7 +56,7 @@ export const postLaunchIpo = async (req, res) => {
         }
     }
 
-    let promiseInvoke = await IssuertoLedger(req.session.name, data.issuer, data.isin, data.cusip,
+    let promiseInvoke = await IssuertoLedger(req.user.user_name, data.issuer, data.isin, data.cusip,
         data.ticker, data.totalShares, data.lowPrice, data.highPrice, data.ipoStartDate,
         data.ipoEndTime, data.lotSize, data.agent, data.principle, buckets, investorClassifications);
 
@@ -78,18 +78,16 @@ export const postLaunchIpo = async (req, res) => {
 
         let investorClassification = await getInvestorClassification(user_id)
 
-        console.log("Finallyyyy");
-
-        return res.redirect('/issuer/launch-ipo')
+        return res.redirect('/issuer/issuer-dashboard')
         res.render(template, {
             session: req.session.name, role_id: role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
             allotment_principle: allotmentPrinciple.name,
             ipoBucket: ipoBucket, investorClassification: investorClassification
         });
     }
-    return res.redirect('/issuer/launch-ipo')
+    // Some error occured
+    return res.redirect('back')
 
-    // res.render("issuer-dashboard.jade",{session:req.session.name,role_id:role_id});
 
 }
 

@@ -18,8 +18,7 @@ async function authorizeUser(userName) {
     try {
         const __dirname = path.resolve(path.dirname(''));
         // load the network configuration
-        const ccpPath = path.resolve('..','..','fabric-samples', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
-        console.log("==========================================\n")
+        const ccpPath = path.resolve('..', '..', 'fabric-samples', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
         const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
         // Create a new file system based wallet for managing identities.
@@ -36,11 +35,11 @@ async function authorizeUser(userName) {
             console.log(`Run the registerUser.js ${userName} application before retrying`);
             return [false, null, ccp];
         }
-        else{
+        else {
             console.log("---Valid User!---");
             return [true, wallet, ccp];
         }
-        
+
     } catch (error) {
         console.error(`Failed to evaluate user: ${error}`);
         process.exit(1);

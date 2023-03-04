@@ -1,14 +1,11 @@
-import { makeDbConnection } from "./dbConnection.js";
+import db from "../../../configurations/sqliteConnection.js";
 
-async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle=null, fixed_price) {
+async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle = null, fixed_price) {
     try {
         // Create DB connection
-        console.log("-------------------------------------");
-        let db = await makeDbConnection();
-        console.log(db, "------------------");
+
         let sql = "";
-        if (!update){
-            console.log("Insert Needed---");
+        if (!update) {
             sql = `insert into tbl_ipo_info
             (ipo_id, isin, cusip, ticker, issuer_name, bid_time, is_complete, has_bidding_started, ipo_announcement_date, bid_start_date, allotment_principle, fixed_price,
                 lot_size,priceRangeLow,priceRangeHigh)
@@ -30,8 +27,7 @@ async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle
                 '${issuer_obj[ipo_id]['ipoInfo']['priceRangeHigh']}'
             )`
         }
-        else{
-            console.log("Update Needed---");
+        else {
             sql = `update tbl_ipo_info 
                 set isin='${issuer_obj['isin']}',
                 cusip='${issuer_obj['cusip']}',
@@ -41,21 +37,19 @@ async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle
         const dbpromise = new Promise(
             (resolve, reject) => {
                 db.run(sql, (err) => {
-                    if (err){
-                        console.log("```````````````````````");
+                    if (err) {
                         console.error(err.message);
                         reject(err.message);
                     }
-                    else{
+                    else {
                         console.log("Execution Successful!");
                         resolve("Success!");
                     }
                 });
             }
         )
-        db.close();
         return dbpromise;
-    } 
+    }
     catch (error) {
         console.error(`Failed to insert IPO information: ${error}`);
         process.exit(1);
@@ -64,18 +58,14 @@ async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle
 
 async function addIpoEligibility(eligibility_obj) {
     try {
-        // Create DB connection
-        console.log("-------------------------------------");
-        let db = await makeDbConnection();
-        console.log(db, "------------------");
         let values = ''
-        for(let i in eligibility_obj){
+        for (let i in eligibility_obj) {
             values += `('${eligibility_obj[i]['ipo_id']}', 
                         ${eligibility_obj[i]['investor_type_id']},
                         ${eligibility_obj[i]['min_lot_qty']},
                         ${eligibility_obj[i]['reserve_lots']}
                     )`
-            if (i < eligibility_obj.length-1){
+            if (i < eligibility_obj.length - 1) {
                 values += ','
             }
         }
@@ -86,25 +76,23 @@ async function addIpoEligibility(eligibility_obj) {
                 reserve_lots
             )
             Values ${values}`;
-        console.log(sql);
         const dbpromise = new Promise(
             (resolve, reject) => {
                 db.run(sql, (err) => {
-                    if (err){
+                    if (err) {
                         console.log("```````````````````````");
                         console.error(err.message);
                         reject(err.message);
                     }
-                    else{
+                    else {
                         console.log("Execution Successful!");
                         resolve("Success!");
                     }
                 });
             }
         )
-        db.close();
         return dbpromise;
-    } 
+    }
     catch (error) {
         console.error(`Failed to insert IPO information: ${error}`);
         process.exit(1);
@@ -113,19 +101,16 @@ async function addIpoEligibility(eligibility_obj) {
 
 async function addIpoBuckets(bucket_obj) {
     try {
-        // Create DB connection
-        console.log("-------------------------------------");
-        let db = await makeDbConnection();
-        console.log(db, "------------------");
+
         let values = ''
-        for(let i in bucket_obj){
+        for (let i in bucket_obj) {
             values += `('${bucket_obj[i]['ipo_id']}', 
                         '${bucket_obj[i]['investor_id']}',
                         ${bucket_obj[i]['investor_type_id']},
                         ${bucket_obj[i]['no_of_shares']},
                         ${bucket_obj[i]['priority']}
                     )`
-            if (i < bucket_obj.length-1){
+            if (i < bucket_obj.length - 1) {
                 values += ','
             }
         }
@@ -137,25 +122,23 @@ async function addIpoBuckets(bucket_obj) {
                 priority
             )
             Values ${values}`;
-        console.log(sql);
         const dbpromise = new Promise(
             (resolve, reject) => {
                 db.run(sql, (err) => {
-                    if (err){
+                    if (err) {
                         console.log("```````````````````````");
                         console.error(err.message);
                         reject(err.message);
                     }
-                    else{
+                    else {
                         console.log("Execution Successful!");
                         resolve("Success!");
                     }
                 });
             }
         )
-        db.close();
         return dbpromise;
-    } 
+    }
     catch (error) {
         console.error(`Failed to insert IPO-Bucket information: ${error}`);
         process.exit(1);

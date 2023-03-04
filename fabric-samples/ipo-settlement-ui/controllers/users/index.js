@@ -56,8 +56,6 @@ export const postRegisterStep2 = async (req, res) => {
     let template;
 
 
-    let investor_type_promise = await getInvestorTypeId(role[1])
-    let investor_type_id = investor_type_promise['investor_type_id'];
 
     db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], async (err, row) => {
         if (err) {
@@ -90,6 +88,9 @@ export const postRegisterStep2 = async (req, res) => {
                 db.run(insert, [user_id, username, password, fullname]);
                 db.run(insert2, [user_id, role_type_id]);
                 if (role_type_id == 'IN') {
+                    let investor_type_promise = await getInvestorTypeId(role[1])
+
+                    let investor_type_id = investor_type_promise['investor_type_id'];
                     return res.redirect(url.format({
                         pathname: '/users/register-step3',
                         query: {
@@ -247,7 +248,6 @@ export const postRegisterauthority = (req, res) => {
 }
 
 export const postLogin = async (req, res) => {
-    console.log("Insideeee LOgin");
     let template;
     let value;
 

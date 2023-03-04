@@ -20,7 +20,6 @@ async function getInvestorClassification(ipo_id) {
                 }
             });
         })
-        db.close();
         return dbpromise;
     }
     catch (error) {
