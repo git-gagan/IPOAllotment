@@ -7,6 +7,8 @@ import { getIpoInfo } from "../../handlers/client-javascript/database/getIpo.js"
 import { getAllotmentPrinciple } from "../../handlers/client-javascript/database/getAllotmentPrinciple.js";
 import { getIpoBucket } from "../../handlers/client-javascript/database/getIpoBucket.js";
 import { getInvestorClassification } from "../../handlers/client-javascript/database/getInvestorClassification.js";
+import { updateIpoIdentifiers } from "../../handlers/client-javascript/functionality/updateIpoIdentifiers.js";
+
 
 // ISSUER Controllers
 export const launchIpo = async (req, res) => {
@@ -20,8 +22,26 @@ export const launchIpo = async (req, res) => {
     })
 }
 
-export const issuerDashboard = (req, res) => {
-    res.render("issuer-dashboard.jade", { session: req.session.name, role_id: role_id })
+export const issuerDashboard = async (req, res) => {
+    let ipoInfo = await getIpoInfo(req.user.user_id)
+    var date = new Date(ipoInfo.bid_start_date)
+    const yyyy = date.getFullYear();
+    let mm = date.getMonth() + 1; // Months start at 0!
+    let dd = date.getDate();
+
+    if (dd < 10) dd = '0' + dd;
+    if (mm < 10) mm = '0' + mm;
+
+    const formattedDate = dd + '-' + mm + '-' + yyyy;
+    let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle)
+    let ipoBucket = await getIpoBucket(req.user.user_id)
+    let investorClassification = await getInvestorClassification(req.user.user_id)
+
+    res.render("issuer-dashboard.jade", {
+        role_id: req.user.role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
+        allotment_principle: allotmentPrinciple.name,
+        ipoBucket: ipoBucket, investorClassification: investorClassification
+    });
 }
 
 export const postLaunchIpo = async (req, res) => {
@@ -63,27 +83,7 @@ export const postLaunchIpo = async (req, res) => {
 
     let ipoInfo = await getIpoInfo(user_id)
     if (ipoInfo) {
-        let template = "issuer-dashboard.jade"
-        var date = new Date(ipoInfo.bid_start_date)
-        const yyyy = date.getFullYear();
-        let mm = date.getMonth() + 1; // Months start at 0!
-        let dd = date.getDate();
-
-        if (dd < 10) dd = '0' + dd;
-        if (mm < 10) mm = '0' + mm;
-
-        const formattedDate = dd + '-' + mm + '-' + yyyy;
-        let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle)
-        let ipoBucket = await getIpoBucket(user_id)
-
-        let investorClassification = await getInvestorClassification(user_id)
-
         return res.redirect('/issuer/issuer-dashboard')
-        res.render(template, {
-            session: req.session.name, role_id: role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
-            allotment_principle: allotmentPrinciple.name,
-            ipoBucket: ipoBucket, investorClassification: investorClassification
-        });
     }
     // Some error occured
     return res.redirect('back')
@@ -95,31 +95,35 @@ export const updateIssuer = async (req, res) => {
     let cusip = req.body.cusip
     let ticker = req.body.ticker
     let isin = req.body.isin
-
-    let updateIpo = await updateIpoIdentifiers(req.session.name, isin, cusip, ticker)
-
-    let user_promise = await getIdFromUsername(req.session.name);
-    let user_id = user_promise["user_id"]
-    let ipoInfo = await getIpoInfo(user_id)
-    if (ipoInfo) {
-        let template = "issuer-dashboard.jade"
-        var date = new Date(ipoInfo.bid_start_date)
-        const yyyy = date.getFullYear();
-        let mm = date.getMonth() + 1; // Months start at 0!
-        let dd = date.getDate();
-
-        if (dd < 10) dd = '0' + dd;
-        if (mm < 10) mm = '0' + mm;
-
-        const formattedDate = dd + '-' + mm + '-' + yyyy;
-        let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle)
-        let ipoBucket = await getIpoBucket(user_id)
-        let investorClassification = await getInvestorClassification(user_id)
-        res.render(template, {
-            session: req.session.name, role_id: role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
-            allotment_principle: allotmentPrinciple.name,
-            ipoBucket: ipoBucket, investorClassification: investorClassification, message: updateIpo
-        });
+    try {
+        let updateIpo = await updateIpoIdentifiers(req.user.user_name, isin, cusip, ticker)
+    } catch (err) {
+        // TODO: Add Flash message
+        console.error(err)
     }
+
+    return res.redirect('/issuer/issuer-dashboard')
+    // let user_id = req.user.user_id
+    // let ipoInfo = await getIpoInfo(user_id)
+    // if (ipoInfo) {
+    //     let template = "issuer-dashboard.jade"
+    //     var date = new Date(ipoInfo.bid_start_date)
+    //     const yyyy = date.getFullYear();
+    //     let mm = date.getMonth() + 1; // Months start at 0!
+    //     let dd = date.getDate();
+
+    //     if (dd < 10) dd = '0' + dd;
+    //     if (mm < 10) mm = '0' + mm;
+
+    //     const formattedDate = dd + '-' + mm + '-' + yyyy;
+    //     let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle)
+    //     let ipoBucket = await getIpoBucket(user_id)
+    //     let investorClassification = await getInvestorClassification(user_id)
+    //     res.render(template, {
+    //         session: req.session.name, role_id: role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
+    //         allotment_principle: allotmentPrinciple.name,
+    //         ipoBucket: ipoBucket, investorClassification: investorClassification, message: updateIpo
+    //     });
+    // }
 }
 
