@@ -21,19 +21,18 @@ async function registerUserAgent(username) {
         // load the network configuration
         // console.log(process.argv);
         // const userName = "AG-" + process.argv[2];   // Take username from command line
-        const userName="AG-"+username
+        const userName = "AG-" + username
         const __dirname = path.resolve(path.dirname(''));
         const ccpPath = path.resolve('..', 'test-network', 'organizations', 'peerOrganizations', 'org3.example.com', 'connection-org3.json');
         const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
-        
+
         // Create a new CA client for interacting with the CA.
         const caURL = ccp.certificateAuthorities['ca.org3.example.com'].url;
         const ca = new FabricCAServices(caURL);
-        
+
         // Create a new file system based wallet for managing identities.
         const walletPath = path.join(process.cwd(), 'wallet');
         const wallet = await Wallets.newFileSystemWallet(walletPath);
-        console.log(`Wallet path: ${walletPath}`);
 
         // Check to see if we've already enrolled the user.
         const userIdentity = await wallet.get(userName);
@@ -41,7 +40,7 @@ async function registerUserAgent(username) {
             console.log(`An identity for the user ${userName} already exists in the wallet`);
             return;
         }
-        
+
         // Check to see if we've already enrolled the admin user.
         const adminIdentity = await wallet.get('admin-agent');
         if (!adminIdentity) {
@@ -59,12 +58,10 @@ async function registerUserAgent(username) {
             enrollmentID: userName,
             role: 'client'
         }, adminUser);
-        console.log("----------------------")
         const enrollment = await ca.enroll({
             enrollmentID: userName,
             enrollmentSecret: secret
         });
-        console.log("22222222222222222222222222")
         const x509Identity = {
             credentials: {
                 certificate: enrollment.certificate,
@@ -81,4 +78,4 @@ async function registerUserAgent(username) {
     }
 }
 
-export {registerUserAgent}
+export { registerUserAgent }

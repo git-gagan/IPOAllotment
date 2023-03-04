@@ -1,6 +1,10 @@
-import db from '../../configurations/sqliteConnection.js'
-import url from 'url'
-import { getRoleTypeId, getInvestorTypeId } from '../../utils/index.js'
+import url from 'url';
+import { v4 as uuidv4 } from 'uuid';
+import db from '../../configurations/sqliteConnection.js';
+import { getInvestorTypeId, getRoleTypeId } from '../../utils/index.js';
+import { registerUserAgent } from "../../handlers/client-javascript/MSP/registerUserAgent.js";
+import { registerUserInvestor } from "../../handlers/client-javascript/MSP/registerUserInvestor.js";
+import { registerUserIssuer } from "../../handlers/client-javascript/MSP/registerUserIssuer.js";
 
 export const registerStep1 = (req, res) => {
     let role_type = [];
@@ -43,79 +47,60 @@ export const postRegisterStep2 = async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
     let fullname = req.body.fullname;
-    let role_type_id = null;
-    let investor_type_id = null;
+
+    // let investor_type_id = null;
     let template;
 
 
-
     let role_type_promise = await getRoleTypeId(role_type)
-    if (role_type_promise) {
-        role_type_id = role_type_promise['role_type_id'];
-    }
+    let role_type_id = role_type_promise['role_type_id'];
 
-    let investor_type_promise = await getInvestorTypeId(role_type)
-    if (investor_type_promise) {
-        investor_type_id = investor_type_promise['investor_type_id'];
-    }
+    // let investor_type_promise = await getInvestorTypeId(role_type)
+    // if (investor_type_promise) {
+    //     investor_type_id = investor_type_promise['investor_type_id'];
+    // }
 
-    // console.log(role_type)
-    db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], (err, row) => {
+
+    db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], async (err, row) => {
         if (err) {
             res.status(400).json({ "error": err.message });
-            console.log(error.message);
+            console.error(err)
             return;
         }
         else if (row) {
-            res.render("register-step2.jade", { message: "Username already exist" });
+            // TODO: add flash messgae
+            // message: username already exists
+            res.redirect('back')
         }
         else {
             let user_id = uuidv4()
-            console.log(username, password, fullname)
-            var promiseRegister, filepath;
             let insert = 'INSERT INTO tbl_user (user_id,user_name, user_pwd,full_name) VALUES (?,?,?,?)';
             let insert2 = 'INSERT INTO tbl_userrole (user_id,role_id) VALUES (?,?)';
-
             try {
-
                 if (role_type_id == 'IN') {
-
-                    promiseRegister = registerUserInvestor(username);
+                    await registerUserInvestor(username);
                     template = "register-investor-step3.jade"
-
-
                 }
                 else if (role_type_id == 'IS') {
-                    promiseRegister = registerUserIssuer(username)
-                    template = "login.jade"
+                    await registerUserIssuer(username)
 
                 }
                 else if (role_type_id == 'AG') {
-                    promiseRegister = registerUserAgent(username)
-                    template = "login.jade"
-
-
+                    await registerUserAgent(username)
                 }
 
-                var promiseValue = async () => {
-                    const value = await promiseRegister;
-
-                };
-                promiseValue();
-
                 db.run(insert, [user_id, username, password, fullname]);
-
                 db.run(insert2, [user_id, role_type_id]);
-                console.log(template)
-                console.log("Investor Type Id:", investor_type_id)
-                res.render(template, { message: "Successfully registered!!", session: req.session.name, role_id: role_id, investor_type_id: investor_type_id, username: username });
-
+                if (role_type_id == 'IN') {
+                    // TODO: Add redirect
+                } else if (role_type_id == 'AG' || role_type_id == 'IS') {
+                    return res.redirect('/users/login')
+                }
+                // res.render(template, { message: "Successfully registered!!", session: req.session.name, role_id: role_id, investor_type_id: investor_type_id, username: username });
             } catch (error) {
-                console.log(error.message);
+                console.error(error.message);
             }
-
         }
-
     });
 
 }
@@ -135,9 +120,7 @@ export const postRegisterInvestorStep3 = async (req, res) => {
     investor_type_id = req.body.investor_type_id
     username = req.body.username
 
-
     let user_promise = await getIdFromUsername(username);
-    console.log("USER promise:- ", user_promise);
 
     let user_id, user_name;
     if (user_promise) {
@@ -148,13 +131,6 @@ export const postRegisterInvestorStep3 = async (req, res) => {
         user_id = null;
         full_name = null;
     }
-
-
-
-
-    console.log(user_id)
-    console.log(investor_type_id)
-    console.log(full_name)
 
     let insert_investor_info = 'INSERT INTO tbl_investor_info (investor_id,investor_type, pan,investor_name,bank_account_no,ifsc_code,lei,swift_address) VALUES (?,?,?,?,?,?,?,?)';
     let insert_investor_dmat = 'INSERT INTO tbl_investor_dmat (investor_id,demat_ac_no,dp_id) values(?,?,?)'
@@ -228,66 +204,10 @@ export const userInfo = async (req, res) => {
 
 }
 
-export const signUp = (req, res) => {
-    console.log(req.body);
-    var username = req.body.username
-    var password = req.body.password
-    var identity = req.body.identity
-    console.log("Identity :", identity)
-    db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], (err, row) => {
-        if (err) {
-            res.status(400).json({ "error": err.message });
-            console.log(error.message);
-            return;
-        }
-        else if (row) {
-            res.render("signup.jade", { message: "Username already exist", session: req.session.name, role_id: role_id });
-        }
-        else {
-            let user_id = uuidv4()
-            var promiseRegister, filepath;
-            let insert = 'INSERT INTO tbl_user (user_id,user_name, user_pwd) VALUES (?,?,?)';
-            let insert2 = 'INSERT INTO tbl_userrole (user_id,role_id) VALUES (?,?)';
 
-            try {
-
-                if (identity == 'IN') {
-                    promiseRegister = registerUserInvestor(username);
-
-                }
-                else if (identity == 'IS') {
-                    promiseRegister = registerUserIssuer(username)
-
-                }
-                else if (identity == 'AG') {
-                    promiseRegister = registerUserAgent(username)
-
-
-                }
-
-                var promiseValue = async () => {
-                    const value = await promiseRegister;
-
-                };
-                promiseValue();
-
-                db.run(insert, [user_id, username, password]);
-                db.run(insert2, [user_id, identity]);
-
-                res.render("login.jade", { message: "Successfully registered!!", session: req.session.name, role_id: role_id });
-
-            } catch (error) {
-                console.log(error.message);
-            }
-
-        }
-
-    });
-
-}
 
 export const logIn = (req, res) => {
-    res.render("login.jade", { session: req.session.name, role_id: role_id })
+    res.render("login.jade")
 }
 
 export const getRegisterAuthority = (req, res) => {
@@ -303,6 +223,7 @@ export const postRegisterauthority = (req, res) => {
 }
 
 export const postLogin = async (req, res) => {
+    console.log("INSIDEEEE LOGIN");
     var data;
     var template;
     var value;

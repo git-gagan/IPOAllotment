@@ -7,7 +7,7 @@ block content
             .col-8
                 if message 
                     .alert.alert-info(role='alert') #{message}
-                form(action="/register-step2",method="post",oninput='cnfpassword.setCustomValidity(cnfpassword.value != password.value ? "Passwords do not match." : "")') 
+                form(action="/users/register-step2",method="post",oninput='cnfpassword.setCustomValidity(cnfpassword.value != password.value ? "Passwords do not match." : "")') 
                     p Step 2:
                     h5.color.mt-4 Basic Details
                     //- form(action="")

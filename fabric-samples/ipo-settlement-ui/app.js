@@ -37,6 +37,8 @@ import { modifyBid } from "./handlers/client-javascript/functionality/modifyBid.
 import { deleteBid } from "./handlers/client-javascript/functionality/deleteBid.js";
 import db from './configurations/sqliteConnection.js'
 import { router } from './routers/index.js'
+import passport from "passport";
+import localPassport from './configurations/localPassport.js'
 
 /////////////////////////////////////////
 // Express setup
@@ -64,6 +66,11 @@ app.use(session({
     // to be saved to the store
     saveUninitialized: true
 }))
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(passport.setAuthenticatedUser)
 
 // Use Express Router
 app.use('/', router)

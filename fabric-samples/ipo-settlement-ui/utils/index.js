@@ -32,7 +32,7 @@ export const getRoleTypeId = async (role_type) => {
         //             where user_id=(
         //                 select user_id from tbl_user where name='${user_name}'
         //             )`;
-        let sql = `select * from tbl_role_type where role_type='${role_type}'`;
+        let sql = `select * from tbl_role_type where role_type_id='${role_type}'`;
         // db.all()/db.get() returns the rows as results unlike db.run()
         const dbpromise = new Promise((resolve, reject) => {
             db.get(sql, (err, row) => {
@@ -44,7 +44,6 @@ export const getRoleTypeId = async (role_type) => {
                 }
             });
         })
-        db.close();
         return dbpromise;
     }
     catch (error) {
