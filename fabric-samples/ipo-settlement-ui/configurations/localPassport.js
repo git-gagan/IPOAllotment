@@ -4,10 +4,14 @@ import db from './sqliteConnection.js'
 
 // AUth using passport
 passport.use(new LocalStrategy({
-    usernameField: 'user_name',
+    usernameField: 'username',
+    passwordField: 'password'
 }, (username, password, done) => {
-    console.log("INSIDEEEE Passport");
-    db.get(`SELECT * FROM tbl_user where user_name = ? and user_pwd = ?`, [username, password], async (err, row) => {
+    let sql = `select tbl_user.user_id, tbl_user.full_name, tbl_userrole.role_id,tbl_user.user_name
+                from tbl_user inner join tbl_userrole 
+                on tbl_user.user_id=tbl_userrole.user_id
+                where user_name= ? and user_pwd = ?`
+    db.get(sql, [username, password], async (err, row) => {
         if (err) {
             return done(err);
         }
@@ -27,7 +31,11 @@ passport.serializeUser((user, done) => {
 
 // deserializing the user
 passport.deserializeUser((user_name, done) => {
-    db.get(`SELECT * FROM tbl_user where user_name = ?`, [user_name], async (err, user) => {
+    let sql = `select tbl_user.user_id, tbl_user.full_name, tbl_userrole.role_id,tbl_user.user_name
+                from tbl_user inner join tbl_userrole 
+                on tbl_user.user_id=tbl_userrole.user_id
+                where user_name= ?`
+    db.get(sql, [user_name], async (err, user) => {
         if (err) {
             return done(err);;
         }

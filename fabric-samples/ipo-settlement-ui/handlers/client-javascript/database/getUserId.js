@@ -1,11 +1,8 @@
-import sqlite3 from 'sqlite3';
-import path from 'path';
-import { makeDbConnection } from "./dbConnection.js";
+import db from '../../../configurations/sqliteConnection.js'
 
 async function getIdFromUsername(user_name) {
     try {
         // Create DB connection
-        let db = await makeDbConnection();
         // let sql = `select user_id, role_id from tbl_userrole 
         //             where user_id=(
         //                 select user_id from tbl_user where name='${user_name}'
@@ -24,7 +21,6 @@ async function getIdFromUsername(user_name) {
                 }
             });
         })
-        db.close();
         return dbpromise;
     }
     catch (error) {
@@ -39,7 +35,6 @@ async function authenticateUser(user_name, password) {
         console.log("===============================");
         // let dbPath = "./client-javascript/ipo.db";  // to be called by index.js
         let dbPath = null;
-        let db = await makeDbConnection(dbPath);
         // let sql = 'select * from pragma_database_list';
         let sql = `select *
                     from tbl_user inner join tbl_userrole
@@ -60,7 +55,6 @@ async function authenticateUser(user_name, password) {
                 }
             });
         })
-        db.close();
         return dbpromise;
     }
     catch (error) {
@@ -75,8 +69,6 @@ async function authenticateUser(user_name, password) {
 async function getUsernameFromId(user_id) {
     try {
         // Create DB connection
-        console.log("===============================");
-        let db = await makeDbConnection();
         // let sql = `select user_id, role_id from tbl_userrole 
         //             where user_id=(
         //                 select user_id from tbl_user where name='${user_name}'
@@ -84,22 +76,17 @@ async function getUsernameFromId(user_id) {
         let sql = `select *
                     from tbl_user 
                     where user_id='${user_id}'`;
-        console.log(sql);
         // db.all()/db.get() returns the rows as results unlike db.run()
         const dbpromise = new Promise((resolve, reject) => {
             db.get(sql, (err, row) => {
                 if (err) {
-                    console.log("[][][][][][][][][][][][][")
                     reject(err.message);
                 }
                 else {
-                    console.log(row);
-                    console.log("Query Successful!");
                     resolve(row);
                 }
             });
         })
-        db.close();
         return dbpromise;
     }
     catch (error) {

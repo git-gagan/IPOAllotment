@@ -79,3 +79,4 @@ app.listen(3000, function () {
     console.log('fabcar-ui listening on port 3000');
 });
 
+// TODO: Use Sequelize for ORM https://sequelize.org/

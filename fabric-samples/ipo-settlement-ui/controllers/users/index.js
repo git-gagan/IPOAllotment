@@ -5,6 +5,8 @@ import { getInvestorTypeId, getRoleTypeId } from '../../utils/index.js';
 import { registerUserAgent } from "../../handlers/client-javascript/MSP/registerUserAgent.js";
 import { registerUserInvestor } from "../../handlers/client-javascript/MSP/registerUserInvestor.js";
 import { registerUserIssuer } from "../../handlers/client-javascript/MSP/registerUserIssuer.js";
+import { getIpoInfo } from "../../handlers/client-javascript/database/getIpo.js";
+import { getIdFromUsername } from '../../handlers/client-javascript/database/getUserId.js';
 
 export const registerStep1 = (req, res) => {
     let role_type = [];
@@ -88,7 +90,7 @@ export const postRegisterStep2 = async (req, res) => {
                 else if (role_type_id == 'AG') {
                     await registerUserAgent(username)
                 }
-
+                // TODO: Implement Password Hashing
                 db.run(insert, [user_id, username, password, fullname]);
                 db.run(insert2, [user_id, role_type_id]);
                 if (role_type_id == 'IN') {
@@ -205,7 +207,6 @@ export const userInfo = async (req, res) => {
 }
 
 
-
 export const logIn = (req, res) => {
     res.render("login.jade")
 }
@@ -223,91 +224,68 @@ export const postRegisterauthority = (req, res) => {
 }
 
 export const postLogin = async (req, res) => {
-    console.log("INSIDEEEE LOGIN");
-    var data;
-    var template;
-    var value;
-    // TODO: Implement Password Hashing
-    // TODO: Use PassportJS for authentication
-    db.get(`SELECT * FROM tbl_user where user_name = ? and user_pwd = ?`, [req.body.username, req.body.password], async (err, row) => {
-        if (err) {
-            res.status(400).json({ "error": err.message });
-            console.error(error.message);
-            return;
-        }
-        else if (row) {
-            let user_promise = await getIdFromUsername(req.body.username);
-            if (user_promise) {
-                role_id = user_promise['role_id'];
-                if (role_id == "IN") {
-                    template = "ongoing-ipo.jade"
-                    req.session.name = req.body.username
-                    sess = req.session.name;
-                    var ongoing = await OngoingIpoInfo();
-                    console.log(ongoing);
-                    res.render(template, { session: req.session.name, role_id: role_id, ongoing: ongoing });
-                }
-                else if (role_id == "IS") {
-                    req.session.name = req.body.username
-                    sess = req.session.name;
-                    let user_id = user_promise["user_id"]
-                    let ipoInfo = await getIpoInfo(user_id)
-                    if (ipoInfo) {
-                        template = "issuer-dashboard.jade"
-                        console.log(ipoInfo)
-                        console.log(ipoInfo.bid_start_date)
-                        var date = new Date(ipoInfo.bid_start_date)
-                        const yyyy = date.getFullYear();
-                        let mm = date.getMonth() + 1; // Months start at 0!
-                        let dd = date.getDate();
+    let template;
+    let value;
 
-                        if (dd < 10) dd = '0' + dd;
-                        if (mm < 10) mm = '0' + mm;
+    let role_id = req.user.role_id;
+    if (role_id == "IN") {
+        template = "ongoing-ipo.jade"
+        req.session.name = req.body.username
+        sess = req.session.name;
+        var ongoing = await OngoingIpoInfo();
+        console.log(ongoing);
+        res.render(template, { session: req.session.name, role_id: role_id, ongoing: ongoing });
+    }
+    else if (role_id == "IS") {
+        let ipoInfo = await getIpoInfo(req.user.user_id)
+        if (ipoInfo) {
+            return res.redirect('/issuer/issuer-dashboard')
+            // template = "issuer-dashboard.jade"
+            // console.log(ipoInfo)
+            // console.log(ipoInfo.bid_start_date)
+            // var date = new Date(ipoInfo.bid_start_date)
+            // const yyyy = date.getFullYear();
+            // let mm = date.getMonth() + 1; // Months start at 0!
+            // let dd = date.getDate();
 
-                        const formattedDate = dd + '-' + mm + '-' + yyyy;
-                        console.log(formattedDate)
-                        let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle)
-                        let ipoBucket = await getIpoBucket(user_id)
-                        console.log(ipoBucket)
-                        let investorClassification = await getInvestorClassification(user_id)
-                        console.log(investorClassification)
-                        res.render(template, {
-                            session: req.session.name, role_id: role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
-                            allotment_principle: allotmentPrinciple.name, ipoBucket: ipoBucket, investorClassification: investorClassification
-                        });
-                    }
-                    else {
-                        res.redirect('/launch-ipo')
+            // if (dd < 10) dd = '0' + dd;
+            // if (mm < 10) mm = '0' + mm;
 
-                    }
-
-                }
-                else if (role_id == "AG") {
-                    var promiseQuery = query(req.body.username);
-                    var promiseValue = async () => {
-                        value = await promiseQuery;
-                        console.log("IPO : ", value);
-                        template = "agent-dashboard.jade"
-                        console.log(role_id)
-                        req.session.name = req.body.username
-                        sess = req.session.name;
-                        res.render(template, { session: req.session.name, role_id: role_id, data: value })
-
-                        // template="agent-dashboard.jade"
-
-                    }
-                    promiseValue();
-                }
-            }
-            else {
-                role_id = null;
-            }
+            // const formattedDate = dd + '-' + mm + '-' + yyyy;
+            // console.log(formattedDate)
+            // let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle)
+            // let ipoBucket = await getIpoBucket(user_id)
+            // console.log(ipoBucket)
+            // let investorClassification = await getInvestorClassification(user_id)
+            // console.log(investorClassification)
+            // res.render(template, {
+            //     session: req.session.name, role_id: role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
+            //     allotment_principle: allotmentPrinciple.name, ipoBucket: ipoBucket, investorClassification: investorClassification
+            // });
         }
         else {
-            res.render("login.jade", { message: "please fill out correct details", session: req.session.name, role_id: role_id });
+            return res.redirect('/issuer/launch-ipo')
         }
+    }
+    else if (role_id == "AG") {
+        var promiseQuery = query(req.body.username);
+        var promiseValue = async () => {
+            value = await promiseQuery;
+            console.log("IPO : ", value);
+            template = "agent-dashboard.jade"
+            console.log(role_id)
+            req.session.name = req.body.username
+            let sess = req.session.name;
+            res.render(template, { session: req.session.name, role_id: role_id, data: value })
 
-    });
+            // template="agent-dashboard.jade"
+
+        }
+        promiseValue();
+    }
+
+    return res.redirect('back')
+
 }
 
 export const logOut = (req, res) => {

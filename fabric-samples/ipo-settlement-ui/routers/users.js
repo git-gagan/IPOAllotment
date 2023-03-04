@@ -4,6 +4,8 @@ import {
     registerStep1, registerStep2, logIn, postLogin
 } from '../controllers/users/index.js';
 import passport from 'passport'
+
+
 export const userRouter = express.Router()
 
 userRouter.get('/register-step1/', registerStep1)

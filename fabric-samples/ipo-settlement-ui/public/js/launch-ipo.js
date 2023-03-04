@@ -59,19 +59,4 @@ document.getElementById("final-submit-button").onclick = async (event) => {
     console.log(finalData);
     $('#launch-ipo-textarea').val(JSON.stringify(finalData))
     $('#launch-ipo-submit-button').click()
-    // try {
-    //     const rawResponse = await fetch('/launch-ipo/', {
-    //         method: 'POST',
-    //         credentials: "same-origin",
-    //         headers: {
-    //             'Accept': 'application/json',
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify(finalData)
-    //     });
-    //     const content = await rawResponse.json();
-    //     console.log(content);
-    // } catch (e) {
-    //     console.error(e);
-    // }
 }

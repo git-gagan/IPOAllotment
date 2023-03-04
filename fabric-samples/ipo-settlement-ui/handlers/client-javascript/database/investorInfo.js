@@ -1,27 +1,21 @@
-import { makeDbConnection } from "./dbConnection.js";
+import db from "../../../configurations/sqliteConnection.js";
 
 async function getInvestorInfo(investor_id) {
     try {
         // Create DB connection
-        console.log("===============================");
-        let db = await makeDbConnection();
         let sql = `select * from tbl_investor_info where investor_id='${investor_id}'`;
         console.log(sql);
         // db.all()/db.get() returns the rows as results unlike db.run()
         const dbpromise = new Promise((resolve, reject) => {
             db.get(sql, (err, row) => {
                 if (err) {
-                    console.log("[][][][][][][][][][][][][")
                     reject(err.message);
                 }
                 else {
-                    console.log(row);
-                    console.log("Query Successful!");
                     resolve(row);
                 }
             });
         })
-        db.close();
         return dbpromise;
     }
     catch (error) {
@@ -34,7 +28,6 @@ async function getInvestorInfo(investor_id) {
 async function getAllInvestorInfo() {
     try {
         // Create DB connection
-        let db = await makeDbConnection();
         let sql = `select * from tbl_investor_info`;
         // db.all()/db.get() returns the rows as results unlike db.run()
         const dbpromise = new Promise((resolve, reject) => {
@@ -47,7 +40,6 @@ async function getAllInvestorInfo() {
                 }
             });
         })
-        db.close();
         return dbpromise;
     }
     catch (error) {
