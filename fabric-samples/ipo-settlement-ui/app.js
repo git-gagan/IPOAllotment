@@ -53,6 +53,9 @@ app.use(express.static("public"));
 const oneDay = 1000 * 60 * 60 * 24;
 
 app.use(bodyParser.urlencoded({ extended: true }));
+
+
+// TODO: Add persistant Sessions
 app.use(session({
     // It holds the secret key for session
     secret: 'test',

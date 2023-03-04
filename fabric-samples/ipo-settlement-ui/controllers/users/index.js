@@ -10,7 +10,7 @@ import { getIdFromUsername } from '../../handlers/client-javascript/database/get
 
 export const registerStep1 = (req, res) => {
     let role_type = [];
-    db.all("select * from tbl_role_type", (err, rows) => {
+    db.all("select * from tbl_role_type", async (err, rows) => {
         if (err) {
             console.log(err)
         }
@@ -24,7 +24,7 @@ export const registerStep1 = (req, res) => {
 
             })
         }
-        res.render("register-step1.jade", { role_type: role_type })
+        return res.render("register-step1.jade", { role_type: role_type })
     });
 }
 
@@ -45,7 +45,9 @@ export const registerStep2 = (req, res) => {
 }
 
 export const postRegisterStep2 = async (req, res) => {
-    let role_type = req.body.role;
+    let role = req.body.role.split("-");
+    let role_type_id = role[0];
+
     let username = req.body.username;
     let password = req.body.password;
     let fullname = req.body.fullname;
@@ -54,14 +56,8 @@ export const postRegisterStep2 = async (req, res) => {
     let template;
 
 
-    let role_type_promise = await getRoleTypeId(role_type)
-    let role_type_id = role_type_promise['role_type_id'];
-
-    // let investor_type_promise = await getInvestorTypeId(role_type)
-    // if (investor_type_promise) {
-    //     investor_type_id = investor_type_promise['investor_type_id'];
-    // }
-
+    let investor_type_promise = await getInvestorTypeId(role[1])
+    let investor_type_id = investor_type_promise['investor_type_id'];
 
     db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], async (err, row) => {
         if (err) {
@@ -94,7 +90,14 @@ export const postRegisterStep2 = async (req, res) => {
                 db.run(insert, [user_id, username, password, fullname]);
                 db.run(insert2, [user_id, role_type_id]);
                 if (role_type_id == 'IN') {
-                    // TODO: Add redirect
+                    return res.redirect(url.format({
+                        pathname: '/users/register-step3',
+                        query: {
+                            investor_type_id: investor_type_id,
+                            username: username
+                        }
+                    }))
+
                 } else if (role_type_id == 'AG' || role_type_id == 'IS') {
                     return res.redirect('/users/login')
                 }
@@ -108,42 +111,62 @@ export const postRegisterStep2 = async (req, res) => {
 }
 
 export const registerInvestorStep3 = (req, res) => {
-    res.render("register-investor-step3.jade", { session: req.session.name, role_id: role_id })
+
+    res.render("register-investor-step3.jade", {
+        investor_type_id: req.query.investor_type_id,
+        username: req.query.username
+    })
 }
 
 export const postRegisterInvestorStep3 = async (req, res) => {
-    let acctnum, ifsc, acctholder, pan, dacctnum, dpartid, investor_type_id, username, full_name
-    acctnum = req.body.acctnum
-    ifsc = req.body.ifsc
-    acctholder = req.body.acctholder
-    pan = req.body.pan
-    dacctnum = req.body.dacctnum
-    dpartid = req.body.dpartid
-    investor_type_id = req.body.investor_type_id
-    username = req.body.username
+
+    let acctnum = req.body.acctnum
+    let ifsc = req.body.ifsc
+    let acctholder = req.body.acctholder
+    let pan = req.body.pan
+    let dacctnum = req.body.dacctnum
+    let dpartid = req.body.dpartid
+    let investor_type_id = req.body.investor_type_id
+    let username = req.body.username
 
     let user_promise = await getIdFromUsername(username);
 
-    let user_id, user_name;
+    let user_id = null
+    let full_name = null;
     if (user_promise) {
         user_id = user_promise['user_id'];
         full_name = user_promise['full_name'];
     }
-    else {
-        user_id = null;
-        full_name = null;
-    }
 
     let insert_investor_info = 'INSERT INTO tbl_investor_info (investor_id,investor_type, pan,investor_name,bank_account_no,ifsc_code,lei,swift_address) VALUES (?,?,?,?,?,?,?,?)';
     let insert_investor_dmat = 'INSERT INTO tbl_investor_dmat (investor_id,demat_ac_no,dp_id) values(?,?,?)'
-    let id = uuidv4()
 
-    db.run(insert_investor_info, [user_id, investor_type_id, pan, full_name, acctnum, ifsc])
-    db.run(insert_investor_dmat, [user_id, dacctnum, dpartid])
-    res.render("login.jade", { session: req.session.name, role_id: role_id })
+    let firstQueryError = ""
+    db.run(insert_investor_info, [user_id, investor_type_id, pan, full_name, acctnum, ifsc], (err, response) => {
+        if (err) {
+            // TODO: give flash message
+            console.error(err)
+            firstQueryError = err
+        }
+    })
+    db.run(insert_investor_dmat, [user_id, dacctnum, dpartid], (err, response) => {
+        if (err || firstQueryError) {
+            // TODO: give flash message
+            console.error(err)
+            return res.redirect(url.format({
+                pathname: '/users/register-step3',
+                query: {
+                    investor_type_id: investor_type_id,
+                    username: username
+                }
+            }))
+        } else {
+            return res.redirect('/users/login')
+        }
+    })
+
 
 }
-
 
 export const enroll = (req, res) => {
     res.render("enroll.jade", { session: req.session.name, role_id: role_id })
@@ -224,6 +247,7 @@ export const postRegisterauthority = (req, res) => {
 }
 
 export const postLogin = async (req, res) => {
+    console.log("Insideeee LOgin");
     let template;
     let value;
 

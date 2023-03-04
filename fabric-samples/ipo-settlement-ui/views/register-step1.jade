@@ -18,7 +18,7 @@ block content
                                 select.form-select(name="role_type_dropdown", required="true")
                                     option(value="") Select Option
                                     for item in role_type 
-                                        option(value="#{item.role_type_id}") #{item.role_type}
+                                        option(value="#{item.role_type_id}-#{item.role_type}") #{item.role_type}
                                 .row.mb-5 
                                     .col-11
                                     .col-1
