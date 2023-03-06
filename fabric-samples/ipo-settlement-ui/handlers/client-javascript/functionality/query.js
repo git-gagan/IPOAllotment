@@ -49,6 +49,7 @@ async function query(username) {
                 // Evaluate the specified transaction.
                 let result = await contract.evaluateTransaction(function_call, user_id);
                 result = result.toString();
+                console.log("RESULT IN QUERY:- ", result);
                 if (result != "0"){
                     console.log(`Transaction has been evaluated, result is: ${result}`);
                     queryResult=JSON.parse(result)

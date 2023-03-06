@@ -188,7 +188,7 @@ function deployCC() {
   export CORE_PEER_ADDRESS=localhost:11051
   infoln "Inside Deploy CC...."
   # scripts/deployCC.sh $CHANNEL_NAME $CC_NAME $CC_SRC_PATH $CC_SRC_LANGUAGE $CC_VERSION $CC_SEQUENCE $CC_INIT_FCN $CC_END_POLICY $CC_COLL_CONFIG $CLI_DELAY $MAX_RETRY $VERBOSE
-  peer lifecycle chaincode package ipo.tar.gz --path ../../ipo-settlement/javascript-chaincode/ --lang node  --label ipo_1
+  peer lifecycle chaincode package ipo.tar.gz --path ../../ipo-settlement-ui/handlers/javascript-chaincode/ --lang node  --label ipo_1
   infoln "CC packaged.."
   peer lifecycle chaincode install ipo.tar.gz
   PACKAGE_ID=$(peer lifecycle chaincode calculatepackageid ${CC_NAME}.tar.gz)
