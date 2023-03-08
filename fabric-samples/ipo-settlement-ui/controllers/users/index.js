@@ -298,25 +298,19 @@ export const postLogin = async (req, res) => {
         }
     }
     else if (role_id == "AG") {
-        var promiseQuery = query(req.body.username);
-        var promiseValue = async () => {
-            value = await promiseQuery;
-            console.log("IPO : ", value);
-            template = "agent-dashboard.jade"
-            console.log(role_id)
-            req.session.name = req.body.username
-            let sess = req.session.name;
-            res.render(template, { session: req.body.username, role_id: role_id, data: value })
-
-            // template="agent-dashboard.jade"
-
-        }
-        promiseValue();
+        // var promiseQuery = query(req.body.username);
+        // var promiseValue = async () => {
+        //     value = await promiseQuery;
+        //     console.log("IPO : ", value);
+        //     template = "agent-dashboard.jade"
+        //     console.log(role_id)
+        //     req.session.name = req.body.username
+        //     let sess = req.session.name;
+        //     res.render(template, { session: req.body.username, role_id: role_id, data: value })
+        return res.redirect('/agent/agent-dashboard');
     }
-
-    return res.redirect('back')
-
 }
+
 
 export const investorDashboard = async (req, res) => {
     let session = req.user;
