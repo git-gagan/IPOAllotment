@@ -2,11 +2,16 @@ import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import db from '../../configurations/sqliteConnection.js';
 import { getInvestorTypeId, getRoleTypeId } from '../../utils/index.js';
+import { getInvestorTransactions } from "../../handlers/client-javascript/database/getInvestorTransactions.js";
 import { registerUserAgent } from "../../handlers/client-javascript/MSP/registerUserAgent.js";
 import { registerUserInvestor } from "../../handlers/client-javascript/MSP/registerUserInvestor.js";
 import { registerUserIssuer } from "../../handlers/client-javascript/MSP/registerUserIssuer.js";
 import { getIpoInfo } from "../../handlers/client-javascript/database/getIpo.js";
 import { getIdFromUsername } from '../../handlers/client-javascript/database/getUserId.js';
+import { OngoingIpoInfo } from '../../handlers/client-javascript/database/OngoingIpoInfo.js';
+import { getAllInvestorInfo, getInvestorInfo } from "../../handlers/client-javascript/database/investorInfo.js";
+import { getdemat } from "../../handlers/client-javascript/database/getDmatFromDB.js";
+import { query } from "../../handlers/client-javascript/functionality/query.js"
 
 export const registerStep1 = (req, res) => {
     let role_type = [];
@@ -253,12 +258,13 @@ export const postLogin = async (req, res) => {
 
     let role_id = req.user.role_id;
     if (role_id == "IN") {
-        template = "ongoing-ipo.jade"
-        req.session.name = req.body.username
-        sess = req.session.name;
-        var ongoing = await OngoingIpoInfo();
-        console.log(ongoing);
-        res.render(template, { session: req.session.name, role_id: role_id, ongoing: ongoing });
+        // template="ongoing-ipo.jade"
+        // req.session.name = req.body.username
+        // sess=req.session.name;
+        // var ongoing=await OngoingIpoInfo();
+        // console.log(ongoing);
+        // res.render(template,{session:req.session.name,role_id:role_id,ongoing:ongoing});
+        return res.redirect('/users/investor-dashboard');
     }
     else if (role_id == "IS") {
         let ipoInfo = await getIpoInfo(req.user.user_id)
@@ -300,7 +306,7 @@ export const postLogin = async (req, res) => {
             console.log(role_id)
             req.session.name = req.body.username
             let sess = req.session.name;
-            res.render(template, { session: req.session.name, role_id: role_id, data: value })
+            res.render(template, { session: req.body.username, role_id: role_id, data: value })
 
             // template="agent-dashboard.jade"
 
@@ -312,10 +318,70 @@ export const postLogin = async (req, res) => {
 
 }
 
+export const investorDashboard = async (req, res) => {
+    let session = req.user;
+    if (!session) {
+        console.log("Redirect to LOGIN");
+        return res.redirect('/users/login')
+    }
+    let template = "ongoing-ipo.jade"
+    let ongoing = await OngoingIpoInfo();
+    console.log(ongoing, req.user.user_name);
+    res.render(template, { session: req.user.user_name, role_id: req.user.role_id, ongoing: ongoing });
+}
+
+export const profile = async (req, res) => {
+    let session = req.user;
+    if (!session) {
+        console.log("Redirect to LOGIN");
+        return res.redirect('/users/login')
+    }
+    console.log("Request Object Session Name:- ", req.user.user_name);
+    let user = await getIdFromUsername(req.user.user_name)
+    console.log(user)
+    let investor = await getInvestorInfo(user.user_id)
+    console.log(investor)
+    let demat = await getdemat(user.user_id)
+    console.log(demat)
+    let value = await query(req.user.user_name);
+    let balance;
+    console.log(value);
+    try {
+        balance = value[value.length - 1].Record.wallet.current_balance
+    }
+    catch (err) {
+        balance = 100000
+    }
+    res.render("profile.jade", { session: req.user.user_name, role_id: req.user.role_id, user: user, investor: investor, demat: demat, balance: balance })
+}
+
+export const portfolio = async (req, res) => {
+    if (!req.user) {
+        return res.redirect('/users/login')
+    }
+    let value = await query(req.user.user_name);
+    let portfolios;
+    console.log("Value:-", value);
+    portfolios = value[value.length - 1].Record.portfolio
+    console.log("Portfolios:-", portfolios);
+    res.render("portfolio.jade", { session: req.user.user_name, role_id: req.user.role_id, portfolios: portfolios })
+}
+
+export const appliedIpo = async (req, res) => {
+    if (!req.user) {
+        return res.redirect('/users/login')
+    }
+    let user = await getIdFromUsername(req.user.user_name)
+    console.log(user)
+    let investor_transactions = await getInvestorTransactions(user.user_id)
+    console.log(investor_transactions)
+    res.render("applied-ipo.jade", { session: req.user.user_name, role_id: req.user.role_id, user: user, investor_transactions: investor_transactions })
+}
+
 export const logOut = (req, res) => {
     req.session.destroy(function (error) {
         console.log("Session Destroyed")
     })
-    res.render("index.jade");
+    res.redirect('/');
 }
 

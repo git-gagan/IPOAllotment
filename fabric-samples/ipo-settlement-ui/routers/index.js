@@ -2,7 +2,7 @@ import express from "express";
 import { userRouter } from './users.js'
 import { home } from '../controllers/full.js'
 import { issuerRouter } from "./issuer.js";
-
+import { logOut } from "../controllers/users/index.js";
 
 export const router = express.Router()
 
@@ -10,3 +10,4 @@ export const router = express.Router()
 router.get('/', home)
 router.use('/users', userRouter)
 router.use('/issuer', issuerRouter)
+router.get('/logout/', logOut);

@@ -3,7 +3,7 @@ import passport from 'passport';
 import {
     logIn, postLogin, postRegisterInvestorStep3,
     postRegisterStep1, postRegisterStep2, registerInvestorStep3,
-    registerStep1, registerStep2
+    registerStep1, registerStep2, investorDashboard, profile, portfolio, appliedIpo
 } from '../controllers/users/index.js';
 
 
@@ -18,3 +18,8 @@ userRouter.post('/register-investor-step3/', postRegisterInvestorStep3)
 userRouter.get('/login/', logIn)
 userRouter.post('/login/',
     passport.authenticate('local', { failureRedirect: '/users/login' }), postLogin)
+userRouter.get('/investor-dashboard/', investorDashboard);
+userRouter.get('/profile/', profile);
+userRouter.get('/portfolio/', portfolio);
+userRouter.get('/applied-ipo/', appliedIpo);
+
