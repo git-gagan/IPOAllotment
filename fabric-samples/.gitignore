@@ -31,7 +31,7 @@ install-fabric.sh
 # Remove wallet from tracking
 ipo-settlement-ui/wallet/*
 
-ipo-settlement-ui/ipo.db
+HF-Node.pem
 
 # override the ignore of all config/ folders
 !full-stack-asset-transfer-guide/infrastructure/sample-network/config
