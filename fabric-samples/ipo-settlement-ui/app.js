@@ -40,6 +40,8 @@ import { router } from './routers/index.js'
 import passport from "passport";
 import localPassport from './configurations/localPassport.js'
 
+// import { job } from "./utils/cron.js";
+
 /////////////////////////////////////////
 // Express setup
 // TODO: Protect urls using Authorization
@@ -80,6 +82,8 @@ app.use('/', router)
 
 app.listen(3000, function () {
     console.log('fabcar-ui listening on port 3000');
+    console.log("Initializing cron...");
+    // job;
 });
 
 // TODO: Use Sequelize for ORM https://sequelize.org/

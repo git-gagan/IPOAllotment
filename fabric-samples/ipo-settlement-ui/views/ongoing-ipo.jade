@@ -18,7 +18,7 @@ block content
                         - const month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
                         - var bid_start_date=new Date(ipo.bid_start_date)
                         - var date=bid_start_date.getDate()+"th"+" "+month[bid_start_date.getMonth()]+" "+bid_start_date.getFullYear()
-                        form(action="/apply", method="post") 
+                        form(action="/users/apply", method="post") 
                             .row 
                                 .col-4 
                                     p.h4 #{ipo.ticker}
@@ -36,7 +36,7 @@ block content
                                         .col-2
 
                 div
-                    a(href="/upcoming-ipo",method="get")
+                    a(href="/users/upcoming-ipo",method="get")
                         div.center
                             i.bi.bi-chevron-double-down
                             p View Upcoming IPOs

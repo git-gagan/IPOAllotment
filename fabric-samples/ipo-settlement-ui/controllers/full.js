@@ -533,9 +533,6 @@ app.post("/apply-ipo", async function (req, res) {
     let ongoing = await OngoingIpoInfo();
     console.log(ongoing);
     res.render("ongoing-ipo.jade", { session: req.session.name, role_id: role_id, ongoing: ongoing })
-
-
-
 });
 
 app.get("/upcoming-ipo", async function (req, res) {

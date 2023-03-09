@@ -25,9 +25,7 @@ block content
                             span.color Lot Size 
                             h5.text-color #{ipo.lot_size}
 
-
-                        
-                            form(action="/apply-ipo", method="post") 
+                            form(action="/users/apply-ipo", method="post") 
                                 .row.mt-5
                                     span.h5 Payment Details 
                                     input(type="hidden", name="ipo_id",value=`${ipo.ipo_id}`)

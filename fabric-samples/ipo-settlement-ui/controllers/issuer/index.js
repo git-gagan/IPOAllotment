@@ -12,6 +12,17 @@ import { updateIpoIdentifiers } from "../../handlers/client-javascript/functiona
 
 // ISSUER Controllers
 export const launchIpo = async (req, res) => {
+    let session = req.user;
+    if (!session) {
+        console.log("Redirect to LOGIN");
+        return res.redirect('/users/login')
+    }
+    let ipoInfo = await getIpoInfo(req.user.user_id)
+    console.log(ipoInfo);
+    if (ipoInfo){
+        console.log("IPO already launched");
+        return res.redirect('/issuer/issuer-dashboard/');
+    }
     let agents = await getAgents()
     let investor_types = await getInvestorTypes()
     let principles = await getOverSubAllotmentPrinciple()
@@ -23,6 +34,12 @@ export const launchIpo = async (req, res) => {
 }
 
 export const issuerDashboard = async (req, res) => {
+    console.log("Issuer Dashboard");
+    let session = req.user;
+    if (!session) {
+        console.log("Redirect to LOGIN");
+        return res.redirect('/users/login')
+    }
     let ipoInfo = await getIpoInfo(req.user.user_id)
     var date = new Date(ipoInfo.bid_start_date)
     const yyyy = date.getFullYear();
@@ -34,17 +51,22 @@ export const issuerDashboard = async (req, res) => {
 
     const formattedDate = dd + '-' + mm + '-' + yyyy;
     let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle)
-    let ipoBucket = await getIpoBucket(req.user.user_id)
+    let ipoBucket = await getIpoBucket(req.user.user_id);
     let investorClassification = await getInvestorClassification(req.user.user_id)
 
     res.render("issuer-dashboard.jade", {
-        role_id: req.user.role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
+        session: req.user.user_name ,role_id: req.user.role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
         allotment_principle: allotmentPrinciple.name,
         ipoBucket: ipoBucket, investorClassification: investorClassification
     });
 }
 
 export const postLaunchIpo = async (req, res) => {
+    let session = req.user;
+    if (!session) {
+        console.log("Redirect to LOGIN");
+        return res.redirect('/users/login')
+    }
     let data = JSON.parse(req.body['launch-ipo'])
     let user_id = req.user.user_id
     let buckets = []
@@ -59,9 +81,11 @@ export const postLaunchIpo = async (req, res) => {
         lotQuantity: 'min_lot_qty'
     }
 
+    console.log(data);
     for (let i in data) {
         const splittedText = i.split("-");
-        if (splittedText[1] !== undefined) {
+        if (splittedText[1] !== undefined && data[i]) {
+            console.log("Inside Bucket Creation --->")
             let a = investorClassifications
             if (['investorTypeBucket', 'BucketSize', 'allocPriority', 'investorId'].includes(splittedText[0])) {
                 a = buckets
@@ -75,11 +99,10 @@ export const postLaunchIpo = async (req, res) => {
             }
         }
     }
-
+    console.log(buckets);
     let promiseInvoke = await IssuertoLedger(req.user.user_name, data.issuer, data.isin, data.cusip,
         data.ticker, data.totalShares, data.lowPrice, data.highPrice, data.ipoStartDate,
         data.ipoEndTime, data.lotSize, data.agent, data.principle, buckets, investorClassifications);
-
 
     let ipoInfo = await getIpoInfo(user_id)
     if (ipoInfo) {

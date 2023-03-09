@@ -30,7 +30,7 @@ html(lang="en")
             .container-fluid
                 
                 -if(session && role_id=="IN"){
-                    a.navbar-brand(href='/ongoing-ipo') 
+                    a.navbar-brand(href='/users/investor-dashboard') 
                         img(src="/image/yodaplus-icon.png", height="50")
                     button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
                         span.navbar-toggler-icon
@@ -59,7 +59,7 @@ html(lang="en")
                             
 
                 -}else if(session && role_id=="IS"){
-                    a.navbar-brand(href='/issuer-dashboard') 
+                    a.navbar-brand(href='/issuer/issuer-dashboard') 
                         img(src="/image/yodaplus-icon.png", height="50")
                     button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
                         span.navbar-toggler-icon
@@ -80,7 +80,7 @@ html(lang="en")
                                 li
                                 a.dropdown-item(href='/logout') Logout
                 -}else if(session && role_id=="AG"){
-                    a.navbar-brand(href='/agent-dashboard') 
+                    a.navbar-brand(href='/agent/agent-dashboard') 
                         img(src="/image/yodaplus-icon.png", height="50")
                     button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
                         span.navbar-toggler-icon

@@ -86,7 +86,7 @@ async function invokeBuy(username,ipo_id,demat_ac_no,lotQuantity,bidperShare) {
                 let lots_bid_valid = await is_lots_bid_valid(user_id, investor_obj, ipo_id);
                 if (!lots_bid_valid){
                     console.log("---Failure---");
-                    process.exit(1);
+                    return false;
                 }
                 // Need to check if the investor hasn't crossed the limit of max 3 allowed bids
                 let num_of_bids = 0;
@@ -98,7 +98,7 @@ async function invokeBuy(username,ipo_id,demat_ac_no,lotQuantity,bidperShare) {
                         console.log("You have already bid for " + investor_ipo_bid_info[0]['num_of_bid'] + " times");
                         console.log("No more bids can be placed");
                         console.log("Failure");
-                        process.exit(1);
+                        return false;
                     }
                     else{
                         num_of_bids = investor_ipo_bid_info[0]['num_of_bid'];
@@ -153,7 +153,8 @@ async function invokeBuy(username,ipo_id,demat_ac_no,lotQuantity,bidperShare) {
         }
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
-        process.exit(1);
+        return false;
+        // process.exit(1);
     }
 }
 

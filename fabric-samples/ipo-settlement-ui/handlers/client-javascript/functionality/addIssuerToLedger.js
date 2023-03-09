@@ -200,9 +200,13 @@ async function IssuertoLedger(username, issuer, isin, cusip,
                 var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
                 // Insert IPO info to DB
                 try {
+                    console.log(issuer_obj, ipo_investor_eligibility_list, ipo_bucket_list);
                     let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, false, allotment_principle, fixed_price);
                     let eligibilityDb = await addIpoEligibility(ipo_investor_eligibility_list);
-                    let bucketDb = await addIpoBuckets(ipo_bucket_list);
+                    if (ipo_bucket_list.toString() != "[]"){
+                        // Only if bucket info exists
+                        let bucketDb = await addIpoBuckets(ipo_bucket_list);
+                    }
                     // Evaluate the specified transaction.
                     const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
                     if (result) {

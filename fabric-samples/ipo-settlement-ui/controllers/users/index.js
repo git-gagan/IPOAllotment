@@ -8,10 +8,12 @@ import { registerUserInvestor } from "../../handlers/client-javascript/MSP/regis
 import { registerUserIssuer } from "../../handlers/client-javascript/MSP/registerUserIssuer.js";
 import { getIpoInfo } from "../../handlers/client-javascript/database/getIpo.js";
 import { getIdFromUsername } from '../../handlers/client-javascript/database/getUserId.js';
+import { invokeBuy } from "../../handlers/client-javascript/functionality/invokeBuy.js"
 import { OngoingIpoInfo } from '../../handlers/client-javascript/database/OngoingIpoInfo.js';
 import { getAllInvestorInfo, getInvestorInfo } from "../../handlers/client-javascript/database/investorInfo.js";
 import { getdemat } from "../../handlers/client-javascript/database/getDmatFromDB.js";
 import { query } from "../../handlers/client-javascript/functionality/query.js"
+import { UpcomingIpoInfo } from "../../handlers/client-javascript/database/UpcomingIpoInfo.js"
 
 export const registerStep1 = (req, res) => {
     let role_type = [];
@@ -26,7 +28,6 @@ export const registerStep1 = (req, res) => {
                         role_type_id: row.role_type_id,
                         role_type: row.role_type
                     })
-
             })
         }
         return res.render("register-step1.jade", { role_type: role_type })
@@ -59,9 +60,6 @@ export const postRegisterStep2 = async (req, res) => {
 
     // let investor_type_id = null;
     let template;
-
-
-
     db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], async (err, row) => {
         if (err) {
             res.status(400).json({ "error": err.message });
@@ -84,7 +82,6 @@ export const postRegisterStep2 = async (req, res) => {
                 }
                 else if (role_type_id == 'IS') {
                     await registerUserIssuer(username)
-
                 }
                 else if (role_type_id == 'AG') {
                     await registerUserAgent(username)
@@ -113,11 +110,9 @@ export const postRegisterStep2 = async (req, res) => {
             }
         }
     });
-
 }
 
 export const registerInvestorStep3 = (req, res) => {
-
     res.render("register-investor-step3.jade", {
         investor_type_id: req.query.investor_type_id,
         username: req.query.username
@@ -125,7 +120,6 @@ export const registerInvestorStep3 = (req, res) => {
 }
 
 export const postRegisterInvestorStep3 = async (req, res) => {
-
     let acctnum = req.body.acctnum
     let ifsc = req.body.ifsc
     let acctholder = req.body.acctholder
@@ -170,8 +164,6 @@ export const postRegisterInvestorStep3 = async (req, res) => {
             return res.redirect('/users/login')
         }
     })
-
-
 }
 
 export const enroll = (req, res) => {
@@ -183,11 +175,9 @@ export const register = (req, res) => {
 }
 
 export const userInfo = async (req, res) => {
-
     var userinfo = []
     let user_promise = await getIdFromUsername(req.session.name);
     console.log("USER promise:- ", user_promise);
-
     let user_id, role_id;
     if (user_promise) {
         user_id = user_promise['user_id'];
@@ -196,7 +186,6 @@ export const userInfo = async (req, res) => {
     else {
         user_id = null;
     }
-
     console.log(user_id, role_id)
 
     db.all(`select user_name,lots_bid,bid_amount,is_allotted from tbl_user 
@@ -208,7 +197,6 @@ export const userInfo = async (req, res) => {
             console.log(err)
         }
         else {
-
             rows.forEach(function (row) {
                 userinfo.push({
                     user_name: row.user_name,
@@ -216,10 +204,7 @@ export const userInfo = async (req, res) => {
                     bid_amount: row.bid_amount,
                     is_allotted: row.is_allotted
                 })
-
-
             })
-
         }
         console.log(userinfo)
         if (userinfo) {
@@ -227,14 +212,8 @@ export const userInfo = async (req, res) => {
             res.render("userinfo.jade", { session: req.session.name, role_id: role_id, userinfo: userinfo })
 
         }
-
-
-
     });
-
-
 }
-
 
 export const logIn = (req, res) => {
     res.render("login.jade")
@@ -360,6 +339,63 @@ export const portfolio = async (req, res) => {
     console.log("Portfolios:-", portfolios);
     res.render("portfolio.jade", { session: req.user.user_name, role_id: req.user.role_id, portfolios: portfolios })
 }
+
+export const apply = async (req, res) => {
+    if (!req.user) {
+        return res.redirect('/users/login')
+    }
+    let ipo_id = req.body.ipo_id;
+    console.log(ipo_id)
+    var ipo = await getIpoInfo(ipo_id)
+    console.log(ipo)
+    let user = await getIdFromUsername(req.user.user_name)
+    console.log(user)
+    let demat = await getdemat(req.user.user_id)
+    console.log(demat)
+    res.render("apply-ipo.jade", { session: req.user.user_name, role_id: req.user.role_id, ipo: ipo, demat: demat })
+};
+
+export const applyIpoGet = async (req, res) => {
+    if (!req.user) {
+        return res.redirect('/users/login')
+    }
+    let user = await getIdFromUsername(req.user.user_name);
+    console.log(user)
+    let demat = await getdemat(req.user.user_id)
+    console.log(demat)
+    res.render("apply-ipo.jade", { session: req.user.user_name, role_id: req.user.role_id, demat: demat })
+};
+
+export const applyIpoPost = async (req, res) => {
+    if (!req.user) {
+        return res.redirect('/users/login')
+    }
+    let demat = req.body.demat
+    let qty = req.body.qty
+    let price = req.body.price
+    let ipo_id = req.body.ipo_id
+    let error = "";
+    console.log(demat, qty, price)
+    let Buy = await invokeBuy(req.user.user_name, ipo_id, demat, qty, price)
+    console.log(Buy)
+    if (Buy == false){
+        error = "Please apply in given range for a higher number of lots";
+    }
+    let ongoing = await OngoingIpoInfo();
+    console.log(ongoing, error);
+    res.render("ongoing-ipo.jade", { session: req.user.user_name, role_id: req.user.role_id, ongoing: ongoing, error: error })
+};
+
+export const upcomingIpo = async function (req, res) {
+    let session = req.user;
+    if (!session) {
+        console.log("Redirect to LOGIN");
+        return res.redirect('/users/login')
+    }
+    let upcoming = await UpcomingIpoInfo();
+    console.log(upcoming)
+    res.render("upcoming-ipo.jade", { session: req.user.user_name, role_id: req.user.role_id, upcoming: upcoming })
+};
 
 export const appliedIpo = async (req, res) => {
     if (!req.user) {
