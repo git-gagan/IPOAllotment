@@ -84,7 +84,7 @@ async function bidTimer(userName, start=null, close=null) {
                     console.log("Error Encountered while trying to start/close the bid:- ", error);
                 }
                 await gateway.disconnect();
-                process.exit(1);
+                return true;
             }
             else {
                 console.log("\n3")
@@ -96,7 +96,7 @@ async function bidTimer(userName, start=null, close=null) {
         }
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
-        process.exit(1);
+        return false;
     }
 }
 

@@ -99,10 +99,19 @@ export const postLaunchIpo = async (req, res) => {
             }
         }
     }
-    console.log(buckets);
+    // Refine the buckets to remove incomplete entries
+    let refined_buckets = [];
+    for (let i in buckets){
+        if(Object.keys(buckets[i]).length != 5){
+            continue;
+        } 
+        refined_buckets.push(buckets[i]);
+    }
+    console.log(refined_buckets);
+    
     let promiseInvoke = await IssuertoLedger(req.user.user_name, data.issuer, data.isin, data.cusip,
         data.ticker, data.totalShares, data.lowPrice, data.highPrice, data.ipoStartDate,
-        data.ipoEndTime, data.lotSize, data.agent, data.principle, buckets, investorClassifications);
+        data.ipoEndTime, data.lotSize, data.agent, data.principle, refined_buckets, investorClassifications);
 
     let ipoInfo = await getIpoInfo(user_id)
     if (ipoInfo) {

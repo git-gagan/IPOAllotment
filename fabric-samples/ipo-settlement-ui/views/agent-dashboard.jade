@@ -12,7 +12,7 @@ block content
                     h6.text-color.center Agent Id
                     h5.color IPO
                     hr
-                    form(action="/agent-dashboard",method="post")
+                    form(action="/agent/agent-dashboard",method="post")
                         .row 
                             .col-4
                                 label.mt-5(for="ipo") Select an IPO
@@ -40,19 +40,25 @@ block content
                             .col-2 
                                 button.btn.button(type="submit") Submit
                         hr
-                        .row 
-                            .col-1
-                            //- .col-5
-                            //-     p.text-color Issue Name 
-                            //-     p.text-color Total Amount
-                            //-     p.text-color Allocation Status
-                            //-     p.text-color Refund Status
-                            //- .col-5
-                            //-     p.text-color XYZ
-                            //-     p.text-color 1200 INR
-                            //-     p.text-color Complete,In Progress,Pending
-                            //-     p.text-color Complete,In Progress,Pending
-                            .col-1
+                        if escrow_info
+                            .row 
+                                .col-1
+                                    .col-5
+                                        p.text-color Issue Name 
+                                        p.text-color Total Amount
+                                        p.text-color Allocation Status
+                                        p.text-color Refund Status
+                                .col-1
+                                .col-2 
+                                    .col-5
+                                        p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.issuer_name}
+                                        br
+                                        p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.wallet_balance}
+                                        br
+                                        p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.is_allotted}
+                                        br
+                                        p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.is_allotted}
+                                .col-2
 
             .col-2
         else 

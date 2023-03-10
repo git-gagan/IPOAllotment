@@ -147,6 +147,7 @@ async function IssuertoLedger(username, issuer, isin, cusip,
             }
             let today = new Date();
             let startDate = new Date(ipoStartDate); // 1 min
+            console.log("StartDate:- ", startDate);
             // Create the issuer object which will be passed to the smart contract to be put on the ledger
             return {
                 ID: user_id,

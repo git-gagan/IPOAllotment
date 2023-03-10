@@ -14,6 +14,7 @@ export const job = schedule('*/10 * * * * *', async function() {
     // Iterate in the list to see for whom bidding can be started or stopped
     let current_time = new Date();
     for (let i in ipoList){
+        let result = null;
         let bid_start_date = new Date(ipoList[i]['bid_start_date']);
         if (ipoList[i]['has_bidding_started'] == 'false'){
             // If bidding hasn't started yet, check if it can be started
@@ -24,7 +25,7 @@ export const job = schedule('*/10 * * * * *', async function() {
             console.log(diff);
             if (diff <= 0){
                 console.log("Start the bid now!");
-                let result = await bidTimer(ipoList[i]['issuer_name'], true);
+                result = await bidTimer(ipoList[i]['issuer_name'], true);
             }
         }
         else if (ipoList[i]['is_complete'] == 'false'){
@@ -35,14 +36,17 @@ export const job = schedule('*/10 * * * * *', async function() {
             console.log(bid_close_time);
             if (current_time.getTime() >= bid_close_time){
                 console.log("Close the bid now!");
-                let result = await bidTimer(ipoList[i]['issuer_name'], false, true);
+                result = await bidTimer(ipoList[i]['issuer_name'], false, true);
             }
+        }
+        if (!result){
+            console.log("Failure while running cron---\nBidding can't be started or closed!")
         }
     }
 
-    count += 1;  
-    if (count==2){
-        console.log("Stop!");
-        job.stop();
-    }
+    // count += 1;  
+    // if (count==2){
+    //     console.log("Stop!");
+    //     job.stop();
+    // }
 });
