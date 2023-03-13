@@ -23,8 +23,13 @@ async function updateIpoIdentifiers(username, isin, cusip, ticker) {
             "ticker": ticker
         }
 
-        let userName = username
+        // Check if issuer object got all the data
+        if(!issuer_obj['isin'] || !issuer_obj['cusip'] || !issuer_obj['ticker']){
+            console.log("--incomplete identifier info--");
+            return;
+        }
 
+        let userName = username
         let user_promise = await getIdFromUsername(userName);
 
         let user_id, role_id;

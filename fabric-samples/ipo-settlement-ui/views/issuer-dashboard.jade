@@ -8,12 +8,12 @@ block content
                 if message 
                     .alert.alert-info(role='alert') #{message} 
 
-                h3.color.center #{ipoInfo.ticker}
+                h3.color.center #{ipoInfo.issuer_name}
                 #accordionExample.accordion
                     .accordion-item
                         h2#headingOne.accordion-header
                             button.accordion-button(type='button' data-bs-toggle='collapse' data-bs-target='#collapseOne' aria-expanded='true' aria-controls='collapseOne')
-                                h5.color Issue Info 
+                                h5.color Issuer Info 
                                     i.bi.bi-pencil
                         #collapseOne.accordion-collapse.collapse.show(aria-labelledby='headingOne' data-bs-parent='#accordionExample')
                             .accordion-body
@@ -23,20 +23,20 @@ block content
                                         .row 
                                             .col-3
                                                 .form-group 
-                                                    label(for="issuename") Issue Name 
-                                                    input.form-control(type="text",name="issuename",value=`${ipoInfo.issuer_name}` readonly )   
+                                                    label(for="issuename") Issuer Name 
+                                                    input.form-control(type="text",name="issuename",value=`${ipoInfo.issuer_name}` readonly)   
                                             .col-3
                                                 .form-group 
                                                     label(for="isin") ISIN
-                                                    input.form-control(type="text",name="isin" value=`${ipoInfo.ISIN}`)    
+                                                    input.form-control(type="text", name="isin", value=`${ipoInfo.ISIN}`, id="isin")    
                                             .col-3
                                                 .form-group 
                                                     label(for="cusip") CUSIP
-                                                    input.form-control(type="text",name="cusip" value=`${ipoInfo.CUSIP}`)    
+                                                    input.form-control(type="text", name="cusip", value=`${ipoInfo.CUSIP}`, id="cusip")    
                                             .col-3
                                                 .form-group 
                                                     label(for="ticker") Ticker
-                                                    input.form-control(type="text",name="ticker" value=`${ipoInfo.ticker}`)    
+                                                    input.form-control(type="text", name="ticker", value=`${ipoInfo.ticker}`, id="ticker")    
                                         .row 
                                             .col-3
                                                 .form-group 
@@ -49,7 +49,7 @@ block content
                                             .col-3
                                                 .form-group 
                                                     label(for="totalShares") Total Shares
-                                                    input.form-control(type="number",name="totalShares" )    
+                                                    input.form-control(type="number", name="totalShares", value=`${ipoInfo.total_size}` readonly)    
                                             .col-3
                                                 .form-group 
                                                     label(for="lotSize") Lot Size
@@ -70,8 +70,7 @@ block content
                                             .col-3 
                                                 .form-group
                                                     label(for="") 
-                                                    button.btn.button.btn-lg(type="submit") Update
-
+                                                    button.btn.button.btn-lg(type="submit", id="update-btn") Update
 
                     .accordion-item
                         h2#headingTwo.accordion-header
@@ -117,12 +116,25 @@ block content
                                                 td #{investor.reserve_lots}
                                                 td #{investor.min_lot_qty}
                                                 td 
-                                                    i.bi.bi-pencil
-                                
-
-                            
-                    
+                                                    i.bi.bi-pencil           
             .col-2
+
+    script.
+        console.log("Inside script")
+        function identifiersAvailable(){
+            let ipoInfo = !{JSON.stringify(ipoInfo)};
+            if (!(ipoInfo.ISIN && ipoInfo.CUSIP && ipoInfo.ticker)){
+                console.log("Update Once available");
+            }
+            else{
+                console.log("No Update allowed...");
+                document.getElementById('isin').readOnly = true;
+                document.getElementById('cusip').readOnly = true;
+                document.getElementById('ticker').readOnly = true;
+                document.getElementById('update-btn').disabled = true;
+            }
+        }
+        identifiersAvailable();
 
 script(src='https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js' integrity='sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p' crossorigin='anonymous')
 script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js' integrity='sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF' crossorigin='anonymous')

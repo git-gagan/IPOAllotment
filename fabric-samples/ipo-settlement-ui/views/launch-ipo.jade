@@ -19,10 +19,10 @@ block content
                                 .col-6
                                     .form-group 
                                         label(for="issuer") Issuer Name
-                                        input.form-control(type="text",name="issuer", required='true')  
+                                        input.form-control(type="text", name="issuer", required='true')  
                                     .form-group 
                                         label(for="cusip") CUSIP
-                                        input.form-control(type="text",name="cusip", required='true')  
+                                        input.form-control(type="text", name="cusip")  
                                     .form-group 
                                         label(for="ipoStartDate") IPO Start Date
                                         input.form-control(type="datetime-local",name="ipoStartDate", required='true')  
@@ -34,26 +34,28 @@ block content
                                         input.form-control(type="number",name="lowPrice", required='true')
 
                                     label(for="principle") Allocation Principle (in the case of over-subscription)
-                                    select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle", required='true')
+                                    select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle", id="a-principle", required='true')
                                         option(value='') Select Option
                                         for principle in principles
                                             option(value=`${principle.id}`) #{principle.name}
+                                    
+                                    //- .form-group
+                                    //-     label(for="fixedPrice") Fixed Price
+                                    //-     input.form-control(type="number", name="fixedPrice", required='true')
 
                                     label(for="agent") Paying Agent
-                                    select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="agent", required='true')
+                                    select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="agent", required='true', onClick="addFixedPrice()")
                                         option(value='') Select Option
                                         for agent in agents
                                             option(value=`${agent.user_id}`) #{agent.user_name}
                                                 
-                                    
-                                
                                 .col-6
                                     .form-group 
                                         label(for="isin") ISIN
-                                        input.form-control(type="text",name="isin", required='true')  
+                                        input.form-control(type="text", name="isin")  
                                     .form-group 
                                         label(for="ticker") Ticker
-                                        input.form-control(type="text",name="ticker", required='true')
+                                        input.form-control(type="text", name="ticker")
                                     .form-group 
                                         label(for="ipoEndTime") IPO End Time(In Seconds)
                                         input.form-control(type="number",name="ipoEndTime", required='true')
@@ -64,7 +66,6 @@ block content
                                         label(for="highPrice") High Price
                                         input.form-control(type="number",name="highPrice", required='true')
 
-                    
                                 .col-12.text-right.mb-5
                                     button.btn.button.btn-lg#basic-ipo-next Next
                                         
@@ -130,7 +131,7 @@ block content
                                     i.bi.bi-plus-circle-fill   Add investor classification
                             .col-6.text-right
                                 button.button.btn-lg(type="submit", id='final-submit-button') Submit
-            form(action="/issuer/launch-ipo",method="post", id='launch-ipo-form') 
+            form(action="/issuer/launch-ipo", method="post", id='launch-ipo-form') 
                 textarea#launch-ipo-textarea(name="launch-ipo", cols="30", rows="10", hidden='true') 
                 button.button.btn-lg(type="submit", id='launch-ipo-submit-button', hidden='true') Submit
 
@@ -150,6 +151,12 @@ block content
         for(let i of investors){
             investorOptions = investorOptions + `<option value="${i.investor_id}">${i.investor_name?i.investor_name:""}</option>`
         }
+
+        function addFixedPrice() {
+            let a_principle = document.getElementById('a-principle');
+            console.log(a_principle);
+        }
+
         function addBucket() {
             bucketId = bucketId + 1
             let newInput = `

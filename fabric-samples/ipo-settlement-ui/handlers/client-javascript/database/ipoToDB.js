@@ -7,13 +7,14 @@ async function insertOrUpdateIpo(issuer_obj, ipo_id, update, allotment_principle
         let sql = "";
         if (!update) {
             sql = `insert into tbl_ipo_info
-            (ipo_id, isin, cusip, ticker, issuer_name, bid_time, is_complete, has_bidding_started, ipo_announcement_date, bid_start_date, allotment_principle, fixed_price,
-                lot_size,priceRangeLow,priceRangeHigh)
+            (ipo_id, isin, cusip, ticker, total_size, issuer_name, bid_time, is_complete, has_bidding_started, ipo_announcement_date, bid_start_date, allotment_principle, fixed_price,
+                lot_size, priceRangeLow, priceRangeHigh)
             values(
                 '${ipo_id}', 
                 '${issuer_obj[ipo_id]['ipoInfo']['isin']}',
                 '${issuer_obj[ipo_id]['ipoInfo']['cusip']}',
                 '${issuer_obj[ipo_id]['ipoInfo']['ticker']}',
+                '${issuer_obj[ipo_id]['ipoInfo']['totalSize']}',
                 '${issuer_obj[ipo_id]['ipoInfo']['issuer_name']}', 
                 '${issuer_obj[ipo_id]['ipoInfo']['total_bid_time']}',
                 '${issuer_obj[ipo_id]['ipoInfo']['is_complete']}',

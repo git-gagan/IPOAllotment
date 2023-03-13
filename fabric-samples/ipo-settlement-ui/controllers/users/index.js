@@ -45,12 +45,14 @@ export const postRegisterStep1 = (req, res) => {
 }
 
 export const registerStep2 = (req, res) => {
+    console.log("Register Investor step 2");
     res.render("register-step2.jade", {
         role: req.query.role
     })
 }
 
 export const postRegisterStep2 = async (req, res) => {
+    console.log("POST Register Investor step 2");
     let role = req.body.role.split("-");
     let role_type_id = role[0];
 
@@ -62,6 +64,7 @@ export const postRegisterStep2 = async (req, res) => {
     let template;
     db.get(`SELECT * FROM tbl_user where user_name = ?`, [req.body.username], async (err, row) => {
         if (err) {
+            console.log(err);
             res.status(400).json({ "error": err.message });
             console.error(err)
             return;
@@ -69,6 +72,7 @@ export const postRegisterStep2 = async (req, res) => {
         else if (row) {
             // TODO: add flash messgae
             // message: username already exists
+            console.log("Username already Exists: ", row);
             res.redirect('back')
         }
         else {
@@ -76,6 +80,7 @@ export const postRegisterStep2 = async (req, res) => {
             let insert = 'INSERT INTO tbl_user (user_id,user_name, user_pwd,full_name) VALUES (?,?,?,?)';
             let insert2 = 'INSERT INTO tbl_userrole (user_id,role_id) VALUES (?,?)';
             try {
+                console.log(role_type_id);
                 if (role_type_id == 'IN') {
                     await registerUserInvestor(username);
                     template = "register-investor-step3.jade"
@@ -90,8 +95,7 @@ export const postRegisterStep2 = async (req, res) => {
                 db.run(insert, [user_id, username, password, fullname]);
                 db.run(insert2, [user_id, role_type_id]);
                 if (role_type_id == 'IN') {
-                    let investor_type_promise = await getInvestorTypeId(role[1])
-
+                    let investor_type_promise = await getInvestorTypeId(role[1]);
                     let investor_type_id = investor_type_promise['investor_type_id'];
                     return res.redirect(url.format({
                         pathname: '/users/register-step3',
@@ -113,6 +117,7 @@ export const postRegisterStep2 = async (req, res) => {
 }
 
 export const registerInvestorStep3 = (req, res) => {
+    console.log("Register Investor step 3");
     res.render("register-investor-step3.jade", {
         investor_type_id: req.query.investor_type_id,
         username: req.query.username

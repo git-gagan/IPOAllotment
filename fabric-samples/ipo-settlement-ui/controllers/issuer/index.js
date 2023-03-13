@@ -133,29 +133,6 @@ export const updateIssuer = async (req, res) => {
         // TODO: Add Flash message
         console.error(err)
     }
-
-    return res.redirect('/issuer/issuer-dashboard')
-    // let user_id = req.user.user_id
-    // let ipoInfo = await getIpoInfo(user_id)
-    // if (ipoInfo) {
-    //     let template = "issuer-dashboard.jade"
-    //     var date = new Date(ipoInfo.bid_start_date)
-    //     const yyyy = date.getFullYear();
-    //     let mm = date.getMonth() + 1; // Months start at 0!
-    //     let dd = date.getDate();
-
-    //     if (dd < 10) dd = '0' + dd;
-    //     if (mm < 10) mm = '0' + mm;
-
-    //     const formattedDate = dd + '-' + mm + '-' + yyyy;
-    //     let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle)
-    //     let ipoBucket = await getIpoBucket(user_id)
-    //     let investorClassification = await getInvestorClassification(user_id)
-    //     res.render(template, {
-    //         session: req.session.name, role_id: role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
-    //         allotment_principle: allotmentPrinciple.name,
-    //         ipoBucket: ipoBucket, investorClassification: investorClassification, message: updateIpo
-    //     });
-    // }
+    return res.redirect('/issuer/issuer-dashboard');
 }
 
