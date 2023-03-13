@@ -2,7 +2,6 @@ extends layout
 
 -var investor_types=#investor_types
 block content
-
     .container 
         nav(style="margin-top:2rem")
             #nav-tab.nav.nav-tabs(role='tablist')
@@ -34,14 +33,10 @@ block content
                                         input.form-control(type="number",name="lowPrice", required='true')
 
                                     label(for="principle") Allocation Principle (in the case of over-subscription)
-                                    select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle", id="a-principle", required='true')
+                                    select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle", id="a-principle", required='true', onChange="addFixedPrice()")
                                         option(value='') Select Option
                                         for principle in principles
                                             option(value=`${principle.id}`) #{principle.name}
-                                    
-                                    //- .form-group
-                                    //-     label(for="fixedPrice") Fixed Price
-                                    //-     input.form-control(type="number", name="fixedPrice", required='true')
 
                                     label(for="agent") Paying Agent
                                     select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="agent", required='true', onClick="addFixedPrice()")
@@ -65,6 +60,9 @@ block content
                                     .form-group 
                                         label(for="highPrice") High Price
                                         input.form-control(type="number",name="highPrice", required='true')
+                                    .form-group
+                                        label(for="fixedPrice", id='fixed-price-label' hidden) Fixed Price
+                                        input.form-control(type="number", name="fixedPrice", id='fixed-price' hidden)
 
                                 .col-12.text-right.mb-5
                                     button.btn.button.btn-lg#basic-ipo-next Next
@@ -96,7 +94,8 @@ block content
                                     select.form-control(name='investorId-0',id="investorId-0", required='true')
                                         option(value='') Select Option
                                         for investor in investors
-                                            option(value=`${investor.investor_id}`) #{investor.investor_name}
+                                            if investor.investor_type != 1
+                                                option(value=`${investor.investor_id}`) #{investor.investor_name}
                         .row  
                             .col-6
                                 button.btn(type="button",onClick="addBucket()")
@@ -153,8 +152,18 @@ block content
         }
 
         function addFixedPrice() {
-            let a_principle = document.getElementById('a-principle');
-            console.log(a_principle);
+            // Add fixed price column if allocation principle is 5
+            let a_principle = document.getElementById('a-principle').value;
+            if(a_principle == 5){
+                document.getElementById('fixed-price-label').hidden = false;
+                document.getElementById('fixed-price').hidden = false;
+                document.getElementById('fixed-price').required = true;
+            }
+            else{
+                document.getElementById('fixed-price-label').hidden = true;
+                document.getElementById('fixed-price').hidden = true;
+                document.getElementById('fixed-price').required = false;
+            }
         }
 
         function addBucket() {

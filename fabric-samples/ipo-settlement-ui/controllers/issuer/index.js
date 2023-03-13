@@ -111,7 +111,7 @@ export const postLaunchIpo = async (req, res) => {
     
     let promiseInvoke = await IssuertoLedger(req.user.user_name, data.issuer, data.isin, data.cusip,
         data.ticker, data.totalShares, data.lowPrice, data.highPrice, data.ipoStartDate,
-        data.ipoEndTime, data.lotSize, data.agent, data.principle, refined_buckets, investorClassifications);
+        data.ipoEndTime, data.lotSize, data.agent, data.principle, data.fixedPrice, refined_buckets, investorClassifications);
 
     let ipoInfo = await getIpoInfo(user_id)
     if (ipoInfo) {

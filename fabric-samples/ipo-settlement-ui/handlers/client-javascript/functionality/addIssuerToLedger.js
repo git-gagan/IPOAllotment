@@ -15,7 +15,7 @@ import { insertOrUpdateIpo, addIpoEligibility, addIpoBuckets } from '../database
 
 async function IssuertoLedger(username, issuer, isin, cusip,
     ticker, totalSize, lowPrice, highPrice, ipoStartDate,
-    ipoEndTime, lotSize, agent, principle, ipo_buckets, investor_categories) {
+    ipoEndTime, lotSize, agent, principle, fixedPrice, ipo_buckets, investor_categories) {
     try {
         let userName = username;
 
@@ -30,15 +30,15 @@ async function IssuertoLedger(username, issuer, isin, cusip,
             user_id = null;
         }
 
-        let agentInfo = await getUsernameFromId(agent)
+        let agentInfo = await getUsernameFromId(agent);
 
-        let agentName = agentInfo["user_name"]
-        let fixed_price = null
+        let agentName = agentInfo["user_name"];
+        let fixed_price = fixedPrice;
         // Get allotment principle id, and fixed price from the form
         let allotment_principle = parseInt(principle);
-        if (allotment_principle == 5) {
-            fixed_price = 150; // Only required for allotment principle 5
-        }
+        // if (allotment_principle == 5) {
+        //     fixed_price = 150; // Only required for allotment principle 5
+        // }
 
 
         // ipo investor eligibility information

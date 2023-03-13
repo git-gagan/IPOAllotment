@@ -67,6 +67,10 @@ block content
                                                 .form-group 
                                                     label(for="principle") Allocation Principle
                                                     input.form-control(type="text",name="principle" value=`${allotment_principle}` readonly)
+                                            .col-3
+                                                .form-group 
+                                                    label(for="fixedPrice") Fixed Price
+                                                    input.form-control(type="number", name="fixedPrice" value=`${ipoInfo.fixed_price}` readonly)
                                             .col-3 
                                                 .form-group
                                                     label(for="") 
