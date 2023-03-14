@@ -19,7 +19,7 @@ async function ipoAllotment(username, ipo_id) {
         // console.log(process.argv);
         let userName = username;   // Take username from command line
 
-        let user_promise = await getIdFromUsername(process.argv[2]);
+        let user_promise = await getIdFromUsername(userName);
         console.log("USER ID:- ", user_promise);
 
         let user_id, role_id, full_name;
@@ -36,6 +36,7 @@ async function ipoAllotment(username, ipo_id) {
 
         if(user_id){
             var ipo_id = ipo_id;
+            var result_code = 0;
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
@@ -77,6 +78,7 @@ async function ipoAllotment(username, ipo_id) {
                                     console.log("No data of investors!!!");
                                     console.log("Allocation can't be made!");
                                     make_allotment = false;
+                                    result_code = 403;
                                 }
                                 else{
                                     allocation_dict = {
@@ -168,6 +170,7 @@ async function ipoAllotment(username, ipo_id) {
                                 await updateIpoBucketInfo(allocation_dict, ipo_id);
                                 await insert_investor_type_allocation(statusInfo, ipo_id)
                                 console.log("\nSUCCESS\n");
+                                result_code = 1;
                             }
                         }
                         else{
@@ -180,14 +183,18 @@ async function ipoAllotment(username, ipo_id) {
             else {
                 console.log("\n3")
                 console.log("Unauthorized User!");
+                result_code = -1;
             }
         }
         else{
             console.log("This user doesn't exist!");
+            result_code = -1;
         }
+        return result_code
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
-        process.exit(1);
+        // process.exit(1);
+        return -1;
     }
 }
 

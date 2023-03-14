@@ -33,7 +33,6 @@ async function getAllocationData(ipo_id, totalSize, lotSize) {
     } 
     catch (error) {
         console.error(`Failed to get user information: ${error}`);
-        process.exit(1);
     }
 }
 
@@ -62,7 +61,6 @@ async function getAllocationPrinciple(ipo_id) {
     } 
     catch (error) {
         console.error(`Failed to get allocation principle from ipo info: ${error}`);
-        process.exit(1);
     }
 }
 
