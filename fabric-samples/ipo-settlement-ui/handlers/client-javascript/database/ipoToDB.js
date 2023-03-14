@@ -146,4 +146,130 @@ async function addIpoBuckets(bucket_obj) {
     }
 }
 
-export { insertOrUpdateIpo, addIpoEligibility, addIpoBuckets };
+async function updateIpoBuckets(allotted_shares, ipo_id, investor_id) {
+    try {
+        let sql = `update tbl_ipo_bucket
+                    SET allotted_shares=${allotted_shares}
+                    where ipo_id='${ipo_id}' and investor_id='${investor_id}'`;
+        console.log(sql);
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.run(sql, (err) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("Execution Successful!");
+                        resolve("Success!");
+                    }
+                });
+            }
+        )
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to update IPO-Bucket information: ${error}`);
+    }
+}
+
+async function getIpoBuckets(ipo_id) {
+    try {
+        let sql = `select * from tbl_ipo_bucket
+                    where ipo_id='${ipo_id}'
+                    order by priority asc`;
+        console.log(sql);
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.all(sql, (err, values) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("ipo bucket info fetched!");
+                        resolve(values);
+                    }
+                });
+            }
+        )
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to get IPO-Bucket information: ${error}`);
+    }
+}
+
+async function insert_investor_type_allocation(allocation_status, ipo_id) {
+    try {
+        let values = '';
+        let keys = Object.keys(allocation_status)
+        for(let i in keys){
+            values += `('${ipo_id}', 
+                        ${i},
+                        ${allocation_status[keys[i]]['sharesAllotted']}
+                    )`
+            if (i < Object.keys(allocation_status).length-1){
+                console.log("inserting , in values");
+                values += ','
+            }
+        }
+        let sql = `insert into tbl_investor_type_allotment_info(
+                ipo_id,
+                investor_type_id,
+                allotted_shares
+            )
+            Values ${values}`;
+        console.log(sql);
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.all(sql, (err, values) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("ipo investor_type allocation info inserted!");
+                        resolve(values);
+                    }
+                });
+            }
+        )
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to insert IPO-allocation information: ${error}`);
+    }
+}
+
+async function getInvestorTypeAllocation(ipo_id) {
+    try {
+        let sql = `select * from tbl_investor_type_allotment_info
+                    where ipo_id='${ipo_id}'`;
+        console.log(sql);
+        const dbpromise = new Promise(
+            (resolve, reject) => {
+                db.all(sql, (err, values) => {
+                    if (err){
+                        console.log("```````````````````````");
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    else{
+                        console.log("ipo investor_type allocation info fetched!");
+                        resolve(values);
+                    }
+                });
+            }
+        )
+        return dbpromise;
+    } 
+    catch (error) {
+        console.error(`Failed to get po investor_type allocation info: ${error}`);
+    }
+}
+
+export { insertOrUpdateIpo, addIpoEligibility, addIpoBuckets, updateIpoBuckets, getIpoBuckets, insert_investor_type_allocation, getInvestorTypeAllocation };

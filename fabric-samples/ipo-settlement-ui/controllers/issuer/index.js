@@ -7,6 +7,7 @@ import { getIpoInfo } from "../../handlers/client-javascript/database/getIpo.js"
 import { getAllotmentPrinciple } from "../../handlers/client-javascript/database/getAllotmentPrinciple.js";
 import { getIpoBucket } from "../../handlers/client-javascript/database/getIpoBucket.js";
 import { getInvestorClassification } from "../../handlers/client-javascript/database/getInvestorClassification.js";
+import { getInvestorTypeAllocation } from "../../handlers/client-javascript/database/ipoToDB.js";
 import { updateIpoIdentifiers } from "../../handlers/client-javascript/functionality/updateIpoIdentifiers.js";
 
 
@@ -50,14 +51,16 @@ export const issuerDashboard = async (req, res) => {
     if (mm < 10) mm = '0' + mm;
 
     const formattedDate = dd + '-' + mm + '-' + yyyy;
-    let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle)
+    let allotmentPrinciple = await getAllotmentPrinciple(ipoInfo.allotment_principle);
     let ipoBucket = await getIpoBucket(req.user.user_id);
-    let investorClassification = await getInvestorClassification(req.user.user_id)
+    let investorClassification = await getInvestorClassification(req.user.user_id);
+    let investor_type_allocation_info = await getInvestorTypeAllocation(req.user.user_id);
+    console.log(investor_type_allocation_info);
 
     res.render("issuer-dashboard.jade", {
         session: req.user.user_name ,role_id: req.user.role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
         allotment_principle: allotmentPrinciple.name,
-        ipoBucket: ipoBucket, investorClassification: investorClassification
+        ipoBucket: ipoBucket, investorClassification: investorClassification, allotment_info: investor_type_allocation_info
     });
 }
 

@@ -9,16 +9,17 @@
 import { authorizeUser } from '../utils/userAuth.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { getAllocationData, getAllocationPrinciple } from '../database/getAllocationDatafromDB.js';
+import { getIpoBuckets, updateIpoBuckets, insert_investor_type_allocation } from '../database/ipoToDB.js';
 import { processAllocationDictU, processAllocationDictO, processAllocationDictOR, getSubscriptionInfo, segregateStatusDictionary, mergeAllocationResultDictionaries } from '../utils/allocationLogic.js';
 import { retrieveContract } from '../utils/getContract.js';
 
 
-async function ipoAllotment(username,ipo_id) {
+async function ipoAllotment(username, ipo_id) {
     try {
         // console.log(process.argv);
         let userName = username;   // Take username from command line
 
-        let user_promise = await getIdFromUsername(username);
+        let user_promise = await getIdFromUsername(process.argv[2]);
         console.log("USER ID:- ", user_promise);
 
         let user_id, role_id, full_name;
@@ -163,6 +164,9 @@ async function ipoAllotment(username,ipo_id) {
                                 // Evaluate the specified transaction.
                                 const result = await contract.submitTransaction('allotSharesNew', ipo_id, JSON.stringify(issuer_info), JSON.stringify(allocation_dict));
                                 console.log(`Transaction has been evaluated, result is: ${result}`);
+                                // Update bucket info 
+                                await updateIpoBucketInfo(allocation_dict, ipo_id);
+                                await insert_investor_type_allocation(statusInfo, ipo_id)
                                 console.log("\nSUCCESS\n");
                             }
                         }
@@ -184,6 +188,25 @@ async function ipoAllotment(username,ipo_id) {
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
         process.exit(1);
+    }
+}
+
+async function updateIpoBucketInfo(allocation_dict, ipo_id){
+    // This function holds the logic of updating ipo buckets
+    // on the basis of their priority and allocation data
+    let ipoBucketInfo = await getIpoBuckets(ipo_id);
+    let allotted_shares = allocation_dict['totalShares'];
+    console.log(allotted_shares, ipoBucketInfo);
+    for(let i in ipoBucketInfo){
+        allotted_shares -= ipoBucketInfo[i]['no_of_shares'];
+        if (allotted_shares >= 0){
+            ipoBucketInfo[i]['allotted_shares'] = ipoBucketInfo[i]['no_of_shares'];
+        }
+        else{
+            ipoBucketInfo[i]['allotted_shares'] = allotted_shares + ipoBucketInfo[i]['no_of_shares'];
+        }
+        // Can be improved to make DB hits all at once rather one at a time
+        await updateIpoBuckets(ipoBucketInfo[i]['allotted_shares'], ipo_id, ipoBucketInfo[i]['investor_id']);
     }
 }
 

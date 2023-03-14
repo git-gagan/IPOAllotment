@@ -152,3 +152,15 @@ CREATE TABLE tbl_ipo_bucket(
 );
 
 drop TABLE tbl_ipo_bucket;
+
+CREATE TABLE tbl_investor_type_allotment_info (
+	id integer PRIMARY KEY AUTOINCREMENT,
+	ipo_id varchar(50),
+	investor_type_id integer,
+	allotted_shares integer,
+	CONSTRAINT uni UNIQUE(ipo_id, investor_type_id),
+	FOREIGN KEY (ipo_id) REFERENCES tbl_ipo_info(ipo_id),
+	FOREIGN KEY (investor_type_id) REFERENCES tbl_investor_type(investor_type_id)
+)
+
+drop TABLE tbl_investor_type_allotment_info;

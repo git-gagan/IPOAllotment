@@ -80,7 +80,8 @@ block content
                                     select.form-control(name='investorTypeBucket-0',id="investorTypeBucket-0", data-investor-type='investorTypeBucket', required='true')
                                         option(value='') Select Option
                                         for investor in investor_types
-                                            option(value=`${investor.investor_type_id}`) #{investor.investor_type}
+                                            if investor.investor_type_id != 1
+                                                option(value=`${investor.investor_type_id}`) #{investor.investor_type}
                                 .col-3 
                                     .form-group 
                                         label(for="BucketSize") Bucket Size
