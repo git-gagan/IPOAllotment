@@ -339,10 +339,15 @@ export const portfolio = async (req, res) => {
     }
     let value = await query(req.user.user_name);
     let portfolios;
+    let isEmpty = false;
     console.log("Value:-", value);
     portfolios = value[value.length - 1].Record.portfolio
     console.log("Portfolios:-", portfolios);
-    res.render("portfolio.jade", { session: req.user.user_name, role_id: req.user.role_id, portfolios: portfolios })
+    if(JSON.stringify(portfolios) == "{}"){
+        console.log("Empty Portfolio");
+        isEmpty = true;
+    }
+    res.render("portfolio.jade", {session: req.user.user_name, role_id: req.user.role_id, portfolios: portfolios, isEmpty: isEmpty})
 }
 
 export const apply = async (req, res) => {
@@ -410,7 +415,24 @@ export const appliedIpo = async (req, res) => {
     console.log(user)
     let investor_transactions = await getInvestorTransactions(user.user_id)
     console.log(investor_transactions)
-    res.render("applied-ipo.jade", { session: req.user.user_name, role_id: req.user.role_id, user: user, investor_transactions: investor_transactions })
+    let refined_investor_transactions = {};
+    for(let transaction_no in investor_transactions){
+        if(!(investor_transactions[transaction_no]['issuer_name'] in refined_investor_transactions)){
+            refined_investor_transactions[investor_transactions[transaction_no]['issuer_name']] = []
+        } 
+        refined_investor_transactions[investor_transactions[transaction_no]['issuer_name']].push(
+            {
+                "bid_amount": investor_transactions[transaction_no]['bid_amount'], 
+                "lots_bid": investor_transactions[transaction_no]['lots_bid'], 
+                "id": investor_transactions[transaction_no]['id'],
+                "ticker": investor_transactions[transaction_no]['ticker'],
+                "lot_size": investor_transactions[transaction_no]['lot_size'],
+                "issuer_name": investor_transactions[transaction_no]['issuer_name']
+            }
+        );
+    }
+    console.log(refined_investor_transactions);
+    res.render("applied-ipo.jade", { session: req.user.user_name, role_id: req.user.role_id, user: user, investor_transactions: refined_investor_transactions })
 }
 
 export const logOut = (req, res) => {

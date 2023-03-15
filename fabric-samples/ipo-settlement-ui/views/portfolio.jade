@@ -2,7 +2,6 @@ extends layout
 
 block content
     div.container   
-          
         .row 
             .col-2 
             .col-8
@@ -10,12 +9,11 @@ block content
                 //- if data 
                 //-     .alert.alert-info(role='alert') #{data}
                
-                if portfolios
+                if !isEmpty
                     for item in portfolios
-                       
-                        .card.border-primary.mb-5
+                        .card.border-success.mb-5
                             .card-body
-                                .card-header.h3.bg-primary(style="text-align:center;") #{item.ipo_name}
+                                .card-header.h3.bg-success(style="text-align:center;") #{item.ipo_name}
                         table.table
                         
                             tbody
@@ -39,7 +37,7 @@ block content
                 else 
                     center 
                         tr 
-                            h2 Empty Portfolio
+                            h3.color.center Empty Portfolio
                                     
                                 
 

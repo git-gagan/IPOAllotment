@@ -53,7 +53,7 @@ async function processAllocationDictU(allocation_dict, lotSize, totalSize, ipo_i
             break;
         } 
         console.log(allocation_dict[i]['investor_type'], statusInfo);
-        if (!(statusInfo && allocation_dict[i]['investor_type'] in statusInfo)){
+        if (!(statusInfo && allocation_dict[i]['investor_type_id'] in statusInfo)){
             // if this investor_type_category is not in the statusInfo category
             console.log("\n---SKIP---\n");
             continue;
@@ -103,7 +103,7 @@ async function processAllocationDictO(allocation_dict, lotSize, totalSize, ipo_i
             console.log("No more shares available!");
             break;
         }
-        if (!(statusInfo && allocation_dict[i]['investor_type'] in statusInfo)){
+        if (!(statusInfo && allocation_dict[i]['investor_type_id'] in statusInfo)){
             // if this investor_type_category is not in the statusInfo category
             console.log("\n---SKIP---\n");
             continue;
@@ -177,7 +177,7 @@ async function processAllocationDictOR(allocation_dict, lotSize, totalSize, ipo_
     let temp_investor_dict = {}
     for(let i in allocation_dict){
         // Make a comprehensive list of bids investor wise
-        if (!(allocation_dict[i]['investor_id'] in temp_investor_dict)){
+        if (!(allocation_dict[i]['investor_type_id'] in temp_investor_dict)){
             temp_investor_dict[allocation_dict[i]['investor_id']] = {};
             temp_investor_dict[allocation_dict[i]['investor_id']]['total_bid'] = allocation_dict[i]['lots_bid']*lotSize;
             temp_investor_dict[allocation_dict[i]['investor_id']]['investor_type'] = allocation_dict[i]['investor_type'];
