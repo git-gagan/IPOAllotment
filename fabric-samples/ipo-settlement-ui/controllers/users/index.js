@@ -14,6 +14,8 @@ import { getAllInvestorInfo, getInvestorInfo } from "../../handlers/client-javas
 import { getdemat } from "../../handlers/client-javascript/database/getDmatFromDB.js";
 import { query } from "../../handlers/client-javascript/functionality/query.js"
 import { UpcomingIpoInfo } from "../../handlers/client-javascript/database/UpcomingIpoInfo.js"
+import { modifyBid } from "../../handlers/client-javascript/functionality/modifyBid.js";
+import { deleteBid } from "../../handlers/client-javascript/functionality/deleteBid.js";
 
 export const registerStep1 = (req, res) => {
     let role_type = [];
@@ -433,6 +435,27 @@ export const appliedIpo = async (req, res) => {
     }
     console.log(refined_investor_transactions);
     res.render("applied-ipo.jade", { session: req.user.user_name, role_id: req.user.role_id, user: user, investor_transactions: refined_investor_transactions })
+}
+
+// Modify/Delete Bid
+export const alterBid = async (req, res) => {
+    // This function needs to be called when the investor wants
+    // to update or delete the bid
+    console.log(req.body);
+    let action = req.body.form_action;
+    let transaction_id = req.body.transaction_id;
+    let bid_amount = req.body.bid_amount;
+    let lots_applied = req.body.lots_applied;
+    let bid_res = null
+    if (action == "modify"){
+        console.log("Modify Bid initiated");
+        bid_res = await modifyBid(req.user.user_name, transaction_id, lots_applied, bid_amount);
+    }
+    else{
+        console.log("Delete Bid initiated");
+        bid_res = await deleteBid(req.user.user_name, transaction_id);
+    }
+    res.redirect("/users/applied-ipo/");
 }
 
 export const logOut = (req, res) => {

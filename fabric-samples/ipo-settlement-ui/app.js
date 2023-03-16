@@ -40,7 +40,7 @@ import { router } from './routers/index.js'
 import passport from "passport";
 import localPassport from './configurations/localPassport.js'
 
-// import { job } from "./utils/cron.js";
+import { job } from "./utils/cron.js";
 
 /////////////////////////////////////////
 // Express setup
@@ -64,9 +64,7 @@ app.use(session({
     // Forces the session to be saved
     // back to the session store
     resave: true,
-
     cookie: { maxAge: oneDay },
-
     // Forces a session that is "uninitialized"
     // to be saved to the store
     saveUninitialized: true

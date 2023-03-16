@@ -36,30 +36,30 @@ block content
                             p.h5.color Issuer Ticker: -
                         for i in key
                             //- p.h3 !{JSON.stringify(i)}
-                            form(action="/alter-bid", method="post") 
+                            form(action="/users/alter-bid", method="post") 
                                 .row 
                                     .col-4 
-                                        input(type="hidden", name="modify_transaction_id" value=`${i.id}`)
+                                        input(type="hidden", name="transaction_id" value=`${i.id}`)
                                         //- p.h4 #{investor_transaction.ticker}
                                         //- p.h5 #{investor_transaction.issuer_name}
-                                        p.h5 Invested #{i.lots_bid*i.lot_size*i.bid_amount} Rs.
+                                        p.h5 Invested: #{i.lots_bid*i.lot_size*i.bid_amount} Rs.
                                     //- .col-6 
                                     //- .col-2
                                     .form-group 
                                         label(for="bid_amount") Bid Amount
-                                        input.form-control(type="text",name="bid_amount" value=`${i.bid_amount}`)    
+                                        input.form-control(type="text", name="bid_amount", value=`${i.bid_amount}`)    
                                     .form-group 
                                         label(for="lots_applied") Lots Applied
-                                        input.form-control(type="text",name="lots_applied" value=`${i.lots_bid}`)    
+                                        input.form-control(type="text", name="lots_applied" value=`${i.lots_bid}`)    
                                         //- p.h6 Bid Amount #{investor_transaction.bid_amount}
                                         //- p.text-color Lots Applied: #{investor_transaction.lots_bid}
                                 .row 
                                     //- .col-4
                                     .col-4
                                         //- input(type="hidden", name="ipo_id" value=`${ipo.ipo_id}`)
-                                        button.button.btn-lg(type="submit" name="modify", value=`${i.id}`) Modify
+                                        button.button.btn-lg(type="submit", name="form_action", value=`modify`) Modify
                                         span 
-                                        button.button.btn-danger.btn-lg(type="submit" name="delete", value=`${i.id}`) Delete           
+                                        button.button.btn-danger.btn-lg(type="submit", name="form_action", value=`delete`) Delete           
                             //- form(action="/delete-bid", method="post")   
                                 .row
                                     .col-4

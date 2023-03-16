@@ -14,9 +14,9 @@ import { retrieveContract } from '../utils/getContract.js';
 import { getIdFromUsername } from '../database/getUserId.js';
 import { getIpoEligibleLots } from '../database/getIpoeligibility.js';
 import { getBid,updateBidinDb } from '../database/editBidDb.js';
-import {getIpoInfo} from "../database/getIpo.js"
+import { getIpoInfo } from "../database/getIpo.js"
 
-async function modifyBid(username,txnid,lots_bid,bid_amount) {
+async function modifyBid(username, txnid, lots_bid, bid_amount) {
     try {
         // console.log(process.argv);
         let userName = username;   // Take username from command line
@@ -41,6 +41,7 @@ async function modifyBid(username,txnid,lots_bid,bid_amount) {
         console.log(user_id, role_id, full_name)
 
         if(user_id){
+            let res = 0;
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
@@ -48,51 +49,64 @@ async function modifyBid(username,txnid,lots_bid,bid_amount) {
                 let res = await is_txn_valid(txn_id, user_id);
                 let is_valid_transaction = res[0];
                 let ipo_id = res[1];    // Should not be NULL if txn is valid
-                let ipoInfo=await getIpoInfo(ipo_id)
+                let ipoInfo = await getIpoInfo(ipo_id)
                 if(ipoInfo.is_complete=='false'){
                     let lots_bid_valid = await is_lots_bid_valid(user_id, new_lots_bid, ipo_id);
-                if(!is_valid_transaction || !lots_bid_valid){
-                    console.log("---Failure---");
-                    process.exit(1);
-                }
-                var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
-                console.log("\n2")
-                // Evaluate the specified transaction.
-                const result = await contract.submitTransaction('updateBid', txn_id, user_id, ipo_id, new_lots_bid, new_bid_amount);
-                console.log(`Transaction has been evaluated, result is: ${result}`);
-                if (result == '0'){
-                    console.log("Failure: Asset doesn't exist!");
-                }
-                else if (result == '1'){
-                    console.log(`Bid updated Successfully by the user: ${userName}`);
-                    // If Bid update is successful, update the information in tbl_investor_transactions
-                    let bidDb = await updateBidinDb(txn_id, user_id, new_lots_bid, new_bid_amount);
-                    console.log("=============================================");
-                    console.log("\nSUCCESS\n");
-                }
-                else if (result == '-1'){
-                    console.log(`Invalid bid amount`);
-                }
-                else{
-                    console.log("Insufficient funds to place the bid");
-                }
-                await gateway.disconnect();
+                    if(!is_valid_transaction || !lots_bid_valid){
+                        console.log("---Failure---");
+                        // process.exit(1);
+                        return 0;
+                    }
+                    var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
+                    console.log("\n2")
+                    // Evaluate the specified transaction.
+                    const result = await contract.submitTransaction('updateBid', txn_id, user_id, ipo_id, new_lots_bid, new_bid_amount);
+                    console.log(`Transaction has been evaluated, result is: ${result}`);
+                    if (result == '0'){
+                        console.log("Failure: Asset doesn't exist!");
+                        res = -1
+                        return res;
+                    }
+                    else if (result == '1'){
+                        console.log(`Bid updated Successfully by the user: ${userName}`);
+                        // If Bid update is successful, update the information in tbl_investor_transactions
+                        let bidDb = await updateBidinDb(txn_id, user_id, new_lots_bid, new_bid_amount);
+                        console.log("=============================================");
+                        console.log("\nSUCCESS\n");
+                        res = 1;
+                    }
+                    else if (result == '-1'){
+                        console.log(`Invalid bid amount`);
+                        res = -1;
+                        return res;
+                    }
+                    else{
+                        console.log("Insufficient funds to place the bid");
+                        res = -2;
+                        return res;
+                    }
+                    await gateway.disconnect();
                 }
                 else{
                     console.log("Modify Bid Not Allowed!!")
+                    res = 0;
                 }
+                return res;
             }
             else {
                 console.log("\n3")
                 console.log("Unauthorized User!");
+                return -1
             }
         }
         else{
             console.log("This user doesn't exist!");
+            return -1;
         }
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
-        process.exit(1);
+        // process.exit(1);
+        return -1;
     }
 }
 

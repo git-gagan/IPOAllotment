@@ -40,7 +40,7 @@ export const job = schedule('*/10 * * * * *', async function() {
             }
         }
         if (!result){
-            console.log("Failure while running cron---\nBidding can't be started or closed!")
+            console.log("\nBidding can't be started or closed!")
         }
     }
 
