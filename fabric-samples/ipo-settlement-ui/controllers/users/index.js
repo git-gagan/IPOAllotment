@@ -1,6 +1,7 @@
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import db from '../../configurations/sqliteConnection.js';
+import { addDemat } from "../../handlers/client-javascript/functionality/addDemat.js";
 import { getInvestorTypeId, getRoleTypeId } from '../../utils/index.js';
 import { getInvestorTransactions } from "../../handlers/client-javascript/database/getInvestorTransactions.js";
 import { registerUserAgent } from "../../handlers/client-javascript/MSP/registerUserAgent.js";
@@ -457,6 +458,31 @@ export const alterBid = async (req, res) => {
     }
     res.redirect("/users/applied-ipo/");
 }
+
+export const addDematPost = async (req, res) => {
+    if (!req.user) {
+        return res.redirect('/users/login');
+    }
+    let dmat_ac_no = req.body.demataccno;
+    let dp_id = req.body.dpid;
+    let addDematRes = await addDemat(req.user.user_name, dmat_ac_no, dp_id)
+    let user = await getIdFromUsername(req.user.user_name)
+    console.log(user)
+    let investor = await getInvestorInfo(req.user.user_id)
+    console.log(investor)
+    let demat = await getdemat(req.user.user_id)
+    console.log(demat)
+    let value = await query(req.user.user_name);
+    let balance;
+    console.log(value);
+    try {
+        balance = value[value.length-1].Record.wallet.current_balance;
+    }
+    catch (err) {
+        balance = 100000;
+    }
+    res.render("profile.jade", {session: req.user.user_name, role_id: req.user.role_id, user: user, investor: investor, demat: demat, balance: balance})
+};
 
 export const logOut = (req, res) => {
     req.session.destroy(function (error) {

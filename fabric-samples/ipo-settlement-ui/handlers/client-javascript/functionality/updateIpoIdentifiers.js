@@ -58,15 +58,17 @@ async function updateIpoIdentifiers(username, isin, cusip, ticker) {
                         console.log("You are allowed to update ONCE!");
                         // Update IPO info
                         try {
-                            let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, true);
+                            // let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, true);
                             issuer_info[user_id]['ipoInfo']['cusip'] = issuer_obj.cusip;
                             issuer_info[user_id]['ipoInfo']['isin'] = issuer_obj.isin;
                             issuer_info[user_id]['ipoInfo']['ticker'] = issuer_obj.ticker;
                             issuer_info[user_id]['ipoInfo']['ipoModifiedTms'] = new Date();
                             // Evaluate the specified transaction.
                             const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_info));
+                            console.log(result, typeof(result));
                             if (result) {
                                 console.log(`Issuer has been updated in the ledger!`);
+                                let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, true);
                                 console.log("\nSUCCESS\n");
                             }
                             else {
@@ -101,7 +103,7 @@ async function updateIpoIdentifiers(username, isin, cusip, ticker) {
     }
     catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
-        process.exit(1);
+        // process.exit(1);
     }
 }
 

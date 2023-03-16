@@ -3,7 +3,7 @@ import passport from 'passport';
 import {
     logIn, postLogin, postRegisterInvestorStep3,
     postRegisterStep1, postRegisterStep2, registerInvestorStep3,
-    registerStep1, registerStep2, investorDashboard, profile, portfolio, appliedIpo, upcomingIpo, apply, applyIpoGet, applyIpoPost, alterBid
+    registerStep1, registerStep2, investorDashboard, profile, portfolio, appliedIpo, upcomingIpo, apply, applyIpoGet, applyIpoPost, alterBid, addDematPost
 } from '../controllers/users/index.js';
 
 
@@ -27,4 +27,5 @@ userRouter.post('/apply/', apply);
 userRouter.get('/apply-ipo/', applyIpoGet);
 userRouter.post('/apply-ipo/', applyIpoPost);
 userRouter.post('/alter-bid/', alterBid);
+userRouter.post('/add-demat/', addDematPost);
 

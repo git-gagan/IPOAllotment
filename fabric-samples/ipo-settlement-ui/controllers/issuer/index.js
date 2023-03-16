@@ -9,6 +9,7 @@ import { getIpoBucket } from "../../handlers/client-javascript/database/getIpoBu
 import { getInvestorClassification } from "../../handlers/client-javascript/database/getInvestorClassification.js";
 import { getInvestorTypeAllocation } from "../../handlers/client-javascript/database/ipoToDB.js";
 import { updateIpoIdentifiers } from "../../handlers/client-javascript/functionality/updateIpoIdentifiers.js";
+import { query } from "../../handlers/client-javascript/functionality/query.js";
 
 
 // ISSUER Controllers
@@ -41,8 +42,11 @@ export const issuerDashboard = async (req, res) => {
         console.log("Redirect to LOGIN");
         return res.redirect('/users/login')
     }
-    let ipoInfo = await getIpoInfo(req.user.user_id)
-    var date = new Date(ipoInfo.bid_start_date)
+    let ledgerIpo = await query(req.user.user_name);
+    console.log(ledgerIpo);
+    console.log(req.user.user_id);
+    let ipoInfo = await getIpoInfo(req.user.user_id);
+    var date = new Date(ipoInfo.bid_start_date);
     const yyyy = date.getFullYear();
     let mm = date.getMonth() + 1; // Months start at 0!
     let dd = date.getDate();
@@ -59,7 +63,7 @@ export const issuerDashboard = async (req, res) => {
 
     res.render("issuer-dashboard.jade", {
         session: req.user.user_name ,role_id: req.user.role_id, ipoInfo: ipoInfo, bid_start_date: formattedDate,
-        allotment_principle: allotmentPrinciple.name,
+        allotment_principle: allotmentPrinciple.name, ledgerIpo: ledgerIpo[req.user.user_id]['ipoInfo'],
         ipoBucket: ipoBucket, investorClassification: investorClassification, allotment_info: investor_type_allocation_info
     });
 }
@@ -116,14 +120,13 @@ export const postLaunchIpo = async (req, res) => {
         data.ticker, data.totalShares, data.lowPrice, data.highPrice, data.ipoStartDate,
         data.ipoEndTime, data.lotSize, data.agent, data.principle, data.fixedPrice, refined_buckets, investorClassifications);
 
-    let ipoInfo = await getIpoInfo(user_id)
+    console.log(req.user.user_id);
+    let ipoInfo = await getIpoInfo(req.user.user_id);
     if (ipoInfo) {
         return res.redirect('/issuer/issuer-dashboard')
     }
     // Some error occured
     return res.redirect('back')
-
-
 }
 
 export const updateIssuer = async (req, res) => {

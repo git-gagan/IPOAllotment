@@ -18,8 +18,8 @@ async function IssuertoLedger(username, issuer, isin, cusip,
     ipoEndTime, lotSize, agent, principle, fixedPrice, ipo_buckets, investor_categories) {
     try {
         let userName = username;
-
         let user_promise = await getIdFromUsername(userName);
+        console.log(user_promise);
         let user_id, role_id, full_name;
         if (user_promise) {
             user_id = user_promise['user_id'];
@@ -209,7 +209,9 @@ async function IssuertoLedger(username, issuer, isin, cusip,
                         let bucketDb = await addIpoBuckets(ipo_bucket_list);
                     }
                     // Evaluate the specified transaction.
+                    console.log("Adding issuer to ledger!");
                     const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
+                    console.log(result.toString());
                     if (result) {
                         console.log(`Issuer has been added to the ledger!`);
                         console.log("\nSUCCESS\n");

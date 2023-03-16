@@ -44,7 +44,7 @@ block content
                                                     input.form-control(type="text",name="ipoStartDate" , value=`${bid_start_date}` readonly)   
                                             .col-3
                                                 .form-group 
-                                                    label(for="ipoEndDate") IPO End Time(In Seconds)
+                                                    label(for="ipoEndDate") IPO End Time (s)
                                                     input.form-control(type="text",name="ipoEndDate",value=`${ipoInfo.bid_time}` readonly )    
                                             .col-3
                                                 .form-group 
@@ -71,6 +71,23 @@ block content
                                                 .form-group 
                                                     label(for="fixedPrice") Fixed Price
                                                     input.form-control(type="number", name="fixedPrice" value=`${ipoInfo.fixed_price}` readonly)
+                                        .row
+                                            .col-3
+                                                .form-group 
+                                                    label(for="walletBalance") Wallet Balance
+                                                    input.form-control(type="number", name="walletBalance" value=`${ledgerIpo.wallet_balance}` readonly)
+                                            .col-3
+                                                .form-group 
+                                                    label(for="totalInvestors") Total Investors
+                                                    input.form-control(type="number", name="totalInvestors" value=`${ledgerIpo.total_investors}` readonly)
+                                            .col-3
+                                                .form-group 
+                                                    label(for="totalAllotted") Total Allotted
+                                                    input.form-control(type="number", name="totalAllotted" value=`${ledgerIpo.total_allotted}` readonly)
+                                            .col-3
+                                                .form-group 
+                                                    label(for="isComplete") Bid Over
+                                                    input.form-control(type="bool", name="isComplete" value=`${ipoInfo.is_complete}` readonly)
                                             .col-3 
                                                 .form-group
                                                     label(for="") 
