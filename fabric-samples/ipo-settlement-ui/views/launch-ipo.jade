@@ -99,7 +99,7 @@ block content
                                         input.form-control(type="number",name="allocPriority-0",id="allocPriority-0", data-allocation-priority='allocPriority', required='true')
                         .row  
                             .col-6
-                                button.btn(type="button",onClick="addBucket()")
+                                button.btn(type="button", onClick="addBucket()")
                                     i.bi.bi-plus-circle-fill Add Bucket
                             .col-6.text-right 
                                 button.button.btn-lg#ipo-bucket-next Next
@@ -178,6 +178,13 @@ block content
                         </select>
                     </div>
                     <div class='col-3'>
+                        <label for="investorId">Investor Name
+                            <select name="investorId-${bucketId}" id="investorId-${bucketId}" class="form-control">
+                                ${investorOptions}
+                            </select>
+                        </label>
+                    </div>
+                    <div class='col-3'>
                         <div class="form-group"> 
                             <label for="BucketSize">Bucket Size</label>
                             <input type="number" name="BucketSize-${bucketId}" id="BucketSize-${bucketId}" data-bucket-size="bucketSize" class="form-control"/>
@@ -188,13 +195,6 @@ block content
                             <label for="allocPriority">Allocation Priority</label>
                             <input type="number" name="allocPriority-${bucketId}" id="allocPriority-${bucketId}" data-allocation-priority="allocPriority" class="form-control"/>
                         </div>
-                    </div>
-                    <div class='col-3'>
-                        <label for="investorId">Investor
-                            <select name="investorId-${bucketId}" id="investorId-${bucketId}" class="form-control">
-                                ${investorOptions}
-                            </select>
-                        </label>
                     </div>
                 </div>
             `
