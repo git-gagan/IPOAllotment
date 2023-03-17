@@ -15,3 +15,5 @@ DELETE from tbl_investor_transactions;
 DELETE from tbl_ipo_bucket;
 
 DELETE from tbl_ipo_info;
+
+DELETE from tbl_investor_type_allotment_info;

@@ -9,6 +9,8 @@ block content
                 h3.mt-3.color.center #{user.full_name}
                 h6.mt-2.center.color #{user.user_name}
         .row 
+            if message 
+                .alert.alert-success(role='alert') #{message}
             .col-12.d-flex.justify-content-center
                 .row.mt-5.w-75
 

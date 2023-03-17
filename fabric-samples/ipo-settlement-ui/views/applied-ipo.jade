@@ -1,6 +1,21 @@
 extends layout
 
 block content
+    style.
+        form {
+            margin-top: 0;
+        }
+        label{
+            margin-top: 0;
+        }
+        .p1{
+            margin-top: 3%;
+            margin-bottom:0;
+        }
+        .button{
+            margin-top: 2%;
+        }
+        
     .container 
         .row 
             .col-4
@@ -42,7 +57,7 @@ block content
                                         input(type="hidden", name="transaction_id" value=`${i.id}`)
                                         //- p.h4 #{investor_transaction.ticker}
                                         //- p.h5 #{investor_transaction.issuer_name}
-                                        p.h5 Invested: #{i.lots_bid*i.lot_size*i.bid_amount} Rs.
+                                        p.h5.p1 Invested: #{i.lots_bid*i.lot_size*i.bid_amount} Rs.
                                     //- .col-6 
                                     //- .col-2
                                     .form-group 
@@ -57,9 +72,9 @@ block content
                                     //- .col-4
                                     .col-4
                                         //- input(type="hidden", name="ipo_id" value=`${ipo.ipo_id}`)
-                                        button.button.btn-lg(type="submit", name="form_action", value=`modify`) Modify
+                                        button.button.btn-sm(type="submit", name="form_action", value=`modify`) Modify
                                         span 
-                                        button.button.btn-danger.btn-lg(type="submit", name="form_action", value=`delete`) Delete           
+                                        button.button.btn-danger.btn-sm(type="submit", name="form_action", value=`delete`) Delete           
                             //- form(action="/delete-bid", method="post")   
                                 .row
                                     .col-4

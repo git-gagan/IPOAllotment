@@ -42,6 +42,9 @@ export const issuerDashboard = async (req, res) => {
         console.log("Redirect to LOGIN");
         return res.redirect('/users/login')
     }
+    if(req.query){
+        console.log("\n\n\n\n", req.query);
+    }
     let ledgerIpo = await query(req.user.user_name);
     console.log(ledgerIpo);
     console.log(req.user.user_id);
@@ -115,7 +118,7 @@ export const postLaunchIpo = async (req, res) => {
         refined_buckets.push(buckets[i]);
     }
     console.log(refined_buckets);
-    
+
     let promiseInvoke = await IssuertoLedger(req.user.user_name, data.issuer, data.isin, data.cusip,
         data.ticker, data.totalShares, data.lowPrice, data.highPrice, data.ipoStartDate,
         data.ipoEndTime, data.lotSize, data.agent, data.principle, data.fixedPrice, refined_buckets, investorClassifications);
@@ -133,12 +136,14 @@ export const updateIssuer = async (req, res) => {
     let cusip = req.body.cusip
     let ticker = req.body.ticker
     let isin = req.body.isin
+    let query = "";
     try {
         let updateIpo = await updateIpoIdentifiers(req.user.user_name, isin, cusip, ticker)
     } catch (err) {
         // TODO: Add Flash message
+        query = "failed";
         console.error(err)
     }
-    return res.redirect('/issuer/issuer-dashboard');
+    return res.redirect(`/issuer/issuer-dashboard?${query}`);
 }
 

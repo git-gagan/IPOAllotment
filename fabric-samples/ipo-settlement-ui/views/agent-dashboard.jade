@@ -18,10 +18,7 @@ block content
                                 label.mt-5(for="ipo") Select an IPO
                                 select.form-control#ipo(name='ipo')
                                     for item in data
-
-                                        option(value=`${item.Key}`) #{item.Record[item.Key].ipoInfo.issuer_name}
-
-                                        
+                                        option(value=`${item.Key}`) #{item.Record[item.Key].ipoInfo.issuer_name}              
                             .col-4 
                                 .dropdown
                                     label.mt-5(for="action") Select an Action
@@ -41,25 +38,26 @@ block content
                                 button.btn.button(type="submit") Submit
                         hr
                         if escrow_info
-                            .row 
-                                .col-1
-                                    .col-5
-                                        p.text-color Issue Name 
-                                        p.text-color Total Amount
-                                        p.text-color Allocation Status
-                                        p.text-color Refund Status
-                                .col-1
-                                .col-2 
-                                    .col-5
-                                        p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.issuer_name}
-                                        br
-                                        p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.wallet_balance}
-                                        br
-                                        p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.is_allotted}
-                                        br
-                                        p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.is_allotted}
-                                .col-2
-
+                            div 
+                                table.table.table-striped.table-bordered.center
+                                    thead
+                                        th
+                                            p.text-color Issue Name
+                                        th
+                                            p.text-color Total Amount
+                                        th 
+                                            p.text-color Allocation Status
+                                        th 
+                                            p.text-color Refund Status
+                                    tbody
+                                        td
+                                            .color #{escrow_info.Record[escrow_info.Key].ipoInfo.issuer_name}
+                                        td
+                                            p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.wallet_balance}
+                                        td
+                                            p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.is_allotted}  
+                                        td   
+                                            p.color #{escrow_info.Record[escrow_info.Key].ipoInfo.is_allotted}                              
             .col-2
         else 
             .row

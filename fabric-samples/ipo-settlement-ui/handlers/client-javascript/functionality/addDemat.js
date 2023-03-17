@@ -43,7 +43,7 @@ async function addDemat(username,dmat_ac_no,dp_id) {
         }
 
         if(user_id){
-            // Get the investor object
+            var res = 0;
             userName = role_id + "-" + userName;
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
             console.log("\n1, ")
@@ -52,19 +52,23 @@ async function addDemat(username,dmat_ac_no,dp_id) {
                 var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
                 let resultDb = await dematToDb(user_id, dmat_obj);
                 console.log(resultDb);
+                res = 1;
                 await gateway.disconnect();
             }
             else {
                 console.log("\n3")
                 console.log("Unauthorized User!");
             }
+            return res;
         }
         else{
             console.log("This user doesn't exist!");
+            return res;
         }
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
         // process.exit(1);
+        return -1;
     }
 }
 

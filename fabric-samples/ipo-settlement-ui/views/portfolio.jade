@@ -7,9 +7,9 @@ block content
             .col-8
                 #portfolios
                 //- if data 
-                //-     .alert.alert-info(role='alert') #{data}
-               
+                //-     .alert.alert-info(role='alert') #{data}      
                 if !isEmpty
+                    #{isEmpty}
                     for item in portfolios
                         .card.border-success.mb-5
                             .card-body
@@ -22,13 +22,11 @@ block content
                                         h4 Average Value Per Share
                                     td 
                                         h4 #{item.avg_price_per_share}
-
                                 tr
                                     td 
                                         h4 Total Shares
                                     td 
-                                        h4 #{item.totalShares}
-                                
+                                        h4 #{item.totalShares}                          
                                 tr
                                     td 
                                         h4 Total Value

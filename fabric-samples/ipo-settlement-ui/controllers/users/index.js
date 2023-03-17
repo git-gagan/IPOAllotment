@@ -346,7 +346,7 @@ export const portfolio = async (req, res) => {
     console.log("Value:-", value);
     portfolios = value[value.length - 1].Record.portfolio
     console.log("Portfolios:-", portfolios);
-    if(JSON.stringify(portfolios) == "{}"){
+    if(JSON.stringify(portfolios) == "{}" || !portfolios){
         console.log("Empty Portfolio");
         isEmpty = true;
     }
@@ -465,7 +465,14 @@ export const addDematPost = async (req, res) => {
     }
     let dmat_ac_no = req.body.demataccno;
     let dp_id = req.body.dpid;
-    let addDematRes = await addDemat(req.user.user_name, dmat_ac_no, dp_id)
+    let message = "";
+    let addDematRes = await addDemat(req.user.user_name, dmat_ac_no, dp_id);
+    if (addDematRes == 1){
+        message = "Demat Added Successfully";
+    }
+    else if(addDematRes == -1){
+        message = "Error: Cannot add the dmat. Please try again with valid credentials";
+    }
     let user = await getIdFromUsername(req.user.user_name)
     console.log(user)
     let investor = await getInvestorInfo(req.user.user_id)
@@ -481,7 +488,7 @@ export const addDematPost = async (req, res) => {
     catch (err) {
         balance = 100000;
     }
-    res.render("profile.jade", {session: req.user.user_name, role_id: req.user.role_id, user: user, investor: investor, demat: demat, balance: balance})
+    res.render("profile.jade", {session: req.user.user_name, role_id: req.user.role_id, user: user, investor: investor, demat: demat, balance: balance, message: message})
 };
 
 export const logOut = (req, res) => {

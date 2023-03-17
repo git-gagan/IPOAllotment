@@ -1,6 +1,10 @@
 extends layout
 
 block content
+    style. 
+        form {
+            margin-top: 0;
+        }
     .container 
         .row
             .col-2 
@@ -13,7 +17,7 @@ block content
                     .accordion-item
                         h2#headingOne.accordion-header
                             button.accordion-button(type='button' data-bs-toggle='collapse' data-bs-target='#collapseOne' aria-expanded='true' aria-controls='collapseOne')
-                                h5.color Issuer Info 
+                                h5.color Issue Info 
                                     i.bi.bi-pencil
                         #collapseOne.accordion-collapse.collapse.show(aria-labelledby='headingOne' data-bs-parent='#accordionExample')
                             .accordion-body
@@ -23,7 +27,7 @@ block content
                                         .row 
                                             .col-3
                                                 .form-group 
-                                                    label(for="issuename") Issuer Name 
+                                                    label(for="issuename") Issue Name 
                                                     input.form-control(type="text",name="issuename",value=`${ipoInfo.issuer_name}` readonly)   
                                             .col-3
                                                 .form-group 

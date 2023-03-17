@@ -82,6 +82,13 @@ block content
                                         for investor in investor_types
                                             if investor.investor_type_id != 1
                                                 option(value=`${investor.investor_type_id}`) #{investor.investor_type}
+                                .col-3
+                                    label(for="investorId") Investor Name
+                                    select.form-control(name='investorId-0',id="investorId-0", required='true')
+                                        option(value='') Select Option
+                                        for investor in investors
+                                            if investor.investor_type != 1
+                                                option(value=`${investor.investor_id}`) #{investor.investor_name}
                                 .col-3 
                                     .form-group 
                                         label(for="BucketSize") Bucket Size
@@ -90,13 +97,6 @@ block content
                                     .form-group 
                                         label(for="allocPriority") Allocation Priority
                                         input.form-control(type="number",name="allocPriority-0",id="allocPriority-0", data-allocation-priority='allocPriority', required='true')
-                                .col-3
-                                    label(for="investorId") Investor
-                                    select.form-control(name='investorId-0',id="investorId-0", required='true')
-                                        option(value='') Select Option
-                                        for investor in investors
-                                            if investor.investor_type != 1
-                                                option(value=`${investor.investor_id}`) #{investor.investor_name}
                         .row  
                             .col-6
                                 button.btn(type="button",onClick="addBucket()")
