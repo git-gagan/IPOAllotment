@@ -344,7 +344,12 @@ export const portfolio = async (req, res) => {
     let portfolios;
     let isEmpty = false;
     console.log("Value:-", value);
-    portfolios = value[value.length - 1].Record.portfolio
+    try{
+        portfolios = value[value.length - 1].Record.portfolio;
+    }
+    catch{
+        portfolios = null;
+    }
     console.log("Portfolios:-", portfolios);
     if(JSON.stringify(portfolios) == "{}" || !portfolios){
         console.log("Empty Portfolio");
