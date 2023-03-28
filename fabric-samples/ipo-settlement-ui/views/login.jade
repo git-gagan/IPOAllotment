@@ -1,5 +1,6 @@
 extends layout
 
+
 block content
     .container 
         .row 
@@ -13,29 +14,26 @@ block content
                         div.person-icon
                             i.bi.bi-person-circle
                     .col-5 
-                
-                form(action="/users/login",method="post")
+
+                form(action="/users/login" method="post")
                     .row
                         .col-12
-                            if message 
-                                .alert.alert-info(role='alert') #{message}
+                            //- if message == "Invalid Username or Password"
+                            //-     .alert.alert-info(role='alert') #{message}
                             .form-group 
                                 label(for="username") User Name 
-                                input.form-control(type="text",placeholder="username",name="username" required)  
+                                input.form-control(type="text" placeholder="username" name="username" required)  
                             .form-group 
                                 label(for="password") Password
-                                input.form-control(type="password",placeholder="password",name="password" required)
-                            
+                                input.form-control(type="password" placeholder="password" name="password" required)
                             .row 
-                                .col-4
-                                
-                                .col-4 
+                                .col-12.d-flex.justify-content-center
                                     button.btn.btn-lg.button(type="submit") Login
 
-                                .col-4
-                        
-                
 
-            
-            
-    
+
+
+
+
+
+

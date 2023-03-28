@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^4.6.0",
+    "connect-flash": "^0.1.1",
     "express": "^4.17.1",
     "express-session": "^1.17.3",
     "fabric-ca-client": "^2.2.4",
