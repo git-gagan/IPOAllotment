@@ -41,7 +41,8 @@ import { router } from "./routers/index.js";
 import passport from "passport";
 import localPassport from "./configurations/localPassport.js";
 import flash from "connect-flash";
-// import { job } from "./utils/cron.js";
+
+import { job } from "./utils/cron.js";
 
 /////////////////////////////////////////
 // Express setup
