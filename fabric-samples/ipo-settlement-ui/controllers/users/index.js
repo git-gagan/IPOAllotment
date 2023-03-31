@@ -371,7 +371,7 @@ export const profile = async (req, res) => {
   try {
     balance = value[value.length - 1].Record.wallet.current_balance;
   } catch (err) {
-    balance = 100000;
+    balance = 1000000;
   }
   res.render("profile.jade", {
     session: req.user.user_name,
@@ -575,7 +575,7 @@ export const addDematPost = async (req, res) => {
   try {
     balance = value[value.length - 1].Record.wallet.current_balance;
   } catch (err) {
-    balance = 100000;
+    balance = 1000000;
   }
   res.render("profile.jade", {
     session: req.user.user_name,

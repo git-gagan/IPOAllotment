@@ -97,7 +97,7 @@ app.post("/add-demat", async function (req, res) {
     try {
       balance = value[value.length - 1].Record.wallet.current_balance;
     } catch (err) {
-      balance = 100000;
+      balance = 1000000;
     }
     res.render("profile.jade", {
       session: req.session.name,
@@ -368,7 +368,7 @@ app.get("/profile", async function (req, res) {
     try {
       balance = value[value.length - 1].Record.wallet.current_balance;
     } catch (err) {
-      balance = 100000;
+      balance = 1000000;
     }
     res.render("profile.jade", {
       session: req.session.name,

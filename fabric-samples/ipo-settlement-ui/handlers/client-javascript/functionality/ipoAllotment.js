@@ -302,7 +302,10 @@ async function ipoAllotment(username, ipo_id) {
                                         console.log(allocation_dict);
                                     }
                                 }
-                                console.log(allocation_dict);
+                                console.log(
+                                    "Outside Allocation Dict",
+                                    allocation_dict
+                                );
                             }
                             if (make_allotment) {
                                 // Evaluate the specified transaction.
