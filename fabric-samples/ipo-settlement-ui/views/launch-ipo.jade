@@ -12,63 +12,63 @@ block content
         div
             #nav-tabContent.tab-content
                 #basic-ipo-details.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='basic-ipo-details-tab')
-                        form(method="post", id='basic-ipo-form')
-                            .row 
-                                h6 Basic IPO Details 
-                                .col-6
-                                    .form-group 
-                                        label(for="issuer") Issuer Name
-                                        input.form-control(type="text", name="issuer", required='true')  
-                                    .form-group 
-                                        label(for="cusip") CUSIP
-                                        input.form-control(type="text", name="cusip")  
-                                    .form-group 
-                                        label(for="ipoStartDate") IPO Start Date
-                                        input.form-control(type="datetime-local",name="ipoStartDate", required='true')  
-                                    .form-group 
-                                        label(for="totalShares") Total Shares
-                                        input.form-control(type="number",name="totalShares", required='true')
-                                    .form-group 
-                                        label(for="lowPrice") Low Price
-                                        input.form-control(type="number",name="lowPrice", required='true')
+                    form(method="post" id='basic-ipo-form')
+                        .row 
+                            h6 Basic IPO Details 
+                            .col-6
+                                .form-group 
+                                    label(for="issuer") Issuer Name
+                                    input.form-control(type="text" name="issuer" required='true')  
+                                .form-group 
+                                    label(for="cusip") CUSIP
+                                    input.form-control(type="text" name="cusip")  
+                                .form-group 
+                                    label(for="ipoStartDate") IPO Start Date
+                                    input.form-control(type="datetime-local" name="ipoStartDate" required='true')  
+                                .form-group 
+                                    label(for="totalShares") Total Shares
+                                    input.form-control(type="number" name="totalShares" required='true')
+                                .form-group 
+                                    label(for="lowPrice") Low Price
+                                    input.form-control(type="number" name="lowPrice" required='true')
 
-                                    label(for="principle") Allocation Principle (in the case of over-subscription)
-                                    select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle", id="a-principle", required='true', onChange="addFixedPrice()")
-                                        option(value='') Select Option
-                                        for principle in principles
-                                            option(value=`${principle.id}`) #{principle.name}
+                                label(for="principle") Allocation Principle (in the case of over-subscription)
+                                select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle" id="a-principle" required='true' onChange="addFixedPrice()")
+                                    option(value='') Select Option
+                                    for principle in principles
+                                        option(value=`${principle.id}`) #{principle.name}
 
-                                    label(for="agent") Paying Agent
-                                    select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="agent", required='true', onClick="addFixedPrice()")
-                                        option(value='') Select Option
-                                        for agent in agents
-                                            option(value=`${agent.user_id}`) #{agent.user_name}
-                                                
-                                .col-6
-                                    .form-group 
-                                        label(for="isin") ISIN
-                                        input.form-control(type="text", name="isin")  
-                                    .form-group 
-                                        label(for="ticker") Ticker
-                                        input.form-control(type="text", name="ticker")
-                                    .form-group 
-                                        label(for="ipoEndTime") IPO End Time(In Seconds)
-                                        input.form-control(type="number",name="ipoEndTime", required='true')
-                                    .form-group 
-                                        label(for="lotSize") Lot Size
-                                        input.form-control(type="number",name="lotSize", required='true')
-                                    .form-group 
-                                        label(for="highPrice") High Price
-                                        input.form-control(type="number",name="highPrice", required='true')
-                                    .form-group
-                                        label(for="fixedPrice", id='fixed-price-label' hidden) Fixed Price
-                                        input.form-control(type="number", name="fixedPrice", id='fixed-price' hidden)
+                                label(for="agent") Paying Agent
+                                select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="agent" required='true' onClick="addFixedPrice()")
+                                    option(value='') Select Option
+                                    for agent in agents
+                                        option(value=`${agent.user_id}`) #{agent.user_name}
 
-                                .col-12.text-right.mb-5
-                                    button.btn.button.btn-lg#basic-ipo-next Next
-                                        
-                            //- #pills-profile.tab-pane.fade(role='tabpanel' aria-labelledby='pills-profile-tab') 
-                        
+                            .col-6
+                                .form-group 
+                                    label(for="isin") ISIN
+                                    input.form-control(type="text" name="isin")  
+                                .form-group 
+                                    label(for="ticker") Ticker
+                                    input.form-control(type="text" name="ticker")
+                                .form-group 
+                                    label(for="ipoEndTime") IPO End Time(In Seconds)
+                                    input.form-control(type="number" name="ipoEndTime" required='true')
+                                .form-group 
+                                    label(for="lotSize") Lot Size
+                                    input.form-control(type="number" name="lotSize" required='true')
+                                .form-group 
+                                    label(for="highPrice") High Price
+                                    input.form-control(type="number" name="highPrice" required='true')
+                                .form-group
+                                    label(for="fixedPrice" id='fixed-price-label' hidden) Fixed Price
+                                    input.form-control(type="number" name="fixedPrice" id='fixed-price' hidden)
+
+                            .col-12.text-right.mb-5
+                                button.btn.button.btn-lg#basic-ipo-next Next
+
+                        //- #pills-profile.tab-pane.fade(role='tabpanel' aria-labelledby='pills-profile-tab') 
+
                 #nav-ipo-bucket.tab-pane.fade(role='tabpanel' aria-labelledby='nav-ipo-bucket-tab')
                     .row 
                         h6 Please add all pre-primary investors, their sale bucket size and priority of allotment
@@ -77,14 +77,14 @@ block content
                             .row 
                                 .col-3
                                     label(for="investorType") Investor Type
-                                    select.form-control(name='investorTypeBucket-0',id="investorTypeBucket-0", data-investor-type='investorTypeBucket', required='true')
+                                    select.form-control(name='investorTypeBucket-0' id="investorTypeBucket-0" data-investor-type='investorTypeBucket' required='true')
                                         option(value='') Select Option
                                         for investor in investor_types
                                             if investor.investor_type_id != 1
                                                 option(value=`${investor.investor_type_id}`) #{investor.investor_type}
                                 .col-3
                                     label(for="investorId") Investor Name
-                                    select.form-control(name='investorId-0',id="investorId-0", required='true')
+                                    select.form-control(name='investorId-0' id="investorId-0" required='true')
                                         option(value='') Select Option
                                         for investor in investors
                                             if investor.investor_type != 1
@@ -92,20 +92,20 @@ block content
                                 .col-3 
                                     .form-group 
                                         label(for="BucketSize") Bucket Size
-                                        input.form-control(type="number",name="BucketSize-0",id="BucketSize-0", data-bucket-size='bucketSize', required='true')
+                                        input.form-control(type="number" name="BucketSize-0" id="BucketSize-0" data-bucket-size='bucketSize' required='true')
                                 .col-3 
                                     .form-group 
                                         label(for="allocPriority") Allocation Priority
-                                        input.form-control(type="number",name="allocPriority-0",id="allocPriority-0", data-allocation-priority='allocPriority', required='true')
+                                        input.form-control(type="number" name="allocPriority-0" id="allocPriority-0" data-allocation-priority='allocPriority' required='true')
                         .row  
                             .col-6
-                                button.btn(type="button", onClick="addBucket()")
+                                button.btn(type="button" onClick="addBucket()")
                                     i.bi.bi-plus-circle-fill Add Bucket
                             .col-6.text-right 
                                 button.button.btn-lg#ipo-bucket-next Next
 
                 #nav-investor-classification.tab-pane.fade(role='tabpanel' aria-labelledby='nav-investor-classification-tab')
-                    //- form(action="/add-investor-category", method="post") 
+                    //- form(action="/add-investor-category" method="post") 
                     .row 
                         h6 Please add all investor categories who are allowed to participate, their reserved quota and minimum lot quantity
                     form(id='investor-classification-form')
@@ -113,27 +113,27 @@ block content
                             .row 
                                 .col-4
                                     label(for="investorType") Investor Type
-                                    select.form-control(name='investorTypeClassification-0',id="investorTypeClassification-0", required='true')
+                                    select.form-control(name='investorTypeClassification-0' id="investorTypeClassification-0" required='true')
                                         option(value='') Select Option
                                         for investor in investor_types
                                             option(value=`${investor.investor_type_id}`) #{investor.investor_type}
                                 .col-4 
                                     .form-group 
                                         label(for="quota") Reserved Quota (lots)
-                                        input.form-control(type="number",name="quota-0",id="quota-0", required='true')
+                                        input.form-control(type="number" name="quota-0" id="quota-0" required='true')
                                 .col-4 
                                     .form-group 
                                         label(for="lotQuantity") Minimum Lot Quantity
-                                        input.form-control(type="number",name="lotQuantity-0",id="lotQuantity-0", required='true')
+                                        input.form-control(type="number" name="lotQuantity-0" id="lotQuantity-0" required='true')
                         .row 
                             .col-6
-                                button.mt-3.btn(type="button",onClick="addInvestorCategory()")
+                                button.mt-3.btn(type="button" onClick="addInvestorCategory()")
                                     i.bi.bi-plus-circle-fill   Add investor classification
                             .col-6.text-right
-                                button.button.btn-lg(type="submit", id='final-submit-button') Submit
-            form(action="/issuer/launch-ipo", method="post", id='launch-ipo-form') 
-                textarea#launch-ipo-textarea(name="launch-ipo", cols="30", rows="10", hidden='true') 
-                button.button.btn-lg(type="submit", id='launch-ipo-submit-button', hidden='true') Submit
+                                button.button.btn-lg(type="submit" id='final-submit-button') Submit
+            form(action="/issuer/launch-ipo" method="post" id='launch-ipo-form') 
+                textarea#launch-ipo-textarea(name="launch-ipo" cols="30" rows="10" hidden='true') 
+                button.button.btn-lg(type="submit" id='launch-ipo-submit-button' hidden='true') Submit
 
     script(src='/js/launch-ipo.js')
     script(type="text/javascript").
@@ -178,11 +178,10 @@ block content
                         </select>
                     </div>
                     <div class='col-3'>
-                        <label for="investorId">Investor Name
-                            <select name="investorId-${bucketId}" id="investorId-${bucketId}" class="form-control">
-                                ${investorOptions}
-                            </select>
-                        </label>
+                        <label for="investorId">Investor Name</label>
+                        <select name="investorId-${bucketId}" id="investorId-${bucketId}" class="form-control mw-100">
+                            ${investorOptions}
+                        </select>
                     </div>
                     <div class='col-3'>
                         <div class="form-group"> 
@@ -228,4 +227,3 @@ block content
             $('#investor-classification-inputs').append(newInput);
         }
 
-        

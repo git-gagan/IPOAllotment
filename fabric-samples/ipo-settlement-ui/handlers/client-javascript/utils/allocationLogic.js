@@ -292,50 +292,70 @@ async function processAllocationDictOR(
     // Temporary dictionary for investor info
     let temp_investor_dict = {};
     for (let i in allocation_dict) {
+        console.log("Investor ID:- ", allocation_dict);
         // Make a comprehensive list of bids investor wise
         if (!(allocation_dict[i]["investor_type_id"] in temp_investor_dict)) {
+            console.log("New Investor Type");
             temp_investor_dict[allocation_dict[i]["investor_id"]] = {};
             temp_investor_dict[allocation_dict[i]["investor_id"]]["total_bid"] =
                 allocation_dict[i]["lots_bid"] * lotSize;
             temp_investor_dict[allocation_dict[i]["investor_id"]][
                 "investor_type"
             ] = allocation_dict[i]["investor_type"];
+            // Added investor type id in the dictionary(temp_investor_dict)
+            temp_investor_dict[allocation_dict[i]["investor_id"]][
+                "investor_type_id"
+            ] = allocation_dict[i]["investor_type_id"];
             continue;
         }
         temp_investor_dict[allocation_dict[i]["investor_id"]]["total_bid"] +=
             allocation_dict[i]["lots_bid"] * lotSize;
     }
-    console.log(temp_investor_dict);
+    console.log("TEMP INVESTOR DICT", temp_investor_dict);
     for (let key in temp_investor_dict) {
+        console.log("KEY", key);
         if (processed_dict["totalShares"] >= totalSize) {
             console.log("No more shares available!");
             break;
         }
+        console.log("Invetsor TYPE", temp_investor_dict[key]["investor_type"]);
+        console.log("Invetsor TYPE ID", temp_investor_dict[key]);
+
         if (
             !(
-                statusInfo &&
-                temp_investor_dict[key]["investor_type"] in statusInfo
+                // Changed the investor_type to investor_type_id after adding investor_type_id in the dictionary(temp_investor_dict)
+                (
+                    statusInfo &&
+                    temp_investor_dict[key]["investor_type_id"] in statusInfo
+                )
             )
         ) {
             // if this investor_type_category is not in the statusInfo category
-            console.log("\n---SKIP---\n");
+            console.log("\n---SKIPP---\n");
             continue;
         }
+        console.log("Invetsor TYPE", temp_investor_dict[key]["investor_type"]);
+        console.log(
+            "Invetsor TYPE ID",
+            temp_investor_dict[key]["investor_type_id"]
+        );
         let allocation_ratio =
-            statusInfo[temp_investor_dict[key]["investor_type"]][
+            statusInfo[temp_investor_dict[key]["investor_type_id"]][
                 "sharesMaxLimit"
             ] /
-            statusInfo[temp_investor_dict[key]["investor_type"]]["sharesBid"]; // Needed if principle = 4 or 5
+            statusInfo[temp_investor_dict[key]["investor_type_id"]][
+                "sharesBid"
+            ]; // Needed if principle = 4 or 5
         let bid_price = null;
         let shares_to_be_allotted = 0;
         let amount_invested = 0;
         let shares_demanded =
             temp_investor_dict[key]["total_bid"] * allocation_ratio; // Shares demanded after applying allocation ratio
         let available_shares =
-            statusInfo[temp_investor_dict[key]["investor_type"]][
+            statusInfo[temp_investor_dict[key]["investor_type_id"]][
                 "sharesMaxLimit"
             ] -
-            statusInfo[temp_investor_dict[key]["investor_type"]][
+            statusInfo[temp_investor_dict[key]["investor_type_id"]][
                 "sharesAllotted"
             ];
         if (available_shares <= 0) {
@@ -348,10 +368,10 @@ async function processAllocationDictOR(
         if (allotment_principle == 4) {
             console.log("Oversubscription Allotment Ratio Avg Price");
             bid_price =
-                statusInfo[temp_investor_dict[key]["investor_type"]][
+                statusInfo[temp_investor_dict[key]["investor_type_id"]][
                     "totalInvestment"
                 ] /
-                statusInfo[temp_investor_dict[key]["investor_type"]][
+                statusInfo[temp_investor_dict[key]["investor_type_id"]][
                     "sharesBid"
                 ];
         } else {
@@ -421,10 +441,12 @@ async function processAllocationDictOR(
             amount_invested;
         processed_dict["totalAmount"] += amount_invested;
         processed_dict["totalShares"] += shares_to_be_allotted;
-        statusInfo[temp_investor_dict[key]["investor_type"]][
+        statusInfo[temp_investor_dict[key]["investor_type_id"]][
             "sharesAllotted"
         ] += shares_to_be_allotted;
     }
+    console.log("Processed DictOR: ", processed_dict);
+    console.log("Status InfoOR: ", statusInfo);
     return processed_dict;
 }
 
