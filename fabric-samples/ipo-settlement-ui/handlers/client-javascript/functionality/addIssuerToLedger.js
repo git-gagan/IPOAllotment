@@ -6,27 +6,45 @@
 
 // Only ISSUER is expected to access this functionality
 
-'use strict';
+"use strict";
 
-import { authorizeUser } from '../utils/userAuth.js';
-import { retrieveContract } from '../utils/getContract.js';
-import { getIdFromUsername, getUsernameFromId } from '../database/getUserId.js';
-import { insertOrUpdateIpo, addIpoEligibility, addIpoBuckets } from '../database/ipoToDB.js';
+import { authorizeUser } from "../utils/userAuth.js";
+import { retrieveContract } from "../utils/getContract.js";
+import { getIdFromUsername, getUsernameFromId } from "../database/getUserId.js";
+import {
+    insertOrUpdateIpo,
+    addIpoEligibility,
+    addIpoBuckets,
+} from "../database/ipoToDB.js";
 
-async function IssuertoLedger(username, issuer, isin, cusip,
-    ticker, totalSize, lowPrice, highPrice, ipoStartDate,
-    ipoEndTime, lotSize, agent, principle, fixedPrice, ipo_buckets, investor_categories) {
+async function IssuertoLedger(
+    username,
+    issuer,
+    isin,
+    cusip,
+    ticker,
+    totalSize,
+    lowPrice,
+    highPrice,
+    ipoStartDate,
+    ipoEndTime,
+    lotSize,
+    agent,
+    principle,
+    fixedPrice,
+    ipo_buckets,
+    investor_categories
+) {
     try {
         let userName = username;
         let user_promise = await getIdFromUsername(userName);
         console.log(user_promise);
         let user_id, role_id, full_name;
         if (user_promise) {
-            user_id = user_promise['user_id'];
-            role_id = user_promise['role_id'];
-            full_name = user_promise['full_name'];
-        }
-        else {
+            user_id = user_promise["user_id"];
+            role_id = user_promise["role_id"];
+            full_name = user_promise["full_name"];
+        } else {
             user_id = null;
         }
 
@@ -39,7 +57,6 @@ async function IssuertoLedger(username, issuer, isin, cusip,
         // if (allotment_principle == 5) {
         //     fixed_price = 150; // Only required for allotment principle 5
         // }
-
 
         // ipo investor eligibility information
         // To be taken from frontend
@@ -107,8 +124,8 @@ async function IssuertoLedger(username, issuer, isin, cusip,
         //     }
         // ]
 
-        let ipo_investor_eligibility_list = investor_categories
-        let ipo_bucket_list = ipo_buckets
+        let ipo_investor_eligibility_list = investor_categories;
+        let ipo_bucket_list = ipo_buckets;
         // let ipo_bucket_list = [
         //     {
         //         ipo_id: user_id,
@@ -143,11 +160,13 @@ async function IssuertoLedger(username, issuer, isin, cusip,
         function createIssuerObject() {
             let ipobucketIds = [];
             for (let i in ipo_bucket_list) {
-                ipobucketIds.push(ipo_bucket_list[i]['investor_id']);
+                ipobucketIds.push(ipo_bucket_list[i]["investor_id"]);
             }
             let today = new Date();
             let startDate = new Date(ipoStartDate); // 1 min
+            let endDate = new Date(ipoEndTime); // 1 min
             console.log("StartDate:- ", startDate);
+            console.log("EndDate:- ", endDate);
             // Create the issuer object which will be passed to the smart contract to be put on the ledger
             return {
                 ID: user_id,
@@ -163,7 +182,7 @@ async function IssuertoLedger(username, issuer, isin, cusip,
                         total_allotted: 0,
                         bid_start_date: startDate,
                         ipo_announcement_date: today,
-                        total_bid_time: ipoEndTime, // Seconds
+                        total_bid_time: endDate, // Seconds
                         is_complete: false,
                         lot_size: parseInt(lotSize),
                         has_bidding_started: false,
@@ -176,7 +195,7 @@ async function IssuertoLedger(username, issuer, isin, cusip,
                         ipoAllotedTms: null,
                         cusip: cusip,
                         isin: isin,
-                        ticker: ticker
+                        ticker: ticker,
                     },
                     escrowInfo: {
                         agentId: agent,
@@ -184,11 +203,11 @@ async function IssuertoLedger(username, issuer, isin, cusip,
                         total_amount: 0,
                         last_transaction: "",
                         refund_amount: 0,
-                        transfer_amount: 0
+                        transfer_amount: 0,
                     },
-                    userInfo: {}
-                }
-            }
+                    userInfo: {},
+                },
+            };
         }
 
         if (user_id) {
@@ -198,30 +217,51 @@ async function IssuertoLedger(username, issuer, isin, cusip,
             let [isAuthUser, wallet, ccp] = await authorizeUser(userName);
 
             if (isAuthUser && role_id == "IS") {
-                var [contract, gateway] = await retrieveContract(userName, wallet, ccp);
+                var [contract, gateway] = await retrieveContract(
+                    userName,
+                    wallet,
+                    ccp
+                );
                 // Insert IPO info to DB
                 try {
-                    console.log(issuer_obj, ipo_investor_eligibility_list, ipo_bucket_list);
-                    let ipoDb = await insertOrUpdateIpo(issuer_obj, user_id, false, allotment_principle, fixed_price);
-                    let eligibilityDb = await addIpoEligibility(ipo_investor_eligibility_list);
-                    if (ipo_bucket_list.toString() != "[]"){
+                    console.log(
+                        issuer_obj,
+                        ipo_investor_eligibility_list,
+                        ipo_bucket_list
+                    );
+                    let ipoDb = await insertOrUpdateIpo(
+                        issuer_obj,
+                        user_id,
+                        false,
+                        allotment_principle,
+                        fixed_price
+                    );
+                    let eligibilityDb = await addIpoEligibility(
+                        ipo_investor_eligibility_list
+                    );
+                    if (ipo_bucket_list.toString() != "[]") {
                         // Only if bucket info exists
                         let bucketDb = await addIpoBuckets(ipo_bucket_list);
                     }
                     // Evaluate the specified transaction.
                     console.log("Adding issuer to ledger!");
-                    const result = await contract.submitTransaction('addIssuer', user_id, JSON.stringify(issuer_obj));
+                    const result = await contract.submitTransaction(
+                        "addIssuer",
+                        user_id,
+                        JSON.stringify(issuer_obj)
+                    );
                     console.log(result.toString());
                     if (result) {
                         console.log(`Issuer has been added to the ledger!`);
                         console.log("\nSUCCESS\n");
-                    }
-                    else {
+                    } else {
                         console.log(`Failed to add Issuer to the ledger!`);
                     }
-                }
-                catch (error) {
-                    console.error("Error Encountered while inserting to DB:-", error);
+                } catch (error) {
+                    console.error(
+                        "Error Encountered while inserting to DB:-",
+                        error
+                    );
                 }
                 // console.log(issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'],"\n\n")
                 // let start_bidding = await startBid(contract, user_id, issuer_obj);
@@ -230,12 +270,10 @@ async function IssuertoLedger(username, issuer, isin, cusip,
                 // let bid_time_over = await biddingOver(contract, user_id, issuer_obj);
                 await gateway.disconnect();
                 // process.exit(1);
-            }
-            else {
+            } else {
                 console.log("Unauthorized User!");
             }
-        }
-        else {
+        } else {
             console.log("This user doesn't exist!");
         }
     } catch (error) {
@@ -244,63 +282,47 @@ async function IssuertoLedger(username, issuer, isin, cusip,
     }
 }
 
-
-
 // ----------- Low level Fix for timer ------------ //
 
 async function biddingOver(contract, user_id, issuer_obj) {
-    var resPromise = new Promise(
-        (resolve, reject) => {
-            let result;
-            setTimeout(
-                async function () {
-                    console.log("Setting is_complete to TRUE\n")
-                    result = await contract.submitTransaction('closeBidding', user_id);
-                    result = result.toString();
-                    console.log(result);
-                    if (result == "1") {
-                        resolve("Bidding Closed!");
-                    }
-                    else if (result == "0") {
-                        resolve("Bidding is already Over!");
-                    }
-                    else {
-                        resolve("Bidding hasn't started yet!");
-                    }
-                },
-                issuer_obj[user_id]['ipoInfo']['total_bid_time'] * 1000
-            )
-        }
-    )
+    var resPromise = new Promise((resolve, reject) => {
+        let result;
+        setTimeout(async function () {
+            console.log("Setting is_complete to TRUE\n");
+            result = await contract.submitTransaction("closeBidding", user_id);
+            result = result.toString();
+            console.log(result);
+            if (result == "1") {
+                resolve("Bidding Closed!");
+            } else if (result == "0") {
+                resolve("Bidding is already Over!");
+            } else {
+                resolve("Bidding hasn't started yet!");
+            }
+        }, issuer_obj[user_id]["ipoInfo"]["total_bid_time"] * 1000);
+    });
     return resPromise;
 }
 
 async function startBid(contract, user_id, issuer_obj) {
-    var resPromise = new Promise(
-        (resolve, reject) => {
-            let result;
-            setTimeout(
-                async function () {
-                    console.log("Setting has_bidding_started to TRUE\n")
-                    result = await contract.submitTransaction('startBidding', user_id);
-                    result = result.toString();
-                    console.log(result);
-                    if (result == "1") {
-                        resolve("Bidding Started!");
-                    }
-                    else if (result == "0") {
-                        resolve("Bidding Over!");
-                    }
-                    else {
-                        resolve("Bidding Already Going on!");
-                    }
-                }
-                , (issuer_obj[user_id]['ipoInfo']['bid_start_date'] - issuer_obj[user_id]['ipoInfo']['ipo_announcement_date'])
-            )
-        }
-    )
+    var resPromise = new Promise((resolve, reject) => {
+        let result;
+        setTimeout(async function () {
+            console.log("Setting has_bidding_started to TRUE\n");
+            result = await contract.submitTransaction("startBidding", user_id);
+            result = result.toString();
+            console.log(result);
+            if (result == "1") {
+                resolve("Bidding Started!");
+            } else if (result == "0") {
+                resolve("Bidding Over!");
+            } else {
+                resolve("Bidding Already Going on!");
+            }
+        }, issuer_obj[user_id]["ipoInfo"]["bid_start_date"] -
+            issuer_obj[user_id]["ipoInfo"]["ipo_announcement_date"]);
+    });
     return resPromise;
 }
 
-
-export { IssuertoLedger }
+export { IssuertoLedger };

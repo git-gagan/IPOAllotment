@@ -3,11 +3,11 @@ export const home = (req, res) => {
     res.render("index.jade", {
       session: req.session.name,
       role_id: role_id,
-      toastContent: "",
+      message: "",
     });
   } else {
     res.render("index.jade", {
-      toastContent: "",
+      message: "",
     });
   }
 };

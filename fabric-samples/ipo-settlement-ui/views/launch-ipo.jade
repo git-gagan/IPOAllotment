@@ -1,4 +1,5 @@
 extends layout
+//- include ./components/tooltips
 
 -var investor_types=#investor_types
 block content
@@ -33,6 +34,7 @@ block content
                                     input.form-control(type="number" name="lowPrice" required='true')
 
                                 label(for="principle") Allocation Principle (in the case of over-subscription)
+                                    i(class="ms-2 fa-sharp fa-solid fa-circle-info" data-bs-toggle="tooltip" data-bs-html="true" title="<em>Tooltip</em> <u>with</u> <b>HTML</b>")
                                 select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle" id="a-principle" required='true' onChange="addFixedPrice()")
                                     option(value='') Select Option
                                     for principle in principles
@@ -52,8 +54,8 @@ block content
                                     label(for="ticker") Ticker
                                     input.form-control(type="text" name="ticker")
                                 .form-group 
-                                    label(for="ipoEndTime") IPO End Time(In Seconds)
-                                    input.form-control(type="number" name="ipoEndTime" required='true')
+                                    label(for="ipoEndTime") IPO End Date
+                                    input.form-control(type="datetime-local" name="ipoEndTime" required='true')
                                 .form-group 
                                     label(for="lotSize") Lot Size
                                     input.form-control(type="number" name="lotSize" required='true')
