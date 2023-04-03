@@ -76,7 +76,7 @@ CREATE TABLE tbl_ipo_info (
 	ISIN varchar(50),
 	CUSIP varchar(50),
 	ticker varchar(50),
-	bid_time integer,
+	bid_time datetime,
 	is_complete integer,
 	has_bidding_started INTEGER,
 	bid_start_date datetime,
