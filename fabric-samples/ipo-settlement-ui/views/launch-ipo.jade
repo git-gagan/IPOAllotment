@@ -34,7 +34,7 @@ block content
                                     input.form-control(type="number" name="lowPrice" required='true')
 
                                 label(for="principle") Allocation Principle (in the case of over-subscription)
-                                    i(class="ms-2 fa-sharp fa-solid fa-circle-info" data-bs-toggle="tooltip" data-bs-html="true" title="<em>Tooltip</em> <u>with</u> <b>HTML</b>")
+                                    i(class="ms-2 fa-sharp fa-solid fa-circle-info" data-bs-toggle="tooltip" data-bs-html="true" title="The Allotment Principle is the method by which the IPO is allocated to investors. The Allotment Principle can be either Fixed Price or Pro Rata. If the Allotment Principle is Fixed Price, then the Fixed Price is the price at which the IPO is allocated to investors. If the Allotment Principle is Pro Rata, then the IPO is allocated to investors based on the amount of shares they have purchased.")
                                 select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle" id="a-principle" required='true' onChange="addFixedPrice()")
                                     option(value='') Select Option
                                     for principle in principles
