@@ -2,20 +2,22 @@ extends layout
 //- include ./components/tooltips
 
 -var investor_types=#investor_types
+
 block content
     .container 
         nav(style="margin-top:2rem")
             #nav-tab.nav.nav-tabs(role='tablist')
                 a#basic-ipo-details-tab.nav-link.active(data-bs-toggle='tab' href='#basic-ipo-details' role='tab' aria-controls='basic-ipo-details' aria-selected='true') Basic IPO Details
-                a#nav-ipo-bucket-tab.nav-link(data-bs-toggle='tab' href='#nav-ipo-bucket' role='tab' aria-controls='nav-ipo-bucket' aria-selected='false') IPO Buckets
-                a#nav-investor-classification-tab.nav-link(data-bs-toggle='tab' href='#nav-investor-classification' role='tab' aria-controls='nav-investor-classification' aria-selected='false') Investor Classification
+                a#nav-ipo-bucket-tab.nav-link(data-bs-toggle='tab' href='#nav-ipo-bucket' role='tab' aria-controls='nav-ipo-bucket' aria-selected='false' disabled) IPO Buckets
+                a#nav-investor-classification-tab.nav-link(data-bs-toggle='tab' href='#nav-investor-classification' role='tab' aria-controls='nav-investor-classification' aria-selected='false' ) Investor Classification
         //- 
         div
             #nav-tabContent.tab-content
                 #basic-ipo-details.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='basic-ipo-details-tab')
                     form(method="post" id='basic-ipo-form')
                         .row 
-                            h6 Basic IPO Details 
+                            h6 Basic IPO Details
+                            label(for="bid-range" id='error_label' hidden).alert.alert-info(role='alert') 
                             .col-6
                                 .form-group 
                                     label(for="issuer") Issuer Name
@@ -25,13 +27,13 @@ block content
                                     input.form-control(type="text" name="cusip")  
                                 .form-group 
                                     label(for="ipoStartDate") IPO Start Date
-                                    input.form-control(type="datetime-local" name="ipoStartDate" required='true')  
+                                    input.form-control(type="datetime-local" name="ipoStartDate" id="ipoStartDate" required='true' onchange="validateDateRange('ipoStartDate','ipoEndTime','error_label')")  
                                 .form-group 
                                     label(for="totalShares") Total Shares
                                     input.form-control(type="number" name="totalShares" required='true')
                                 .form-group 
                                     label(for="lowPrice") Low Price
-                                    input.form-control(type="number" name="lowPrice" required='true')
+                                    input.form-control(type="number" name="lowPrice" id="lowPrice" required='true' onchange='validateBidRange()')
 
                                 label(for="principle") Allocation Principle (in the case of over-subscription)
                                     i(class="ms-2 fa-sharp fa-solid fa-circle-info" data-bs-toggle="tooltip" data-bs-html="true" title="The Allotment Principle is the method by which the IPO is allocated to investors. The Allotment Principle can be either Fixed Price or Pro Rata. If the Allotment Principle is Fixed Price, then the Fixed Price is the price at which the IPO is allocated to investors. If the Allotment Principle is Pro Rata, then the IPO is allocated to investors based on the amount of shares they have purchased.")
@@ -55,13 +57,13 @@ block content
                                     input.form-control(type="text" name="ticker")
                                 .form-group 
                                     label(for="ipoEndTime") IPO End Date
-                                    input.form-control(type="datetime-local" name="ipoEndTime" required='true')
+                                    input.form-control(type="datetime-local" name="ipoEndTime" id="ipoEndTime" required='true' onchange="validateDateRange('ipoStartDate', 'ipoEndTime', 'error_label')")
                                 .form-group 
                                     label(for="lotSize") Lot Size
                                     input.form-control(type="number" name="lotSize" required='true')
                                 .form-group 
                                     label(for="highPrice") High Price
-                                    input.form-control(type="number" name="highPrice" required='true')
+                                    input.form-control(type="number" name="highPrice" id="highPrice" required='true' onchange='validateBidRange()')
                                 .form-group
                                     label(for="fixedPrice" id='fixed-price-label' hidden) Fixed Price
                                     input.form-control(type="number" name="fixedPrice" id='fixed-price' hidden)
@@ -74,6 +76,7 @@ block content
                 #nav-ipo-bucket.tab-pane.fade(role='tabpanel' aria-labelledby='nav-ipo-bucket-tab')
                     .row 
                         h6 Please add all pre-primary investors, their sale bucket size and priority of allotment
+                        label(for="bid-range" id='error_label' hidden).alert.alert-info(role='alert')
                     form(id='buckets-form')
                         div#bucket-inputs
                             .row 
@@ -228,4 +231,72 @@ block content
             `
             $('#investor-classification-inputs').append(newInput);
         }
+
+        const tabAnchor = document.querySelector('#nav-ipo-bucket-tab');
+        const tabAnchor2 = document.querySelector('#nav-investor-classification-tab');
+
+        function validateBidRange(){
+            let highPrice = document.getElementById('highPrice').value;
+            let lowPrice = document.getElementById('lowPrice').value;
+            let errorLabel = document.getElementById('error_label');
+            console.log("High Price: " + highPrice)
+            console.log("Low Price: " + lowPrice)
+            // Check if input is valid
+            if (highPrice.trim() <= lowPrice.trim()) {
+                errorLabel.innerText = 'Issue high price should be higher than the issue low price';
+                errorLabel.style.fontWeight = 'bold';
+                errorLabel.hidden = false;
+                tabAnchor.disabled = true;
+                tabAnchor2.disabled = true;
+            }
+            else {
+                errorLabel.innerText = ''; // Clear error message
+                errorLabel.hidden = true;
+                isDisabled = false;
+                tabAnchor.disabled = false;
+                tabAnchor2.disabled = false;
+            }
+        }
+
+        function validateDateRange(startDateFieldId, endDateFieldId, errorLabelId) {
+            const startDateField = document.getElementById(startDateFieldId);
+            const endDateField = document.getElementById(endDateFieldId);
+            const errorLabel = document.getElementById(errorLabelId);
+
+            const startDate = new Date(startDateField.value);
+            const endDate = new Date(endDateField.value);
+
+            console.log("START DATE",startDate);
+            console.log("END DATE",endDate);
+
+            // Check if start date is greater than end date
+            if (startDate >= endDate) {
+                errorLabel.innerText = 'Start date cannot be greater than end date.';
+                errorLabel.hidden = false;
+                errorCheck = true;
+                tabAnchor.disabled = true;
+                tabAnchor2.disabled = true;
+
+            } else {
+                errorLabel.innerText = ''; // Clear error message
+                errorLabel.hidden = true;
+                errorCheck = false;
+                tabAnchor.disabled = false;
+                tabAnchor2.disabled = false;
+            }
+        }
+
+        //- function validatLotRange(){
+        //-     let lotSize = document.getElementById('lotSize').value;
+        //-     let quota = document.getElementById('quota-0').value;
+        //-     let errorLabel2 = document.getElementById('error_label2');
+
+        //-     console.log("Lot Size: " + lotSize)
+        //-     console.log("Quota: " + quota)
+
+        //-     // Check if input is valid
+        //-     If(lotSize * quota > quota){
+
+        //-     }
+        //- }
 
