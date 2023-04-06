@@ -2,8 +2,8 @@ extends layout
 
 block content
     .container 
-        if message 
-            .alert.alert-info(role='alert') #{message}
+        //- if message 
+        //-     .alert.alert-info(role='alert') #{message}
         if data != undefined && data.length > 0
             .row
                 .col-2 
@@ -12,7 +12,7 @@ block content
                     h6.text-color.center Agent Id
                     h5.color IPO
                     hr
-                    form(action="/agent/agent-dashboard",method="post")
+                    form(action="/agent/agent-dashboard" method="post")
                         .row 
                             .col-4
                                 label.mt-5(for="ipo") Select an IPO

@@ -152,7 +152,7 @@ async function invokeBuy(
                         console.log(
                             `Shares bought Successfully by the user: ${userName}`
                         );
-                        message = `Shares bought Successfully by the user: ${userName}`;
+                        message = `Shares bought Successfully by the user: ${user_promise["full_name"]}`;
                         // If Bid is successful, put the information in tbl_investor_transactions
                         let bidDb = await insertBid(
                             investor_obj,

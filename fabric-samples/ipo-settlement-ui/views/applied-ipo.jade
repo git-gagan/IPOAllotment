@@ -37,45 +37,46 @@ block content
                     p.h4 IPOs Applied
                     hr
                     //- p.h4 !{JSON.stringify(investor_transactions)} 
-                    for key in investor_transactions  
-                        //- p.h4 !{JSON.stringify(key)}  
-                        p.h4.color Issuer Name: #{key[0].issuer_name} 
-                        if key[0].ticker
-                            p.h5.color Issuer Ticker: #{key[0].ticker}
-                        else 
-                            p.h5.color Issuer Ticker: -
-                        for i in key
-                            //- p.h3 !{JSON.stringify(i)}
-                            form(action="/users/alter-bid" method="post") 
-                                .row 
-                                    .col-4 
-                                        input(type="hidden" name="transaction_id" value=`${i.id}`)
-                                        //- p.h4 #{investor_transaction.ticker}
-                                        //- p.h5 #{investor_transaction.issuer_name}
-                                        p.h5.p1 Invested: #{i.lots_bid*i.lot_size*i.bid_amount} Rs.
-                                    //- .col-6 
-                                    //- .col-2
-                                    .form-group 
-                                        label(for="bid_amount") Bid Amount
-                                        input.form-control(type="text" name="bid_amount", value=`${i.bid_amount}`)    
-                                    .form-group 
-                                        label(for="lots_applied") Lots Applied
-                                        input.form-control(type="text" name="lots_applied" value=`${i.lots_bid}`)    
-                                        //- p.h6 Bid Amount #{investor_transaction.bid_amount}
-                                        //- p.text-color Lots Applied: #{investor_transaction.lots_bid}
-                                .row 
-                                    //- .col-4
-                                    .col-4
-                                        //- input(type="hidden" name="ipo_id" value=`${ipo.ipo_id}`)
-                                        button.button.btn-sm(type="submit" name="form_action", value=`modify`) Modify
-                                        span 
-                                        button.button.btn-danger.btn-sm(type="submit" name="form_action", value=`delete`) Delete           
-                            //- form(action="/delete-bid" method="post")   
-                                .row
-                                    .col-4
-                                        input(type="hidden" name="delete_transaction_id" value=`${i.id}`)
-                                    .col-4
-                                        //- input(type="hidden" name="ipo_id" value=`${ipo.ipo_id}`)
-                                        button.button.btn-lg(type="submit" name="delete") Delete                      
-                        hr
+                    #accordionExample.accordion
+                        each key in investor_transactions
+                            - var headingOne = `heading${key[0].issuer_name}`
+                            - var collapseOne = `collapse${key[0].issuer_name}`
+                            .accordion-item
+                                .accordion-header(id=headingOne)
+                                    button.accordion-button(type='button' data-bs-toggle='collapse' data-bs-target=`#${collapseOne}` aria-expanded='false' aria-controls=`${collapseOne}` data-bs-parent='#accordionExample')
+                                        h5.color #{key[0].issuer_name} 
+                                        i.bi.bi-pencil
+                            .accordion-collapse.collapse(aria-labelledby=headingOne id=collapseOne)
+                                each i in key
+                                    .accordion-body
+                                        form(action="/users/alter-bid" method="post")
+                                            .row 
+                                                .col-12
+                                                    .row 
+                                                        .col-6
+                                                            .form-group 
+                                                                label(for="issuename") Issuer Name: #{key[0].issuer_name} 
+                                                        .col-6
+                                                            .form-group 
+                                                                label(for="ticker")  
+                                                                    if key[0].ticker
+                                                                        p Issuer Ticker: #{key[0].ticker}
+                                                                    else 
+                                                                        p Issuer Ticker: Not Set
+                                                    .row 
+                                                        .col-6
+                                                            .form-group 
+                                                                label(for="bid_amount") Bid Amount
+                                                                input.form-control(type="text" name="bid_amount", value=`${i.bid_amount}`)   
+                                                        .col-6
+                                                            .form-group 
+                                                                label(for="lots_applied") Lots Applied
+                                                                input.form-control(type="text" name="lots_applied" value=`${i.lots_bid}`)
+                                                    .row
+                                                        .col-12.d-flex.justify-content-end.m-3
+                                                            .form-group.m-3
+                                                                button.button.btn-sm(type="submit" name="form_action", value=`modify`) Modify
+                                                            .form-group.m-3
+                                                                button.button.btn-danger.btn-sm(type="submit" name="form_action", value=`delete`) Delete                     
+                                        hr
 

@@ -10,36 +10,28 @@ block content
                 //-     .alert.alert-info(role='alert') #{data}      
                 if !isEmpty
                     #{isEmpty}
-                    for item in portfolios
-                        .card.border-success.mb-5
-                            .card-body
-                                .card-header.h3.bg-success(style="text-align:center;") #{item.ipo_name}
-                        table.table
-                        
-                            tbody
+                    table.table.table-striped-columns.table-hover
+                        thead
+                            tr
+                                th(scope="col") Instruments 
+                                th(scope="col") Qty (Shares)
+                                th(scope="col") Avg. Price
+                                th(scope="col") Total Value
+                        tbody   
+                            for item in portfolios
+
                                 tr
-                                    td 
-                                        h4 Average Value Per Share
-                                    td 
-                                        h4 #{item.avg_price_per_share}
-                                tr
-                                    td 
-                                        h4 Total Shares
-                                    td 
-                                        h4 #{item.totalShares}                          
-                                tr
-                                    td 
-                                        h4 Total Value
-                                    td 
-                                        h4 #{item.totalValue}
+                                    td #{item.ipo_name}
+                                    td #{item.totalShares}
+                                    td #{item.avg_price_per_share}                          
+                                    td #{item.totalValue}
                 else 
                     center 
                         tr 
                             h3.color.center Empty Portfolio
-                                    
-                                
 
-                            
 
-                            
-                                
+
+
+
+

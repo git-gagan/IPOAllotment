@@ -31,6 +31,7 @@ async function ipoAllotment(username, ipo_id) {
     try {
         // console.log(process.argv);
         let userName = username; // Take username from command line
+        let message = "Allotment made already for this IPO";
 
         let user_promise = await getIdFromUsername(userName);
         console.log("USER ID:- ", user_promise);
@@ -66,6 +67,9 @@ async function ipoAllotment(username, ipo_id) {
                     ipo_id
                 );
                 issuer_info = JSON.parse(issuer_info);
+
+                let issuerName = issuer_info[ipo_id]["ipoInfo"]["issuer_name"];
+
                 console.log(issuer_info);
                 if (!issuer_info) {
                     console.log(`Issuer with ID ${ipo_id} does not exist!`);
@@ -111,6 +115,7 @@ async function ipoAllotment(username, ipo_id) {
                                     console.log("Allocation can't be made!");
                                     make_allotment = false;
                                     result_code = 403;
+                                    message = "No data of investors!!!";
                                 } else {
                                     allocation_dict = {
                                         investorInfo: {},
@@ -329,6 +334,7 @@ async function ipoAllotment(username, ipo_id) {
                                 );
                                 console.log("\nSUCCESS\n");
                                 result_code = 1;
+                                message = `Issue ${issuerName} has been successfully allocated`;
                             }
                         } else {
                             console.log(
@@ -341,13 +347,15 @@ async function ipoAllotment(username, ipo_id) {
             } else {
                 console.log("\n3");
                 console.log("Unauthorized User!");
+                message = "Unauthorized User!";
                 result_code = -1;
             }
         } else {
             console.log("This user doesn't exist!");
+            message = "This user doesn't exist!";
             result_code = -1;
         }
-        return result_code;
+        return message;
     } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
         // process.exit(1);
