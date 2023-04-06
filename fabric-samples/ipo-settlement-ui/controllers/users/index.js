@@ -416,7 +416,7 @@ export const apply = async (req, res) => {
   let ipo_id = req.body.ipo_id;
   console.log(ipo_id);
   var ipo = await getIpoInfo(ipo_id);
-  console.log(ipo);
+  console.log("APPLY IPO", ipo);
   let user = await getIdFromUsername(req.user.user_name);
   console.log(user);
   let demat = await getdemat(req.user.user_id);
@@ -452,20 +452,27 @@ export const applyIpoPost = async (req, res) => {
   let qty = req.body.qty;
   let price = req.body.price;
   let ipo_id = req.body.ipo_id;
-  let error = "";
+  let message = "";
+  let type = "info";
   console.log(demat, qty, price);
   let Buy = await invokeBuy(req.user.user_name, ipo_id, demat, qty, price);
-  console.log(Buy);
+
   if (Buy == false) {
-    error = "Please apply in given range for a higher number of lots";
+    message = "The bid quantity is lesser than minimum required quantity.";
+  } else {
+    message = Buy;
   }
+
+  console.log("INVOKE BUY", Buy);
+
   let ongoing = await OngoingIpoInfo();
-  console.log(ongoing, error);
+  console.log(ongoing, message);
   res.render("ongoing-ipo.jade", {
     session: req.user.user_name,
     role_id: req.user.role_id,
     ongoing: ongoing,
-    error: error,
+    message: message,
+    type: type,
   });
 };
 
