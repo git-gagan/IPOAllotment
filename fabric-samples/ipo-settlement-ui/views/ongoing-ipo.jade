@@ -12,34 +12,54 @@ block content
                     //-         .person-icon
                     //-             i.bi.bi-person-square
                 div
+
+
                     p.h4 IPOs(#{ongoing.length})
+                    .row 
+                        .col-2
+                            h5 Instrument
+                        .col-2 
+                            h5 IPO Start Date
+                        .col-2 
+                            h5 IPO End Date
+                        .col-2 
+                            h5 Price Range 
+                        .col-2 
+                            h5 Lot Size
                     hr
                     for ipo in ongoing 
                         - const month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
                         - var bid_start_date=new Date(ipo.bid_start_date)
-                        - var date=bid_start_date.getDate()+"th"+" "+month[bid_start_date.getMonth()]+" "+bid_start_date.getFullYear()
-                        form(action="/users/apply", method="post") 
+                        - var bid_end_date = new Date(ipo.bid_time)
+                        - var date=bid_start_date.getDate()+" "+month[bid_start_date.getMonth()]+" "+bid_start_date.getFullYear()
+                        - var time=bid_start_date.getHours()+":"+bid_start_date.getMinutes()+"-"+bid_end_date.getHours()+":"+bid_end_date.getMinutes()
+                        - var endDate = bid_end_date.getDate()+" "+month[bid_end_date.getMonth()]+" "+bid_end_date.getFullYear()
+                        form(action="/users/apply" method="post")
+
                             .row 
-                                .col-4 
-                                    p.h4 #{ipo.ticker}
-                                    p.h6 #{ipo.issuer_name}
+                                .col-2 
+                                    if ipo.ticker
+                                        p.h4 #{ipo.ticker}
+                                    else 
+                                        p.h6 #{ipo.issuer_name}
+                                .col-2
                                     p #{date}
-                                .col-6 
+                                .col-2 
+                                    p #{endDate}
                                 .col-2
                                     p.h6 Rs. #{ipo.priceRangeLow}-Rs.#{ipo.priceRangeHigh}
-                                    p.text-color Lot Size: #{ipo.lot_size}
-                                    .row 
-                                        .col-2
-                                        .col-6
-                                            input(type="hidden", name="ipo_id" value=`${ipo.ipo_id}`)
-                                            button.button.btn-lg(type="submit") Apply
-                                        .col-2
+                                .col-2 
+                                    p.h6 #{ipo.lot_size}
+                                .col-2.d-flex.align-items-center  
+                                    input(type="hidden" name="ipo_id" value=`${ipo.ipo_id}`)
+                                    button.button.btn-lg(type="submit") Apply
+
+
 
                 div
-                    a(href="/users/upcoming-ipo",method="get")
+                    a(href="/users/upcoming-ipo" method="get")
                         div.center
                             i.bi.bi-chevron-double-down
                             p View Upcoming IPOs
-                
-        
-   
+    script(src='/js/launch-ipo.js')
+
