@@ -416,7 +416,7 @@ export const apply = async (req, res) => {
   let ipo_id = req.body.ipo_id;
   console.log(ipo_id);
   var ipo = await getIpoInfo(ipo_id);
-  console.log(ipo);
+  console.log("APPLY IPO", ipo);
   let user = await getIdFromUsername(req.user.user_name);
   console.log(user);
   let demat = await getdemat(req.user.user_id);
@@ -456,6 +456,13 @@ export const applyIpoPost = async (req, res) => {
   let type = "info";
   console.log(demat, qty, price);
   let Buy = await invokeBuy(req.user.user_name, ipo_id, demat, qty, price);
+
+  if (Buy == false) {
+    message = "The bid quantity is lesser than minimum required quantity.";
+  } else {
+    message = Buy;
+  }
+
   console.log("INVOKE BUY", Buy);
 
   let ongoing = await OngoingIpoInfo();
@@ -464,7 +471,7 @@ export const applyIpoPost = async (req, res) => {
     session: req.user.user_name,
     role_id: req.user.role_id,
     ongoing: ongoing,
-    message: Buy,
+    message: message,
     type: type,
   });
 };
