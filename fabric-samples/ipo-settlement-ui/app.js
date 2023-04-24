@@ -42,7 +42,7 @@ import passport from "passport";
 import localPassport from "./configurations/localPassport.js";
 import flash from "connect-flash";
 
-import { job } from "./utils/cron.js";
+// import { job } from "./utils/cron.js";
 
 /////////////////////////////////////////
 // Express setup
@@ -53,6 +53,7 @@ import { job } from "./utils/cron.js";
 var app = express();
 app.set("views", "./views");
 app.use(express.static("public"));
+import sqlite3 from "sqlite3";
 
 const oneDay = 1000 * 60 * 60 * 24;
 
@@ -78,6 +79,82 @@ app.use(passport.session());
 
 app.use(passport.setAuthenticatedUser);
 app.use(flash());
+
+// Connect to the database
+const dbAllot = new sqlite3.Database("ipo.db", (err) => {
+  if (err) {
+    console.error(err.message);
+  } else {
+    console.log("Connected to the database Manage.");
+  }
+});
+
+// Set up routes for each table
+app.get("/tbl_user", (req, res) => {
+  dbAllot.all("SELECT * FROM tbl_user", (err, rows) => {
+    if (err) {
+      console.error(err.message);
+    } else {
+      res.render("tbl_user.jade", { rows });
+    }
+  });
+});
+
+// Route for tbl_userrole
+app.get("/tbl_userrole", (req, res) => {
+  dbAllot.all("SELECT * FROM tbl_userrole", (err, rows) => {
+    if (err) {
+      console.error(err.message);
+    } else {
+      res.render("tbl_userrole.jade", { rows });
+    }
+  });
+});
+
+// Route for tbl_investor_dmat
+app.get("/tbl_investor_dmat", (req, res) => {
+  dbAllot.all("SELECT * FROM tbl_investor_dmat", (err, rows) => {
+    if (err) {
+      console.error(err.message);
+    } else {
+      res.render("tbl_investor_dmat.jade", { rows });
+    }
+  });
+});
+
+// Route for tbl_investor_ipo_bid
+app.get("/tbl_investor_ipo_bid", (req, res) => {
+  dbAllot.all("SELECT * FROM tbl_investor_ipo_bid", (err, rows) => {
+    if (err) {
+      console.error(err.message);
+    } else {
+      res.render("tbl_investor_ipo_bid.jade", { rows });
+    }
+  });
+});
+
+// Route for tbl_investor_info
+app.get("/tbl_investor_info", (req, res) => {
+  dbAllot.all("SELECT * FROM tbl_investor_info", (err, rows) => {
+    if (err) {
+      console.error(err.message);
+    } else {
+      res.render("tbl_investor_info.jade", { rows });
+    }
+  });
+});
+
+// Route for tbl_ipo_info
+app.get("/tbl_ipo_info", (req, res) => {
+  dbAllot.all("SELECT * FROM tbl_ipo_info", (err, rows) => {
+    if (err) {
+      console.error(err.message);
+    } else {
+      res.render("tbl_ipo_info.jade", { rows });
+    }
+  });
+});
+
 // Use Express Router
 app.use("/", router);
 

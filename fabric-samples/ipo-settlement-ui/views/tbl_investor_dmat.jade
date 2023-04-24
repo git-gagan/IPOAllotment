@@ -1,0 +1,19 @@
+extends layout
+
+block content
+    h1 Table: tbl_investor_dmat
+
+    table.table.table-striped
+        thead
+            tr
+                th ID
+                th Investor ID
+                th Demat Account No.
+                th DP ID
+        tbody
+            each row in rows
+                tr
+                    td= row.id
+                    td= row.investor_id
+                    td= row.demat_ac_no
+                    td= row.dp_id

@@ -1,0 +1,31 @@
+extends layout
+
+block content
+    h1 Table: tbl_investor_info
+
+    table.table.table-striped
+        thead
+            tr
+                th Investor ID
+                th Investor Type
+                th PAN
+                th Investor Name
+                th Country Domicile
+                th Custodian ID
+                th Bank Account No.
+                th IFSC Code
+                th LEI
+                th SWIFT Address
+        tbody
+            each row in rows
+                tr
+                    td= row.investor_id
+                    td= row.investor_type
+                    td= row.pan
+                    td= row.investor_name
+                    td= row.country_domicile
+                    td= row.custodian_id
+                    td= row.bank_account_no
+                    td= row.ifsc_code
+                    td= row.lei
+                    td= row.swift_address

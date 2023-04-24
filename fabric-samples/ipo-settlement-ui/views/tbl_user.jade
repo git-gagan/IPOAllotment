@@ -1,0 +1,19 @@
+extends layout
+
+block content
+    h1 Table: tbl_user
+
+    table.table.table-striped
+        thead
+            tr
+                th User ID
+                th User Name
+                th User Password
+                th Full Name
+        tbody
+            each row in rows
+                tr
+                    td= row.user_id
+                    td= row.user_name
+                    td= row.user_pwd
+                    td= row.full_name
