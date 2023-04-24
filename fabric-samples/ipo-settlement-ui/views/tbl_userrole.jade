@@ -1,0 +1,19 @@
+extends layout
+
+block content
+    h1 Table: tbl_userrole
+
+    table.table.table-striped
+        thead
+            tr
+                th User ID
+                th Role ID
+        tbody
+            each row in rows
+                tr
+                    td= row.user_id
+                    td= row.role_id
+
+
+
+

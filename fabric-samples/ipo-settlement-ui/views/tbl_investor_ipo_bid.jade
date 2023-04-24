@@ -1,0 +1,21 @@
+extends layout
+
+block content
+    h1 Table: tbl_investor_ipo_bid
+
+    table.table.table-striped
+        thead
+            tr
+                th ID
+                th Investor ID
+                th IPO ID
+                th Demat Account No.
+                th Number of Bids
+    tbody
+        each row in rows
+            tr
+                td= row.id
+                td= row.investor_id
+                td= row.ipo_id
+                td= row.demat_ac_no
+                td= row.num_of_bid

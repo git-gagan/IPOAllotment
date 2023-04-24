@@ -1,0 +1,43 @@
+extends layout
+
+block content
+    h1 Table: tbl_ipo_info
+
+    table.table.table-striped
+        thead
+            tr
+                th IPO ID
+                th Issuer Name
+                th ISIN
+                th CUSIP
+                th Ticker
+                th Bid Time
+                th Is Complete
+                th Has Bidding Started
+                th Bid Start Date
+                th IPO Announcement Date
+                th Allotment Principle
+                th Total Size
+                th Fixed Price
+                th Lot Size
+                th Price Range Low
+                th Price Range High
+        tbody
+            each row in rows
+                tr
+                    td= row.ipo_id
+                    td= row.issuer_name
+                    td= row.ISIN
+                    td= row.CUSIP
+                    td= row.ticker
+                    td= row.bid_time
+                    td= row.is_complete
+                    td= row.has_bidding_started
+                    td= row.bid_start_date
+                    td= row.ipo_announcement_date
+                    td= row.allotment_principle
+                    td= row.total_size
+                    td= row.fixed_price
+                    td= row.lot_size
+                    td= row.priceRangeLow
+                    td= row.priceRangeHigh
