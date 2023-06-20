@@ -1,36 +1,36 @@
 extends layout
 
 block content
-    .container 
+    .container.mb-5.pb-5 
         .row
             .col-2 
             .col-8
                 if message 
                     .alert.alert-info(role='alert') #{message}
-                form(action="/users/register-step2/", method="post",oninput='cnfpassword.setCustomValidity(cnfpassword.value != password.value ? "Passwords do not match." : "")') 
+                form(action="/users/register-step2/" method="post" oninput='cnfpassword.setCustomValidity(cnfpassword.value != password.value ? "Passwords do not match." : "")') 
                     p Step 2:
                     h5.color.mt-4 Basic Details
                     //- form(action="")
                     .row 
-                        input(type="hidden",name="role",value=`${role}`)
+                        input(type="hidden" name="role",value=`${role}`)
                         .col-4
                             .form-group 
                                 label(for="fullname") Full Name 
-                                input.form-control(type="text",name="fullname" required)  
+                                input.form-control(type="text" name="fullname" required)  
                             .form-group 
                                 label(for="domicile") Country Of Domicile
-                                input.form-control(type="text",name="domicile")  
+                                input.form-control(type="text" name="domicile")  
                             .form-group 
-                                label(for="phone") Phone Number
-                                input.form-control(type="tel",name="phone",pattern="[0-9]{10}" )  
+                                label(for="phone") Contact Number
+                                input.form-control(type="tel" name="phone" pattern="[0-9]{10}" )  
                         .col-2
                         .col-4
                             .form-group 
-                                label(for="dob") Date Of Birth 
-                                input.form-control(type="date",name="dob" )  
+                                label(for="dob") Date of incorporation 
+                                input.form-control(type="date" name="dob" )  
                             .form-group 
-                                label(for="email") Email Id
-                                input.form-control(type="email",name="email") 
+                                label(for="email") Contact Email Id
+                                input.form-control(type="email" name="email") 
 
                     h5.color.mt-4 Set Login Details
                     //- form(action="")
@@ -38,23 +38,22 @@ block content
                         .col-4
                             .form-group 
                                 label(for="username") Username
-                                input.form-control(type="text",name="username" required)  
+                                input.form-control(type="text" name="username" required)  
                             .form-group 
                                 label(for="cnfpassword") Confirm Password
-                                input.form-control(type="password",name="cnfpassword" required)  
+                                input.form-control(type="password" name="cnfpassword" required)  
                         .col-2
                         .col-4
                             .form-group 
                                 label(for="password") Password
-                                input.form-control(type="password",name="password" required)  
-                   
+                                input.form-control(type="password" name="password" required)  
+
                     .row.mb-5 
                         .col-11
                         .col-1
                             button.btn.button(type="submit") Next                    
             .col-2 
-                        
 
-            
-            
-   
+
+
+
