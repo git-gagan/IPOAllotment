@@ -16,7 +16,7 @@ block content
             margin-top: 2%;
         }
 
-    .container 
+    .container.mb-5.pb-5
         .row 
             .col-4
             .col-4 
@@ -38,7 +38,7 @@ block content
                     hr
                     //- p.h4 !{JSON.stringify(investor_transactions)} 
                     #accordionExample.accordion
-                        each key in investor_transactions
+                        for key in investor_transactions
                             - var headingOne = `heading${key[0].issuer_name}`
                             - var collapseOne = `collapse${key[0].issuer_name}`
                             .accordion-item
@@ -47,8 +47,8 @@ block content
                                         h5.color #{key[0].issuer_name} 
                                         i.bi.bi-pencil
                             .accordion-collapse.collapse(aria-labelledby=headingOne id=collapseOne)
-                                each i in key
-                                    .accordion-body
+                                .accordion-body
+                                    for i in key
                                         form(action="/users/alter-bid" method="post")
                                             .row 
                                                 .col-12
@@ -67,7 +67,8 @@ block content
                                                         .col-6
                                                             .form-group 
                                                                 label(for="bid_amount") Bid Amount
-                                                                input.form-control(type="text" name="bid_amount", value=`${i.bid_amount}`)   
+                                                                input.form-control(type="text" name="bid_amount" value=`${i.bid_amount}`) 
+                                                                input.form-control(type="hidden" name="id" value=`${i.id}`)
                                                         .col-6
                                                             .form-group 
                                                                 label(for="lots_applied") Lots Applied

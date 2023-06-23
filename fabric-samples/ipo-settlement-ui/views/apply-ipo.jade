@@ -1,7 +1,7 @@
 extends layout
 
 block content
-    .container 
+    .container.mb-4.pb-4 
         .row.mb-5
             .col-12.d-flex.justify-content-center
                 .row.mt-5.w-75
@@ -25,10 +25,10 @@ block content
                             span.color Lot Size 
                             h5.text-color #{ipo.lot_size}
 
-                            form(action="/users/apply-ipo", method="post") 
+                            form(action="/users/apply-ipo" method="post") 
                                 .row.mt-5
                                     span.h5 Payment Details 
-                                    input(type="hidden", name="ipo_id",value=`${ipo.ipo_id}`)
+                                    input(type="hidden" name="ipo_id",value=`${ipo.ipo_id}`)
                                     //- .col-4
                                     //-     .form-group 
                                     //-         label(for="acctnum") Account Number
@@ -42,7 +42,7 @@ block content
                                     //-         label(for="ifsc") Bank IFSC
                                     //-         input.form-control(type="text")
 
-                                    
+
                                     label(for="demat") Demat Number
                                         select.form-select.form-select-lg(aria-label='.form-select-lg example' name="demat" required)
                                             option(value='')
@@ -57,7 +57,7 @@ block content
                                     .col-6
                                         label.mt-0(for="price") Price
                                         input.form-control(type="text" name="price" onchange="Amount()" id="price")  
-                                    
+
 
                                 .row.mt-5
 
@@ -88,11 +88,11 @@ block content
                 document.getElementById("total").innerHTML=total
             }
         }
-        
 
-                
-                
-        
-    
 
-        
+
+
+
+
+
+

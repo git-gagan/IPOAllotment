@@ -535,9 +535,11 @@ export const appliedIpo = async (req, res) => {
 export const alterBid = async (req, res) => {
   // This function needs to be called when the investor wants
   // to update or delete the bid
-  console.log(req.body);
+
+  console.log("REQUEST BODY", req.body);
+  // console.log("REQUEST BODY", req.params);
   let action = req.body.form_action;
-  let transaction_id = req.body.transaction_id;
+  let transaction_id = req.body.id;
   let bid_amount = req.body.bid_amount;
   let lots_applied = req.body.lots_applied;
   let bid_res = null;

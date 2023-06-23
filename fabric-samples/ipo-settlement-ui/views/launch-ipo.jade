@@ -60,7 +60,7 @@ block content
                                     input.form-control(type="datetime-local" name="ipoEndTime" id="ipoEndTime" required='true' onchange="validateDateRange('ipoStartDate', 'ipoEndTime', 'error_label')")
                                 .form-group 
                                     label(for="lotSize") Lot Size
-                                    input.form-control(type="number" name="lotSize" required='true')
+                                    input.form-control(type="number" id="lotSize" name="lotSize" required='true')
                                 .form-group 
                                     label(for="highPrice") High Price
                                     input.form-control(type="number" name="highPrice" id="highPrice" required='true' onchange='validateBidRange()')
@@ -102,7 +102,7 @@ block content
                                     .form-group 
                                         label(for="allocPriority") Allocation Priority
                                         input.form-control(type="number" name="allocPriority-0" id="allocPriority-0" data-allocation-priority='allocPriority' required='true')
-                        .row  
+                        .row.mb-4.pb-4  
                             .col-6
                                 button.btn(type="button" onClick="addBucket()")
                                     i.bi.bi-plus-circle-fill Add Bucket
@@ -115,6 +115,7 @@ block content
                         h6 Please add all investor categories who are allowed to participate, their reserved quota and minimum lot quantity
                     form(id='investor-classification-form')
                         div#investor-classification-inputs
+                            label(for='totalShares' id='total_result' name="total_result" hidden style="color: green;")
                             .row 
                                 .col-4
                                     label(for="investorType") Investor Type
@@ -124,13 +125,15 @@ block content
                                             option(value=`${investor.investor_type_id}`) #{investor.investor_type}
                                 .col-4 
                                     .form-group 
-                                        label(for="quota") Reserved Quota (lots)
-                                        input.form-control(type="number" name="quota-0" id="quota-0" required='true')
+                                        label(for="quota") Reserved Quota (lots) 
+                                        label(for="quota0" id='quota_result' name="quota_result" hidden style="color: green;") 
+                                        label(for="quota0shares" id='quota_result_shares' name="quota_result" hidden style="color: green;") 
+                                        input.form-control(type="number" name="quota-0" id="quota-0" required='true' onchange="calculateQuota()")
                                 .col-4 
                                     .form-group 
                                         label(for="lotQuantity") Minimum Lot Quantity
                                         input.form-control(type="number" name="lotQuantity-0" id="lotQuantity-0" required='true')
-                        .row 
+                        .row.mb-4.pb-4 
                             .col-6
                                 button.mt-3.btn(type="button" onClick="addInvestorCategory()")
                                     i.bi.bi-plus-circle-fill   Add investor classification
@@ -205,8 +208,10 @@ block content
             $('#bucket-inputs').append(newInput);
         }
 
+        var newInputLength = 0;
         function addInvestorCategory(){
             investorCategoryId = investorCategoryId + 1
+
             let newInput = `
                 <div class='row'>
                     <div class='col-4'>
@@ -218,7 +223,9 @@ block content
                     <div class="col-4"> 
                         <div class="form-group"> 
                             <label for="quota">Reserved Quota</label>
-                            <input type="number" name="quota-${investorCategoryId}" id="quota-${investorCategoryId}" class="form-control"/>
+                            <label for="quota0_${investorCategoryId}" id="quota_result_${investorCategoryId}" hidden style="color: green;"></label>
+                            <label for="quota0shares_${investorCategoryId}" id="quota_result_shares_${investorCategoryId}" hidden style="color: green;"></label>
+                            <input type="number" name="quota-${investorCategoryId}" id="quota-${investorCategoryId}" class="form-control" onchange="calculateQuotaCategory(${investorCategoryId})"/>
                         </div>
                     </div>
                     <div class="col-4"> 
@@ -230,19 +237,21 @@ block content
                 </div>
             `
             $('#investor-classification-inputs').append(newInput);
+            //- newInputLength = (newInput.match(/<div class='row'>/g) || []).length;
+            newInputLength = newInputLength + 1;
         }
 
         const tabAnchor = document.querySelector('#nav-ipo-bucket-tab');
         const tabAnchor2 = document.querySelector('#nav-investor-classification-tab');
 
         function validateBidRange(){
-            let highPrice = document.getElementById('highPrice').value;
-            let lowPrice = document.getElementById('lowPrice').value;
+            let highPrice = parseFloat(document.getElementById('highPrice').value);
+            let lowPrice = parseFloat(document.getElementById('lowPrice').value);
             let errorLabel = document.getElementById('error_label');
             console.log("High Price: " + highPrice)
             console.log("Low Price: " + lowPrice)
             // Check if input is valid
-            if (highPrice.trim() <= lowPrice.trim()) {
+            if (highPrice <= lowPrice) {
                 errorLabel.innerText = 'Issue high price should be higher than the issue low price';
                 errorLabel.style.fontWeight = 'bold';
                 errorLabel.hidden = false;
@@ -255,6 +264,74 @@ block content
                 isDisabled = false;
                 tabAnchor.disabled = false;
                 tabAnchor2.disabled = false;
+            }
+        }
+
+        function calculateQuota() {
+            var quota0 = parseFloat(document.getElementById('quota-0').value);
+            var lotSize = parseFloat(document.getElementById('lotSize').value);
+            var errorLabel = document.getElementById('quota_result');
+            var errorLabelShares = document.getElementById('quota_result_shares');
+            var result = quota0 * lotSize;
+            if (result > 0){
+                errorLabel.innerText = " " + result;
+                errorLabel.hidden = false;
+                errorLabelShares.innerText = " - Shares";
+                errorLabelShares.hidden = false;
+            }
+            else{
+                errorLabel.innerText = 0;
+                errorLabel.hidden = true;
+                errorLabelShares.innerText = "";
+                errorLabelShares.hidden = true;
+            }
+            calculateTotalShares();
+        }
+
+        function calculateQuotaCategory(investorCategoryId) {
+            var quotaInput = document.getElementById(`quota-${investorCategoryId}`);
+            var lotSizeInput = document.getElementById('lotSize');
+            var errorLabel = document.getElementById(`quota_result_${investorCategoryId}`);
+            var errorLabelShares = document.getElementById(`quota_result_shares_${investorCategoryId}`);
+            var quota = parseFloat(quotaInput.value);
+            var lotSize = parseFloat(lotSizeInput.value);
+            var result = quota * lotSize;
+
+            if (result > 0) {
+                errorLabel.innerText = result;
+                errorLabel.hidden = false;
+                errorLabelShares.innerText = " - Shares";
+                errorLabelShares.hidden = false;
+            } else {
+                errorLabel.innerText = 0;
+                errorLabel.hidden = true;
+                errorLabelShares.innerText = "";
+                errorLabelShares.hidden = true;
+
+            }
+            calculateTotalShares();
+        }
+
+        function calculateTotalShares(){
+            var quota_result_0  = parseFloat(document.getElementById('quota_result').textContent);
+            var total_result = document.getElementById('total_result');
+            var total = 0;
+            console.log("NEW INPUT LENGTH",newInputLength);
+            console.log("QUOTA RESULT 0",quota_result_0);
+            for (var i = 1; i <= newInputLength; i++) {
+                var quota_result_investor  = parseFloat(document.getElementById(`quota_result_${i}`).textContent);
+                total += quota_result_investor;
+            }
+            console.log("NEW INPUT LENGTH",newInputLength);
+            console.log("QUOTA RESULT 0",quota_result_0);
+            console.log("TOTAL",total);
+            if (total > 0){
+                total_result.innerText ="Total Shares - " + (total + quota_result_0);
+                total_result.hidden = false;
+            }
+            else{
+                total_result.innerText = 0;
+                total_result.hidden = true;
             }
         }
 
@@ -286,17 +363,17 @@ block content
             }
         }
 
-        //- function validatLotRange(){
-        //-     let lotSize = document.getElementById('lotSize').value;
-        //-     let quota = document.getElementById('quota-0').value;
-        //-     let errorLabel2 = document.getElementById('error_label2');
+    //- function validatLotRange(){
+    //-     let lotSize = document.getElementById('lotSize').value;
+    //-     let quota = document.getElementById('quota-0').value;
+    //-     let errorLabel2 = document.getElementById('error_label2');
 
-        //-     console.log("Lot Size: " + lotSize)
-        //-     console.log("Quota: " + quota)
+    //-     console.log("Lot Size: " + lotSize)
+    //-     console.log("Quota: " + quota)
 
-        //-     // Check if input is valid
-        //-     If(lotSize * quota > quota){
+    //-     // Check if input is valid
+    //-     If(lotSize * quota > quota){
 
-        //-     }
-        //- }
+    //-     }
+    //- }
 
