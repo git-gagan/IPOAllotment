@@ -457,9 +457,7 @@ export const applyIpoPost = async (req, res) => {
   console.log(demat, qty, price);
   let Buy = await invokeBuy(req.user.user_name, ipo_id, demat, qty, price);
 
-  if (Buy == false) {
-    message = "The bid quantity is lesser than minimum required quantity.";
-  } else {
+  if (Buy) {
     message = Buy;
   }
 
