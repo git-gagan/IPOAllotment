@@ -30,7 +30,7 @@ block content
                                     input.form-control(type="datetime-local" name="ipoStartDate" id="ipoStartDate" required='true' onchange="validateDateRange('ipoStartDate','ipoEndTime','error_label')")  
                                 .form-group 
                                     label(for="totalShares") Total Shares
-                                    input.form-control(type="number" name="totalShares" required='true')
+                                    input.form-control(type="number" name="totalShares" id='totalShares' required='true')
                                 .form-group 
                                     label(for="lowPrice") Low Price
                                     input.form-control(type="number" name="lowPrice" id="lowPrice" required='true' onchange='validateBidRange()')
@@ -115,7 +115,10 @@ block content
                         h6 Please add all investor categories who are allowed to participate, their reserved quota and minimum lot quantity
                     form(id='investor-classification-form')
                         div#investor-classification-inputs
-                            label(for='totalShares' id='total_result' name="total_result" hidden style="color: green;")
+                            label(for='total_result_error' id='total_result_error' name="total_result_error" hidden).alert.alert-info(role='alert')
+                            br
+                            label(for='total_result_text' id='total_result_text' name="total_result_text" hidden style="color: green;") Total Shares -
+                            label(for='total_result' id='total_result' name="total_result" hidden style="color: green;")
                             .row 
                                 .col-4
                                     label(for="investorType") Investor Type
@@ -138,7 +141,7 @@ block content
                                 button.mt-3.btn(type="button" onClick="addInvestorCategory()")
                                     i.bi.bi-plus-circle-fill   Add investor classification
                             .col-6.text-right
-                                button.button.btn-lg(type="submit" id='final-submit-button') Submit
+                                button.button.btn-lg(type="submit" id='final-submit-button' disabled) Submit
             form(action="/issuer/launch-ipo" method="post" id='launch-ipo-form') 
                 textarea#launch-ipo-textarea(name="launch-ipo" cols="30" rows="10" hidden='true') 
                 button.button.btn-lg(type="submit" id='launch-ipo-submit-button' hidden='true') Submit
@@ -273,8 +276,9 @@ block content
             var errorLabel = document.getElementById('quota_result');
             var errorLabelShares = document.getElementById('quota_result_shares');
             var result = quota0 * lotSize;
+            console.log("RESULT CALCULATE QUOTA: " + result)
             if (result > 0){
-                errorLabel.innerText = " " + result;
+                errorLabel.innerText = result;
                 errorLabel.hidden = false;
                 errorLabelShares.innerText = " - Shares";
                 errorLabelShares.hidden = false;
@@ -314,6 +318,7 @@ block content
 
         function calculateTotalShares(){
             var quota_result_0  = parseFloat(document.getElementById('quota_result').textContent);
+            var total_result_text = document.getElementById('total_result_text');
             var total_result = document.getElementById('total_result');
             var total = 0;
             console.log("NEW INPUT LENGTH",newInputLength);
@@ -325,14 +330,18 @@ block content
             console.log("NEW INPUT LENGTH",newInputLength);
             console.log("QUOTA RESULT 0",quota_result_0);
             console.log("TOTAL",total);
-            if (total > 0){
-                total_result.innerText ="Total Shares - " + (total + quota_result_0);
+            if (quota_result_0 > 0){
+                final_total = parseFloat(total) + quota_result_0;
+                total_result.innerText = final_total;
+                total_result_text.hidden = false;
                 total_result.hidden = false;
             }
             else{
                 total_result.innerText = 0;
+                total_result_text.hidden = true;
                 total_result.hidden = true;
             }
+            validateTotalShares();
         }
 
         function validateDateRange(startDateFieldId, endDateFieldId, errorLabelId) {
@@ -360,6 +369,26 @@ block content
                 errorCheck = false;
                 tabAnchor.disabled = false;
                 tabAnchor2.disabled = false;
+            }
+        }
+
+        // check if the total_result is greater than the totalShares
+        function validateTotalShares() {
+            console.log("VALIDATE TOTAL SHARES");
+            var total_result = parseFloat(document.getElementById('total_result').textContent);
+            var totalShares = parseFloat(document.getElementById('totalShares').value);
+            var final_button = document.getElementById('final-submit-button');
+            var errorLabel = document.getElementById('total_result_error');
+            console.log("TOTAL RESULT",total_result);
+            console.log("TOTAL SHARES",totalShares);
+            if (total_result > totalShares) {
+                errorLabel.innerText = 'Shares cannot be greater than the total shares of the issue.';
+                errorLabel.hidden = false;
+                final_button.disabled = true;
+            } else {
+                errorLabel.innerText = ''; // Clear error message
+                errorLabel.hidden = true;
+                final_button.disabled = false;
             }
         }
 
