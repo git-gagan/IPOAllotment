@@ -137,70 +137,63 @@ async function invokeBuy(
                     demat_ac_no
                 );
                 if (is_valid) {
-                    // Check if the investor is eligible to buy the minimum lot quantity
-
-                    if (condition) {
-                        // Evaluate the specified transaction.
-                        const result = await contract.submitTransaction(
-                            "buyShares",
+                    // Evaluate the specified transaction.
+                    const result = await contract.submitTransaction(
+                        "buyShares",
+                        user_id,
+                        JSON.stringify(investor_obj),
+                        ipo_id
+                    );
+                    console.log(
+                        `Transaction has been evaluated, result is: ${result}`
+                    );
+                    if (result == "0") {
+                        console.log("Bidding not allowed!");
+                        message = "Bidding not allowed!";
+                        return message;
+                    } else if (result == "1") {
+                        console.log(
+                            `Shares bought Successfully by the user: ${userName}`
+                        );
+                        message = `Shares bought Successfully by the user: ${user_promise["full_name"]}`;
+                        // If Bid is successful, put the information in tbl_investor_transactions
+                        let bidDb = await insertBid(
+                            investor_obj,
                             user_id,
-                            JSON.stringify(investor_obj),
                             ipo_id
                         );
                         console.log(
-                            `Transaction has been evaluated, result is: ${result}`
+                            "============================================="
                         );
-                        if (result == "0") {
-                            console.log("Bidding not allowed!");
-                            message = "Bidding not allowed!";
-                            return message;
-                        } else if (result == "1") {
-                            console.log(
-                                `Shares bought Successfully by the user: ${userName}`
-                            );
-                            message = `Shares bought Successfully by the user: ${user_promise["full_name"]}`;
-                            // If Bid is successful, put the information in tbl_investor_transactions
-                            let bidDb = await insertBid(
-                                investor_obj,
+                        if (is_valid == -1) {
+                            console.log("Inserting investor-ipo-bid-dmat info");
+                            let dmatDb = await insertDmatIpo(
                                 user_id,
-                                ipo_id
+                                ipo_id,
+                                demat_ac_no
                             );
                             console.log(
                                 "============================================="
                             );
-                            if (is_valid == -1) {
-                                console.log(
-                                    "Inserting investor-ipo-bid-dmat info"
-                                );
-                                let dmatDb = await insertDmatIpo(
-                                    user_id,
-                                    ipo_id,
-                                    demat_ac_no
-                                );
-                                console.log(
-                                    "============================================="
-                                );
-                            }
-                            // Update counter in DB
-                            console.log(
-                                "Updating bid number of investor ",
-                                user_id
-                            );
-                            let updateDb = await updateIpoBidNumber(
-                                user_id,
-                                ipo_id,
-                                num_of_bids + 1
-                            );
-                            console.log("\nSUCCESS\n");
-                            return message;
-                        } else if (result == "-2") {
-                            console.log(`Insufficient Wallet Balance!`);
-                            message = `Insufficient Wallet Balance!`;
-                            return message;
-                        } else {
-                            console.log("Invalid Bid amount!");
                         }
+                        // Update counter in DB
+                        console.log(
+                            "Updating bid number of investor ",
+                            user_id
+                        );
+                        let updateDb = await updateIpoBidNumber(
+                            user_id,
+                            ipo_id,
+                            num_of_bids + 1
+                        );
+                        console.log("\nSUCCESS\n");
+                        return message;
+                    } else if (result == "-2") {
+                        console.log(`Insufficient Wallet Balance!`);
+                        message = `Insufficient Wallet Balance!`;
+                        return message;
                     } else {
+                        console.log("Invalid Bid amount!");
                     }
                 } else {
                     console.log(
@@ -270,7 +263,7 @@ async function is_lots_bid_valid(investor_id, investor_obj, ipo_id) {
             "No ipo eligibility info available for investor:- ",
             investor_id
         );
-        message = "No ipo eligibility info available for investor:- ";
+        message = `No ipo eligibility info available for investor:- ${investor_id}`;
         return message;
     }
     if (
@@ -280,8 +273,7 @@ async function is_lots_bid_valid(investor_id, investor_obj, ipo_id) {
         console.log(
             "Investor is not allowed to bid with this quantity of lots!!!"
         );
-        message =
-            "Investor is not allowed to bid with this quantity of lots!!!";
+        message = `Investor is not allowed to bid with this quantity of lots!!!`;
         console.log(`Please place a bid of atleast ${eligible_lots} lots`);
         return message;
     }
