@@ -82,14 +82,14 @@ block content
                             .row 
                                 .col-3
                                     label(for="investorType") Investor Type
-                                    select.form-control(name='investorTypeBucket-0' id="investorTypeBucket-0" data-investor-type='investorTypeBucket' required='true')
+                                    select.form-control(name='investorTypeBucket-0' id="investorTypeBucket-0" data-investor-type='investorTypeBucket')
                                         option(value='') Select Option
                                         for investor in investor_types
                                             if investor.investor_type_id != 1
                                                 option(value=`${investor.investor_type_id}`) #{investor.investor_type}
                                 .col-3
                                     label(for="investorId") Investor Name
-                                    select.form-control(name='investorId-0' id="investorId-0" required='true')
+                                    select.form-control(name='investorId-0' id="investorId-0")
                                         option(value='') Select Option
                                         for investor in investors
                                             if investor.investor_type != 1
@@ -97,11 +97,11 @@ block content
                                 .col-3 
                                     .form-group 
                                         label(for="BucketSize") Bucket Size
-                                        input.form-control(type="number" name="BucketSize-0" id="BucketSize-0" data-bucket-size='bucketSize' required='true')
+                                        input.form-control(type="number" name="BucketSize-0" id="BucketSize-0" data-bucket-size='bucketSize')
                                 .col-3 
                                     .form-group 
                                         label(for="allocPriority") Allocation Priority
-                                        input.form-control(type="number" name="allocPriority-0" id="allocPriority-0" data-allocation-priority='allocPriority' required='true')
+                                        input.form-control(type="number" name="allocPriority-0" id="allocPriority-0" data-allocation-priority='allocPriority')
                         .row.mb-4.pb-4  
                             .col-6
                                 button.btn(type="button" onClick="addBucket()")
@@ -142,8 +142,8 @@ block content
                                     i.bi.bi-plus-circle-fill   Add investor classification
                             .col-6.text-right
                                 button.button.btn-lg(type="submit" id='final-submit-button' disabled) Submit
-            form(action="/issuer/launch-ipo" method="post" id='launch-ipo-form') 
-                textarea#launch-ipo-textarea(name="launch-ipo" cols="30" rows="10" hidden='true') 
+            form(action="/issuer/launch-ipo" method="post" id='launch-ipo-form')
+                textarea#launch-ipo-textarea(name="launch-ipo" cols="30" rows="10" hidden='true')
                 button.button.btn-lg(type="submit" id='launch-ipo-submit-button' hidden='true') Submit
 
     script(src='/js/launch-ipo.js')

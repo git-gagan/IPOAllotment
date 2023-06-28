@@ -118,7 +118,7 @@ export const postLaunchIpo = async (req, res) => {
     lotQuantity: "min_lot_qty",
   };
 
-  console.log(data);
+  console.log("DATA", data);
   for (let i in data) {
     const splittedText = i.split("-");
     if (splittedText[1] !== undefined && data[i]) {
@@ -151,7 +151,7 @@ export const postLaunchIpo = async (req, res) => {
     }
     refined_buckets.push(buckets[i]);
   }
-  console.log(refined_buckets);
+  console.log("refined_buckets", refined_buckets);
 
   let promiseInvoke = await IssuertoLedger(
     req.user.user_name,
