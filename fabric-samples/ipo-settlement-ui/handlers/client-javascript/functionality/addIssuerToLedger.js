@@ -32,7 +32,7 @@ async function IssuertoLedger(
     agent,
     principle,
     fixedPrice,
-    ipo_buckets,
+    ipo_buckets = [],
     investor_categories
 ) {
     try {
@@ -167,6 +167,8 @@ async function IssuertoLedger(
             let endDate = new Date(ipoEndTime); // 1 min
             console.log("StartDate:- ", startDate);
             console.log("EndDate:- ", endDate);
+            console.log("ipobucketIds:- ", ipobucketIds);
+            console.log("IPO BUCKETS LIST:- ", ipo_bucket_list);
             // Create the issuer object which will be passed to the smart contract to be put on the ledger
             return {
                 ID: user_id,
@@ -225,6 +227,7 @@ async function IssuertoLedger(
                 // Insert IPO info to DB
                 try {
                     console.log(
+                        "ISSUER OBJ:- ",
                         issuer_obj,
                         ipo_investor_eligibility_list,
                         ipo_bucket_list
@@ -239,8 +242,9 @@ async function IssuertoLedger(
                     let eligibilityDb = await addIpoEligibility(
                         ipo_investor_eligibility_list
                     );
-                    if (ipo_bucket_list.toString() != "[]") {
+                    if (ipo_bucket_list.length > 0) {
                         // Only if bucket info exists
+                        console.log("Adding buckets to DB!", ipo_bucket_list);
                         let bucketDb = await addIpoBuckets(ipo_bucket_list);
                     }
                     // Evaluate the specified transaction.
