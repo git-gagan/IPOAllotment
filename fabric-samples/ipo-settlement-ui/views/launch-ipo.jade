@@ -18,31 +18,32 @@ block content
                         .row 
                             h6 Basic IPO Details
                             label(for="bid-range" id='error_label' hidden).alert.alert-info(role='alert') 
+                            label(for="ipoDateTimeError" id='ipoDateTimeError' hidden).alert.alert-info(role='alert') 
                             .col-6
                                 .form-group 
-                                    label(for="issuer") Issuer Name
+                                    label(for="issuer") Issuer Name *
                                     input.form-control(type="text" name="issuer" required='true')  
                                 .form-group 
                                     label(for="cusip") CUSIP
                                     input.form-control(type="text" name="cusip")  
                                 .form-group 
-                                    label(for="ipoStartDate") IPO Start Date
+                                    label(for="ipoStartDate") IPO Start Date *
                                     input.form-control(type="datetime-local" name="ipoStartDate" id="ipoStartDate" required='true' onchange="validateDateRange('ipoStartDate','ipoEndTime','error_label')")  
                                 .form-group 
-                                    label(for="totalShares") Total Shares
+                                    label(for="totalShares") Total Shares *
                                     input.form-control(type="number" name="totalShares" id='totalShares' required='true')
                                 .form-group 
-                                    label(for="lowPrice") Low Price
+                                    label(for="lowPrice") Low Price *
                                     input.form-control(type="number" name="lowPrice" id="lowPrice" required='true' onchange='validateBidRange()')
 
-                                label(for="principle") Allocation Principle (in the case of over-subscription)
+                                label(for="principle") Allocation Principle (in the case of over-subscription) *
                                     i(class="ms-2 fa-sharp fa-solid fa-circle-info" data-bs-toggle="tooltip" data-bs-html="true" title="The Allotment Principle is the method by which the IPO is allocated to investors. The Allotment Principle can be either Fixed Price or Pro Rata. If the Allotment Principle is Fixed Price, then the Fixed Price is the price at which the IPO is allocated to investors. If the Allotment Principle is Pro Rata, then the IPO is allocated to investors based on the amount of shares they have purchased.")
                                 select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="principle" id="a-principle" required='true' onChange="addFixedPrice()")
                                     option(value='') Select Option
                                     for principle in principles
                                         option(value=`${principle.id}`) #{principle.name}
 
-                                label(for="agent") Paying Agent
+                                label(for="agent") Paying Agent *
                                 select.form-select.form-select-lg.mb-3(aria-label='.form-select-lg example' name="agent" required='true' onClick="addFixedPrice()")
                                     option(value='') Select Option
                                     for agent in agents
@@ -56,20 +57,20 @@ block content
                                     label(for="ticker") Ticker
                                     input.form-control(type="text" name="ticker")
                                 .form-group 
-                                    label(for="ipoEndTime") IPO End Date
+                                    label(for="ipoEndTime") IPO End Date *
                                     input.form-control(type="datetime-local" name="ipoEndTime" id="ipoEndTime" required='true' onchange="validateDateRange('ipoStartDate', 'ipoEndTime', 'error_label')")
                                 .form-group 
-                                    label(for="lotSize") Lot Size
+                                    label(for="lotSize") Lot Size *
                                     input.form-control(type="number" id="lotSize" name="lotSize" required='true')
                                 .form-group 
-                                    label(for="highPrice") High Price
+                                    label(for="highPrice") High Price *
                                     input.form-control(type="number" name="highPrice" id="highPrice" required='true' onchange='validateBidRange()')
                                 .form-group
-                                    label(for="fixedPrice" id='fixed-price-label' hidden) Fixed Price
+                                    label(for="fixedPrice" id='fixed-price-label' hidden) Fixed Price *
                                     input.form-control(type="number" name="fixedPrice" id='fixed-price' hidden)
 
                             .col-12.text-right.mb-5
-                                button.btn.button.btn-lg#basic-ipo-next Next
+                                button.btn.button.btn-lg#basic-ipo-next(disabled) Next
 
                         //- #pills-profile.tab-pane.fade(role='tabpanel' aria-labelledby='pills-profile-tab') 
 
@@ -121,20 +122,20 @@ block content
                             label(for='total_result' id='total_result' name="total_result" hidden style="color: green;")
                             .row 
                                 .col-4
-                                    label(for="investorType") Investor Type
+                                    label(for="investorType") Investor Type *
                                     select.form-control(name='investorTypeClassification-0' id="investorTypeClassification-0" required='true')
                                         option(value='') Select Option
                                         for investor in investor_types
                                             option(value=`${investor.investor_type_id}`) #{investor.investor_type}
                                 .col-4 
                                     .form-group 
-                                        label(for="quota") Reserved Quota (lots) 
+                                        label(for="quota") Reserved Quota (lots) * 
                                         label(for="quota0" id='quota_result' name="quota_result" hidden style="color: green;") 
                                         label(for="quota0shares" id='quota_result_shares' name="quota_result" hidden style="color: green;") 
                                         input.form-control(type="number" name="quota-0" id="quota-0" required='true' onchange="calculateQuota()")
                                 .col-4 
                                     .form-group 
-                                        label(for="lotQuantity") Minimum Lot Quantity
+                                        label(for="lotQuantity") Minimum Lot Quantity *
                                         input.form-control(type="number" name="lotQuantity-0" id="lotQuantity-0" required='true')
                         .row.mb-4.pb-4 
                             .col-6
@@ -155,6 +156,66 @@ block content
         let bucketInputs = document.getElementById('bucket-inputs');
         let investorTypesOptions = ``
         let investorOptions = ``
+
+
+        var ipoStartDateInput = document.getElementById('ipoStartDate');
+
+        ipoStartDateInput.addEventListener('change', function() {
+            var errorLabel = document.getElementById('ipoDateTimeError');
+            var next_button = document.getElementById('basic-ipo-next');
+            var selectedDate = new Date(ipoStartDateInput.value);
+            var currentDate = new Date();
+
+            if (selectedDate < currentDate) {
+                ipoStartDateInput.value = ''; // Clear the input field if the selected date is in the past
+                errorLabel.innerHTML = 'Start Date cannot be in the past';
+                errorLabel.hidden = false;
+                next_button.disabled = true;
+            // You can also display an error message or perform any other action here
+            }
+            else{
+                errorLabel.hidden = true;
+                next_button.disabled = false;
+            }
+        });
+
+        var ipoEndTimeInput = document.getElementById('ipoEndTime');
+
+        ipoEndTimeInput.addEventListener('change', function() {
+            var errorLabel = document.getElementById('ipoDateTimeError');
+            var next_button = document.getElementById('basic-ipo-next');
+            var selectedDate = new Date(ipoEndTimeInput.value);
+            var currentDate = new Date();
+
+            if (selectedDate < currentDate) {
+                ipoEndTimeInput.value = ''; // Clear the input field if the selected date is in the past
+                errorLabel.innerHTML = 'End Date cannot be in the past';
+                errorLabel.hidden = false;
+                next_button.disabled = true;
+            // You can also display an error message or perform any other action here
+            }
+            else{
+                errorLabel.hidden = true;
+                next_button.disabled = false;
+            }
+        });
+
+        //- $('#ipoStartDate').on('change', function(){
+        //-     if($(this).val()){
+        //-         $('#ipoEndTime').attr('min', $(this).val())
+        //-     }
+        //-     else{
+        //-         $('#ipoEndTime').removeAttr('min')
+        //-     }
+        //- })
+        //- $('#ipoEndTime').on('change', function(){
+        //-     if($(this).val()){
+        //-         $('#ipoStartDate').attr('max', $(this).val())
+        //-     }
+        //-     else{
+        //-         $('#ipoStartDate').removeAttr('max')
+        //-     }
+        //- })
 
         for(let i of investorTypes){
             investorTypesOptions = investorTypesOptions + `<option value="${i.investor_type_id}">${i.investor_type}</option>`

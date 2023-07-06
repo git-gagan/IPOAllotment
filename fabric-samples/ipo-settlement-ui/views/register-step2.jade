@@ -15,45 +15,59 @@ block content
                         input(type="hidden" name="role",value=`${role}`)
                         .col-4
                             .form-group 
-                                label(for="fullname") Full Name 
+                                label(for="fullname") Full Name *
                                 input.form-control(type="text" name="fullname" required)  
                             .form-group 
-                                label(for="domicile") Country Of Domicile
-                                input.form-control(type="text" name="domicile")  
+                                label(for="domicile") Country Of Domicile *
+                                input.form-control(type="text" name="domicile" required)  
                             .form-group 
-                                label(for="phone") Contact Number
-                                input.form-control(type="tel" name="phone" pattern="[0-9]{10}" )  
+                                label(for="phone") Contact Number *
+                                input.form-control(type="tel" name="phone" pattern="[0-9]{10}" required)  
                         .col-2
                         .col-4
                             .form-group 
-                                label(for="dob") Date of incorporation 
-                                input.form-control(type="date" name="dob" )  
+                                label(for="dob") Date of incorporation *
+                                input.form-control(type="date" name="dob" required)  
                             .form-group 
-                                label(for="email") Contact Email Id
-                                input.form-control(type="email" name="email") 
+                                label(for="email") Contact Email Id *
+                                input.form-control(type="email" name="email" required) 
 
                     h5.color.mt-4 Set Login Details
                     //- form(action="")
                     .row 
                         .col-4
                             .form-group 
-                                label(for="username") Username
+                                label(for="username") Username *
                                 input.form-control(type="text" name="username" required)  
                             .form-group 
-                                label(for="cnfpassword") Confirm Password
+                                label(for="cnfpassword") Confirm Password *
                                 input.form-control(type="password" name="cnfpassword" required)  
                         .col-2
                         .col-4
                             .form-group 
-                                label(for="password") Password
+                                label(for="password") Password *
                                 input.form-control(type="password" name="password" required)  
 
                     .row.mb-5 
                         .col-11
                         .col-1
-                            button.btn.button(type="submit") Next                    
+                            button.btn.button(id='btn_submit' type="submit" disabled) Next                    
             .col-2 
 
+    script(type='text/javascript').
 
+        // Get all the input fields and the submit button
+        const inputs = document.querySelectorAll('input');
+        const submitButton = document.getElementById('btn_submit');
+
+        // Add event listeners to each input field to check if they are filled
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                // Check if all fields are filled
+                const allFieldsFilled = Array.from(inputs).every(input => input.value.trim() !== '');
+                // Enable or disable the submit button based on the result
+                submitButton.disabled = !allFieldsFilled;
+            });
+        });
 
 
